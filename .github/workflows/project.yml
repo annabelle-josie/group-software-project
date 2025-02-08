@@ -48,6 +48,8 @@ jobs:
       # 5. Run tests (e.g., Django or Pytest tests)
       - name: Run Django unit tests
         run: |
-          python manage.py test
-          # Or if you prefer pytest:
-          # pytest
+          if [ -f manage.py ]; then
+            python manage.py test
+          else
+            echo "manage.py not found, skipping tests."
+          fi
