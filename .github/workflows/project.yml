@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out the repository
+      - uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # You can specify any supported Python version
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: |
+          # Make sure pip is up-to-date
+          python -m pip install --upgrade pip
+          
+          # Install linting tools and project requirements
+          pip install flake8 black isort pytest
+          # If you have a requirements.txt, install it as well
+          pip install -r requirements.txt
+
+      # 4. Run linting
+      - name: Lint code
+        run: |
+          echo "Running flake8..."
+          flake8 .
+
+          echo "Running Black in check mode..."
+          black --check .
+
+          echo "Running isort in check mode..."
+          isort --check-only .
+
+      # 5. Run tests (e.g., Django or Pytest tests)
+      - name: Run Django unit tests
+        run: |
+          python manage.py test
+          # Or if you prefer pytest:
+          # pytest
