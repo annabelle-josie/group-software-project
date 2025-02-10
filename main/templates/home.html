@@ -4,6 +4,37 @@
 
 {% block content %}
 
-<h1>Hello world</h1>
+<div class="w-100 p-3 h-50" style=" background-color: #eee;">
+    <h1>Username's Garden</h1>
+</div>
+<div class="row h-50">
+    <div class="col-6" style=" background-color: rgb(255, 176, 176)">
+        <h2 class="mt-2">Current Tasks</h2>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <button>(tickbox)</button>
+                Task1
+            </li>
+            <li class="list-group-item">
+                <button>(tickbox)</button>
+                Task2
+            </li>
+            <li class="list-group-item">
+                <button>(tickbox)</button>
+                Task3
+            </li>
+            <li class="list-group-item">
+                <button>(tickbox)</button>
+                Task4
+            </li>
+        </ul>
+        <button class="btn btn-primary mt-2">See more tasks</button>
+    </div>
+    <div class="col-6" style=" background-color: rgb(200, 203, 255)">
+       <button class="btn btn-primary mt-5">Scan QR Code</button>
+    </div>
+
+</div>
+
 
 {% endblock %}
