@@ -1,11 +1,23 @@
 {% extends 'base.html' %}
+{% load auth_extras %}
 
 {% block title %} Home {% endblock %}
 
 {% block content %}
 
 <div class="w-100 p-3 h-50" style=" background-color: #eee;">
-    <h1>Username's Garden</h1>
+    {% if user.is_authenticated %}
+        <h1>{{ user.username }}'s Garden!</h1>
+    {% else %}
+        <h1>Guest's Garden!</h1>
+    {% endif %}
+
+    {% if request.user|has_group:"Game Keepers" %} 
+        <p>You are a Game Keeper.</p>
+    {% else %}
+        <p>You are a User.</p>
+    {% endif %}
+        
 </div>
 <div class="row h-50">
     <div class="col-6" style=" background-color: rgb(255, 176, 176)">
