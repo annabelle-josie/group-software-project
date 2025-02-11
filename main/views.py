@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from rest_framework.response import Response
 from django.contrib import messages
@@ -32,7 +35,7 @@ def generate_qr(request):
             buffer = BytesIO()
             img.save(buffer, format='PNG')
             qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
-            img.save("main/qrcodes/mypng.png")
+            img.save("main/qrcodes/"+text+".png")
     else:
         form = QRCodeForm()
     
