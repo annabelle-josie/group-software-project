@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+
+<p>You are already logged in.</p>
+
+{% else %}
+
+<h2>Sign up</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form }}
+  <button type="submit">Sign Up</button>
+</form>
+
+<br/>
+<p>Already have an account? <a href="/login">Log In</a></p>
+
+{% endif %}
+
+{% endblock %}
