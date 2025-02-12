@@ -18,7 +18,7 @@ class Events(models.Model):
     def __str__(self):
         return self.title
 
-class EventMembers(models.Model):
+class EventParticipants(models.Model):
     username = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(Events, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)
