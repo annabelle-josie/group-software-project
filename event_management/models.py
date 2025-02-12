@@ -6,10 +6,14 @@ class Events(models.Model):
     desc = models.TextField()
     title = models.CharField(max_length=255)
     noOfTasks = models.IntegerField()
-    rewardValue = models.DecimalField()
+    rewardValue = models.DecimalField(max_digits=1000, decimal_places=2)
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
     eventMaster = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Events"
+        verbose_name_plural = "Events"  
 
     def __str__(self):
         return self.title
@@ -21,7 +25,8 @@ class EventMembers(models.Model):
     status = models.CharField(max_length=50)
 
     class Meta:
-        unique_together = ('username', 'eventId')
+        verbose_name = "Event Members"
+        verbose_name_plural = "Event Participants"  
 
     def __str__(self):
         return f"{self.username.username} - {self.eventId.title}"
