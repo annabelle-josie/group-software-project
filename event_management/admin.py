@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Events, EventMembers
+from .models import Events, EventParticipants
 
 admin.site.register(Events)
-admin.site.register(EventMembers)
+admin.site.register(EventParticipants)

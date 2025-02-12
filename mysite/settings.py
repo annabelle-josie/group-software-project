@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'main',
     'login',
     'user_management',
-    'event_management.apps.EventManagementConfig'
+    'event_management'
 ]
 
 MIDDLEWARE = [
