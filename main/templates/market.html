@@ -12,23 +12,28 @@
 {% load static %}
 
 <div class="h-50 row" style=" background-color: rgb(176, 239, 255)">
-        <img id="chosen-plant-image" class="mt-3 col-6" alt="ajhhh" src="{% static plants.bla %}" style="max-height: 80%; max-width: 80%; width: auto;">
+        <img id="chosen-plant-image" class="mt-3 col-6" alt="Click a plant to select" src="{% static plants.bla %}" style="max-height: 80%; max-width: 80%; width: auto;">
         <div id="chosen-plant-facts" class="col-6">
+            <p>Your Leaves: {{leaves}}</p>
             <h1>Plants</h1>
-            <h2>Name: </h2>
-            <h2>Cost: </h2>
-            <h2>Description: </h2>
-            <h2>Fun Fact: </h2>
+            <h2 id="chosen-plant-name">Name: </h2>
+            <h2 id="chosen-plant-cost">Cost: </h2>
+            <h2 id="chosen-plant-fact">Fun Fact: </h2>
             <button class="btn btn-primary">Buy plant</button>
         </div>
 </div>
 
 <div class="h-50" style="background-color: rgb(255, 176, 221)">
     <div class="row overflow-scroll" style="max-width: 100%; max-height: 100%;">
-        {% for plant_key, plant_value in plants.items %}
-            <button class="col-3" onClick='document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant_value %}");'>
-                <img alt="{{plant_key}}" src="{% static plant_value %}"  width="100px">
-                <p>{{plant_key}}</p>
+        {% for plant_name, plant_dict in plants.items %}
+            <button class="col-3" onClick='
+            document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant_dict.image %}");
+            document.getElementById("chosen-plant-name").innerHTML = "Name: {{plant_name}}";
+            document.getElementById("chosen-plant-cost").innerHTML = "Name: {{ plant_dict.cost }}";
+            document.getElementById("chosen-plant-fact").innerHTML = "Name: {{plant_dict.fact}}";
+            '>
+                <img alt="{{plant_name}}" src="{% static plant_dict.image %}"  width="100px">
+                <p>{{plant_name}}</p>
             </button>
         {% endfor %}
     </div>

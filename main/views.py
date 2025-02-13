@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from django.contrib import messages
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import *
+from user_management.models import UsersInfo
+from django.contrib.auth.models import User
 from .forms import QRCodeForm
 import qrcode
 from io import BytesIO
@@ -26,11 +27,17 @@ def events(request):
     return render(request, "events.html")
 
 def market(request):
+    all_the_leaves = UsersInfo.objects.all()
+    current_leaves = 80
+    for user_leaves in all_the_leaves:
+            if(user_leaves.Username.get_username() == "annabelleTest"): #Replace with some test of current user
+                current_leaves = user_leaves.Leaves
+
     context = {
-        "plants" : {"plant1" : "soup.jpg", "plant2" : "other-soup.jpeg", "plant3" : "soup.jpg", "ccc" : "soup.jpg",
-                    "ddd" : "soup.jpg", "eee" : "soup.jpg", "fff" : "soup.jpg", "ggg" : "soup.jpg",
-                    "hhh" : "soup.jpg", "iii" : "soup.jpg", "jjj" : "soup.jpg", "kkk" : "soup.jpg",
-                    "lll" : "soup.jpg", "mmm" : "soup.jpg", "nnn" : "soup.jpg", "ooo" : "soup.jpg"}
+        "plants" : {"plant1" : {"image" : "soup.jpg", "cost" : "20", "fact" : "plants are cool"},
+                    "plant2" : {"image" : "other-soup.jpeg", "cost" : "60", "fact" : "plants are very cool"}, 
+                    "plant3" : {"image" : "soup.jpg", "cost" : "100", "fact" : "plants are super cool"}},
+        "leaves" : current_leaves
     }
     return render(request, "market.html", context)
   
