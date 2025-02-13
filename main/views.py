@@ -14,8 +14,20 @@ from io import BytesIO
 import base64
 
 def home(request):
-    return render(request,'home.html')
+    return render(request, "home.html")
 
+def leaderboard(request):
+    return render(request, "leaderboard.html")
+
+def garden(request):
+    return render(request, "garden.html")
+
+def events(request):
+    return render(request, "events.html")
+
+def market(request):
+    return render(request, "market.html")
+  
 def generate_qr(request):
     qr_image_base64 = None
     if request.method == 'POST':
