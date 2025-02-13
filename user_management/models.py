@@ -1,41 +1,68 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now
+from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth import get_user_model
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class CustomUser(AbstractUser):
-    """Custom User model that extends Django's built-in User model."""
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
-    
-    # Merging UsersInfo fields here
-    leaves = models.IntegerField(default=0)
-    points = models.IntegerField(default=0)
+
+    def is_game_keeper(self):
+        """Check if the user belongs to the 'Game Keepers' group."""
+        return self.groups.filter(name="Game Keepers").exists()
+
+    def award_points(self, target_user, amount):
+        """Allows Game Keepers to award points to other users."""
+        if not self.is_game_keeper():
+            raise PermissionError("Only Game Keepers can award points.")
+
+        target_user.stats.points += amount
+        target_user.stats.save()
+
+    def award_leaves(self, target_user, amount):
+        """Allows Game Keepers to award leaves to other users."""
+        if not self.is_game_keeper():
+            raise PermissionError("Only Game Keepers can award leaves.")
+
+        target_user.stats.leaves += amount
+        target_user.stats.save()
 
     def send_friend_request(self, to_user):
+        """Allows sending a friend request only if no rejected request exists."""
         if self == to_user:
             raise ValueError("You cannot send a friend request to yourself.")
-        if self.friends.filter(pk=to_user.pk).exists():
-            raise ValueError("You are already friends.")
-        if FriendRequest.objects.filter(senderId=self, receiverId=to_user, status="pending").exists():
-            raise ValueError("Friend request already sent.")
-        if FriendRequest.objects.filter(senderId=to_user, receiverId=self, status="pending").exists():
-            raise ValueError("User has already sent you a friend request.")
+
+        # Check for past requests
+        existing_request = FriendRequest.objects.filter(senderId=self, receiverId=to_user).first()
+        reverse_request = FriendRequest.objects.filter(senderId=to_user, receiverId=self).first()
+
+        # If a request already exists
+        if existing_request:
+            if existing_request.status == "pending":
+                raise ValueError("Friend request already sent.")
+            elif existing_request.status == "rejected":
+                raise ValueError("This user has rejected your request.")
+        
+        # If the reverse request was rejected, allow sending one
+        if reverse_request and reverse_request.status == "rejected":
+            reverse_request.delete() 
 
         FriendRequest.objects.create(senderId=self, receiverId=to_user)
 
     def accept_friend_request(self, from_user):
+        """Accepts a pending friend request and deletes it while adding the friend."""
         try:
             request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
-            if self.friends.filter(pk=from_user.pk).exists():
-                raise ValueError("You are already friends.")
-
-            request.status = "accepted"
-            request.save()
-
             self.friends.add(from_user)
             from_user.friends.add(self)
+            request.delete()  # Remove request after accepting
         except FriendRequest.DoesNotExist:
             raise ValueError("No pending friend requests.")
 
     def reject_friend_request(self, from_user):
+        """Rejects a pending friend request, preventing future requests from that user."""
         try:
             request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
             request.status = "rejected"
@@ -43,9 +70,58 @@ class CustomUser(AbstractUser):
         except FriendRequest.DoesNotExist:
             raise ValueError("No pending friend requests.")
 
-    def remove_friend(self, friend):
+    def unfriend(self, friend):
+        """Removes a user from friends but allows sending a new request."""
         if friend in self.friends.all():
             self.friends.remove(friend)
             friend.friends.remove(self)
         else:
             raise ValueError("This user is not your friend.")
+
+def ensure_game_keeper_group():
+    """Creates the 'Game Keepers' group if it doesn't exist."""
+    Group.objects.get_or_create(name="Game Keepers")
+
+ensure_game_keeper_group() 
+
+class UserStats(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="stats")
+    leaves = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+    class Meta:
+        verbose_name = "User Stats"
+        verbose_name_plural = "User Stats"
+
+    def __str__(self):
+        return f"| {self.user.username} | {self.leaves} Leaves Remaining | {self.points} Total Points |"
+
+@receiver(post_save, sender=CustomUser)
+def create_user_stats(sender, instance, created, **kwargs):
+    """Automatically creates a UserStats entry for every new user."""
+    if created:
+        UserStats.objects.create(user=instance)
+        
+CustomUser = get_user_model() # Ensure it uses correct user model
+
+class FriendRequest(models.Model):
+    senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)
+    receiverId = models.ForeignKey(CustomUser, related_name="received_requests", on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("rejected", "Rejected"),
+        ],
+        default="pending",
+    )
+    created_at = models.DateTimeField(default=now)  
+    updated_at = models.DateTimeField(auto_now=True)  
+
+    class Meta:
+        verbose_name = "Friend Request"
+        verbose_name_plural = "Friend Requests"
+        unique_together = ("senderId", "receiverId") 
+
+    def __str__(self):
+        return f"{self.senderId.username} to {self.receiverId.username} ({self.status})"
+
