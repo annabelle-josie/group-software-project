@@ -4,48 +4,26 @@
 {% block title %} Home {% endblock %}
 
 {% block content %}
-
-<div class="w-100 p-3 h-50" style=" background-color: #eee;">
-    {% if user.is_authenticated %}
-        <h1>{{ user.username }}'s Garden!</h1>
-    {% else %}
-        <h1>Guest's Garden!</h1>
-    {% endif %}
-
-    {% if request.user|has_group:"Game Keepers" %} 
-        <p>You are a Game Keeper.</p>
-    {% else %}
-        <p>You are a User.</p>
-    {% endif %}
-</div>
-<div class="row h-50">
-    <div class="col-6" style=" background-color: rgb(255, 176, 176)">
+<h1>all challenges</h1>
+<div class="row h-100">
+    <div class="col-12" style=" background-color: rgb(255, 176, 176)">
         <h2 class="mt-2">Current Tasks</h2>
         <ul class="list-group">
             <li class="list-group-item">
                 {% for item in challenge_list%}
-                {%if forloop.counter <= 4 %}
-
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                     <label class="form-check-label" for="flexCheckDefault">
                         {{item.title}}-{{item.desc}}-has {{item.noOfTasks}} 
-                    <button class="remove-button btn btn-primary mt-1" data-id="{{item.challengeId}}" data-points="{{item.rewardValue}}">complete</button>
+                        <button class="remove-button btn btn-primary mt-1" data-id="{{item.challengeId}}" data-points="{{item.rewardValue}}">complete</button>
+              
                 </div>
-                {% endif %}
                 <div>
                     <p> {% empty %} no challenges left</p>
                 </div>
                 {% endfor %}
             </li>
         </ul>
-        <button class="btn btn-primary mt-2" onclick="window.location.href='allchallenges'">See more tasks</button><!-- click takes you to new page with all tasks -->
-    </div>
-    <div class="col-6" style=" background-color: rgb(200, 203, 255)">
-       <button class="btn btn-primary mt-5">Scan QR Code</button>
-        <div style="width:120px" id="reader"></div>
-    </div>
-    
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -88,28 +66,4 @@
         });
     });
 </script>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script>
-    function visible(){
-        document.getElementById('reader').style.visibility="visible"
-        html5QrcodeScaner.visibility="visible"
-    }
-    function onScanSuccess(decodedText, decodedResult) {
-    // Handle on success condition with the decoded text or result.
-    console.log(`Scan result: ${decodedText}`, decodedResult);
-    alert(decodedText)
-    //html5QrcodeScanner.clear()
-    //document.getElementById('reader').style.visibility="hidden"
-
-}
-function onScanError(errorMessage) {
-    alert("qr code could not be found")
-}
-
-var html5QrcodeScanner = new Html5QrcodeScanner(
-	"reader", { fps: 10, qrbox: 200 });
-    html5QrcodeScanner.render(onScanSuccess);
-</script>
-
 {% endblock %}

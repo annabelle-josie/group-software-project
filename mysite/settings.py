@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'main',
     'login',
     'user_management',
+    'rest_framework',
     'event_management'
 ]
 
