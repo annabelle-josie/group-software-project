@@ -62,9 +62,31 @@
     </div>
     <div class="col-6" style=" background-color: rgb(200, 203, 255)">
        <button class="btn btn-primary mt-5">Scan QR Code</button>
+        <div style="width:120px" id="reader"></div>
     </div>
-
+    
 </div>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    function visible(){
+        document.getElementById('reader').style.visibility="visible"
+        html5QrcodeScaner.visibility="visible"
+    }
+    function onScanSuccess(decodedText, decodedResult) {
+    // Handle on success condition with the decoded text or result.
+    console.log(`Scan result: ${decodedText}`, decodedResult);
+    alert(decodedText)
+    //html5QrcodeScanner.clear()
+    //document.getElementById('reader').style.visibility="hidden"
 
+}
+function onScanError(errorMessage) {
+    alert("qr code could not be found")
+}
+
+var html5QrcodeScanner = new Html5QrcodeScanner(
+	"reader", { fps: 10, qrbox: 200 });
+    html5QrcodeScanner.render(onScanSuccess);
+</script>
 
 {% endblock %}
