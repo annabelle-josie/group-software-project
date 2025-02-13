@@ -1,5 +1,5 @@
 <html lang="en">
-
+    
 <head>
     <title>{% block title %}{% endblock %}</title>
         <meta charset="utf-8">
@@ -24,16 +24,7 @@
                 <a class="nav-link" href="/">Home</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/garden">Garden</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/events">Events</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/leaderboard">Leaderboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/market">Market</a>
+                <a class="nav-link" href="#">Link</a>
             </li>
             
             {% if user.is_authenticated %}
@@ -53,8 +44,23 @@
         </ul>
     </div>
 </nav>
-
     {% block content %}
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Generate QR Code</button>
+        </form>
+        {% if qr_image_base64 %}
+            <div class="qr-code">
+                <h2>Your QR Code</h2>
+                <img src="data:image/png;base64,{{ qr_image_base64 }}" alt="QR Code">
+                <br>
+                <a href="{% url 'qr' %}">Generate another QR Code</a>
+            </div>
+        {% endif %}
+    </div>
     {% endblock %}
     
     
