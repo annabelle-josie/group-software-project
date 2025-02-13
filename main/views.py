@@ -17,7 +17,7 @@ def events(request):
 
 def market(request):
     context = {
-        "plants" : {"bla" : "soup.jpg", "aaa" : "soup.jpg", "bbb" : "soup.jpg", "ccc" : "soup.jpg",
+        "plants" : {"plant1" : "soup.jpg", "plant2" : "other-soup.jpeg", "plant3" : "soup.jpg", "ccc" : "soup.jpg",
                     "ddd" : "soup.jpg", "eee" : "soup.jpg", "fff" : "soup.jpg", "ggg" : "soup.jpg",
                     "hhh" : "soup.jpg", "iii" : "soup.jpg", "jjj" : "soup.jpg", "kkk" : "soup.jpg",
                     "lll" : "soup.jpg", "mmm" : "soup.jpg", "nnn" : "soup.jpg", "ooo" : "soup.jpg"}

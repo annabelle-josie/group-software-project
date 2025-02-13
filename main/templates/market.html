@@ -5,33 +5,43 @@
 
 {% block content %}
 
-<h1>Market Page</h1>
+<script>
+    
+</script>
 
 {% load static %}
 
-<div class="h-50" style=" background-color: rgb(176, 239, 255)">
-    <div class="row">
-        <img class="mt-3 col-6" alt="ajhhh" src="{% static plants.bla %}" style="max-height: 80%; max-width: 80%;">
-        <div class="col-6">
+<div class="h-50 row" style=" background-color: rgb(176, 239, 255)">
+        <img id="chosen-plant-image" class="mt-3 col-6" alt="ajhhh" src="{% static plants.bla %}" style="max-height: 80%; max-width: 80%; width: auto;">
+        <div id="chosen-plant-facts" class="col-6">
             <h1>Plants</h1>
             <h2>Name: </h2>
             <h2>Cost: </h2>
             <h2>Description: </h2>
             <h2>Fun Fact: </h2>
+            <button class="btn btn-primary">Buy plant</button>
         </div>
-    </div>
 </div>
 
 <div class="h-50" style="background-color: rgb(255, 176, 221)">
     <div class="row overflow-scroll" style="max-width: 100%; max-height: 100%;">
         {% for plant_key, plant_value in plants.items %}
-            <div  class="col-3">
+            <button class="col-3" onClick='document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant_value %}");'>
                 <img alt="{{plant_key}}" src="{% static plant_value %}"  width="100px">
                 <p>{{plant_key}}</p>
-            </div>
+            </button>
         {% endfor %}
     </div>
 </div>
 
+<!-- Working on this, realised I need to know how the database will be put in before I can complete this
+onClick='
+                document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant_value %}");
+                var factList = [];
+                factParent = document.getElementById("chosen-plant-facts");
+                for(i = 1; i < factParent.childNodes.length; i++){
+                    
+                }
+            ' -->
 
 {% endblock %}
