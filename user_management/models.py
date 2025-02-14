@@ -1,13 +1,29 @@
 from django.db import models
 from django.utils.timezone import now
-from django.contrib.auth.models import AbstractUser, Group
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser, Group, BaseUserManager
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+class CustomUserManager(BaseUserManager):
+    """Custom manager to prevent issues with swapped user models."""
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        if not username:
+            raise ValueError("The Username field must be set")
+        email = self.normalize_email(email) if email else None
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(username, email, password, **extra_fields)
+    
 class CustomUser(AbstractUser):
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    objects = CustomUserManager()
 
     def is_game_keeper(self):
         """Check if the user belongs to the 'Game Keepers' group."""
@@ -82,8 +98,6 @@ def ensure_game_keeper_group():
     """Creates the 'Game Keepers' group if it doesn't exist."""
     Group.objects.get_or_create(name="Game Keepers")
 
-ensure_game_keeper_group() 
-
 class UserStats(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="stats")
     leaves = models.IntegerField(default=0)
@@ -100,8 +114,6 @@ def create_user_stats(sender, instance, created, **kwargs):
     """Automatically creates a UserStats entry for every new user."""
     if created:
         UserStats.objects.create(user=instance)
-        
-CustomUser = get_user_model() # Ensure it uses correct user model
 
 class FriendRequest(models.Model):
     senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)
