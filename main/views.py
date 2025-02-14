@@ -1,8 +1,5 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-# from django.contrib.auth.forms import UserCreationForm
-# from django.urls import reverse_lazy
-# from django.views.generic import CreateView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -13,16 +10,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from rest_framework.response import Response
-from django.contrib import messages
-from rest_framework.decorators import api_view
-from rest_framework import status
-from user_management.models import UsersInfo
-from django.contrib.auth.models import User
-from .forms import QRCodeForm
 import qrcode
 from io import BytesIO
 import base64
+from django.contrib.auth.models import User
+from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 
 def home(request):
@@ -94,31 +86,6 @@ def events(request):
         'events': events_with_progress,
         'is_gamekeeper': is_gamekeeper
     })
-
-
-def market(request):
-    all_the_leaves = UsersInfo.objects.all()
-    current_leaves = 80
-    for user_leaves in all_the_leaves:
-            if(user_leaves.Username.get_username() == "annabelleTest"): #Replace with some test of current user
-                current_leaves = user_leaves.Leaves
-
-    context = {
-        "plants" : {"plant1" : {"image" : "soup.jpg", "cost" : "20", "fact" : "plants are cool"},
-                    "plant2" : {"image" : "other-soup.jpeg", "cost" : "60", "fact" : "plants are very cool"}, 
-                    "plant3" : {"image" : "soup.jpg", "cost" : "100", "fact" : "plants are super cool"},
-                    "plant4" : {"image" : "soup.jpg", "cost" : "20", "fact" : "plants are cool"},
-                    "plant5" : {"image" : "other-soup.jpeg", "cost" : "60", "fact" : "plants are very cool"}, 
-                    "plant6" : {"image" : "soup.jpg", "cost" : "100", "fact" : "plants are super cool"},
-                    "plant7" : {"image" : "soup.jpg", "cost" : "20", "fact" : "plants are cool"},
-                    "plant8" : {"image" : "other-soup.jpeg", "cost" : "60", "fact" : "plants are very cool"}, 
-                    "plant9" : {"image" : "soup.jpg", "cost" : "100", "fact" : "plants are super cool"},
-                    "plant10" : {"image" : "soup.jpg", "cost" : "20", "fact" : "plants are cool"},
-                    "plant11" : {"image" : "other-soup.jpeg", "cost" : "60", "fact" : "plants are very cool"}, 
-                    "plant12" : {"image" : "soup.jpg", "cost" : "100", "fact" : "plants are super cool"}},
-        "leaves" : current_leaves
-    }
-    return render(request, "market.html", context)
   
 def generate_qr(request):
     qr_image_base64 = None
