@@ -22,6 +22,7 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
     
 class CustomUser(AbstractUser):
+    email = models.EmailField(null=True, blank=True) # Allows no email, potentially remove in sprint 2
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
     owned_plants = models.ManyToManyField("garden.Plant", blank=True, related_name="owners")
     objects = CustomUserManager()
