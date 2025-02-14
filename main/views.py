@@ -45,6 +45,9 @@ def events(request):
 def market(request):
     return render(request, "market.html")
   
+def update(request):
+    return render(request, "market.html")
+
 def generate_qr(request):
     qr_image_base64 = None
     if request.method == 'POST':
