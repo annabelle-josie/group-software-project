@@ -29,8 +29,8 @@
             <button class="col-3" onClick='
             document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant_dict.image %}");
             document.getElementById("chosen-plant-name").innerHTML = "Name: {{plant_name}}";
-            document.getElementById("chosen-plant-cost").innerHTML = "Name: {{ plant_dict.cost }}";
-            document.getElementById("chosen-plant-fact").innerHTML = "Name: {{plant_dict.fact}}";
+            document.getElementById("chosen-plant-cost").innerHTML = "Cost: {{ plant_dict.cost }}";
+            document.getElementById("chosen-plant-fact").innerHTML = "Fact: {{plant_dict.fact}}";
             '>
                 <img alt="{{plant_name}}" src="{% static plant_dict.image %}"  width="100px">
                 <p>{{plant_name}}</p>
