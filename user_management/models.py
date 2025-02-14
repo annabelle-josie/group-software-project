@@ -1,93 +1,149 @@
 from django.db import models
+from django.utils.timezone import now
+from django.contrib.auth.models import AbstractUser, Group, BaseUserManager
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
 
-# Create your models here.
-class UsersInfo(models.Model):
-    Username = models.OneToOneField(User, to_field="username", on_delete=models.CASCADE, primary_key=True)
-    Leaves = models.IntegerField(default=0)
-    Points = models.IntegerField(default=0)
+class CustomUserManager(BaseUserManager):
+    """Custom manager to prevent issues with swapped user models."""
+    def create_user(self, username, email=None, password=None, **extra_fields):
+        if not username:
+            raise ValueError("The Username field must be set")
+        email = self.normalize_email(email) if email else None
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        return self.create_user(username, email, password, **extra_fields)
+    
+class CustomUser(AbstractUser):
+    email = models.EmailField(null=True, blank=True) # Allows no email, potentially remove in sprint 2
+    friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    owned_plants = models.ManyToManyField("garden.Plant", blank=True, related_name="owners")
+    objects = CustomUserManager()
+
+    def is_game_keeper(self):
+        """Check if the user belongs to the 'Game Keepers' group."""
+        return self.groups.filter(name="Game Keepers").exists()
+
+    def award_points(self, target_user, amount):
+        """Allows Game Keepers to award points to other users."""
+        if not self.is_game_keeper():
+            raise PermissionError("Only Game Keepers can award points.")
+
+        target_user.stats.points += amount
+        target_user.stats.save()
+
+    def award_leaves(self, target_user, amount):
+        """Allows Game Keepers to award leaves to other users."""
+        if not self.is_game_keeper():
+            raise PermissionError("Only Game Keepers can award leaves.")
+
+        target_user.stats.leaves += amount
+        target_user.stats.save()
+
+    def send_friend_request(self, to_user):
+        """Allows sending a friend request only if no rejected request exists."""
+        if self == to_user:
+            raise ValueError("You cannot send a friend request to yourself.")
+
+        # Check for past requests
+        existing_request = FriendRequest.objects.filter(senderId=self, receiverId=to_user).first()
+        reverse_request = FriendRequest.objects.filter(senderId=to_user, receiverId=self).first()
+
+        # If a request already exists
+        if existing_request:
+            if existing_request.status == "pending":
+                raise ValueError("Friend request already sent.")
+            elif existing_request.status == "rejected":
+                raise ValueError("This user has rejected your request.")
+        
+        # If the reverse request was rejected, allow sending one
+        if reverse_request and reverse_request.status == "rejected":
+            reverse_request.delete() 
+
+        FriendRequest.objects.create(senderId=self, receiverId=to_user)
+
+    def accept_friend_request(self, from_user):
+        """Accepts a pending friend request and deletes it while adding the friend."""
+        try:
+            request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
+            self.friends.add(from_user)
+            from_user.friends.add(self)
+            request.delete()  # Remove request after accepting
+        except FriendRequest.DoesNotExist:
+            raise ValueError("No pending friend requests.")
+
+    def reject_friend_request(self, from_user):
+        """Rejects a pending friend request, preventing future requests from that user."""
+        try:
+            request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
+            request.status = "rejected"
+            request.save()
+        except FriendRequest.DoesNotExist:
+            raise ValueError("No pending friend requests.")
+
+    def unfriend(self, friend):
+        """Removes a user from friends but allows sending a new request."""
+        if friend in self.friends.all():
+            self.friends.remove(friend)
+            friend.friends.remove(self)
+        else:
+            raise ValueError("This user is not your friend.")
+
+def ensure_game_keeper_group():
+    """Creates the 'Game Keepers' group if it doesn't exist."""
+    Group.objects.get_or_create(name="Game Keepers")
+
+class UserStats(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="stats")
+    leaves = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
     class Meta:
-        verbose_name = "User Info"
-        verbose_name_plural = "User Information"  
+        verbose_name = "User Stats"
+        verbose_name_plural = "User Stats"
 
     def __str__(self):
-        return f"{self.Username.username} - Points: {self.Points} - Leaves: {self.Leaves}"
-    
-@receiver(post_save, sender=User)
-def create_user_info(sender, instance, created, **kwargs):
-    if created:  # Only run when a new User is created
-        UsersInfo.objects.create(Username=instance)
+        return f"| {self.user.username} | {self.leaves} Leaves Remaining | {self.points} Total Points |"
 
-    
+@receiver(post_save, sender=CustomUser)
+def create_user_stats(sender, instance, created, **kwargs):
+    """Automatically creates a UserStats entry for every new user."""
+    if created:
+        UserStats.objects.create(user=instance)
 
+@receiver(post_save, sender=CustomUser)
+def create_user_garden(sender, instance, created, **kwargs):
+    """Automatically creates a UserGarden for every new user."""
+    if created:
+        # Import here so that there isn't a circular import between garden and user_management
+        from garden.models import UserGarden
+        UserGarden.objects.create(user=instance)
 
 class FriendRequest(models.Model):
-    senderId = models.ForeignKey(User, related_name="sent_requests", on_delete=models.CASCADE)
-    receiverId = models.ForeignKey(User, related_name="received_requests", on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("accepted", "Accepted"),
-        ("rejected", "Rejected"),
-    ]
-    
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)
+    receiverId = models.ForeignKey(CustomUser, related_name="received_requests", on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=10,
+        choices=[
+            ("pending", "Pending"),
+            ("rejected", "Rejected"),
+        ],
+        default="pending",
+    )
+    created_at = models.DateTimeField(default=now)  
+    updated_at = models.DateTimeField(auto_now=True)  
 
     class Meta:
-        unique_together = ("senderId", "receiverId")  
+        verbose_name = "Friend Request"
+        verbose_name_plural = "Friend Requests"
+        unique_together = ("senderId", "receiverId") 
 
     def __str__(self):
         return f"{self.senderId.username} to {self.receiverId.username} ({self.status})"
-    
-
-def send_friend_request(self, to_user):
-    if self == to_user:
-        raise ValueError("You cannot send a friend request to yourself.")
-
-    if self.friends.filter(pk=to_user.pk).exists():
-        raise ValueError("You are already friends.")
-
-    if FriendRequest.objects.filter(from_user=self, to_user=to_user, status="pending").exists():
-        raise ValueError("Friend request already sent.")
-
-    if FriendRequest.objects.filter(from_user=to_user, to_user=self, status="pending").exists():
-        raise ValueError("User has already sent you a friend request.")
-
-    FriendRequest.objects.create(from_user=self, to_user=to_user)
-    
-
-def accept_friend_request(self, from_user):
-    try:
-        request = FriendRequest.objects.get(from_user=from_user, to_user=self, status="pending")
-
-        if self.friends.filter(pk=from_user.pk).exists():
-            raise ValueError("You are already friends.")
-
-        request.status = "accepted"
-        request.save()
-
-        self.friends.add(from_user)
-        from_user.friends.add(self)
-    except FriendRequest.DoesNotExist:
-        raise ValueError("No pending friend requests.")
-
-def reject_friend_request(self, from_user):
-    try:
-        request = FriendRequest.objects.get(from_user=from_user, to_user=self, status="pending")
-        request.status = "rejected"
-        request.save()
-    except FriendRequest.DoesNotExist:
-        raise ValueError("No pending friend requests.")
-
-def remove_friend(self, friend):
-    if friend in self.friends.all():
-        self.friends.remove(friend)
-        friend.friends.remove(self)  
-    else:
-        raise ValueError("This user is not your friend.")
-
 

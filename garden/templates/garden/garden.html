@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Garden {% endblock %}
+
+{% block content %}
+<h1>{{ user.username }}'s Garden</h1>
+
+<div class="row h-50">
+    <div class="row h-50">
+        {% for plant in plant_slots %}
+            <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
+                <p>Plant {{ forloop.counter }}</p>
+
+                {% if plant and plant.image %}
+                    <img class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                {% else %}
+                    <img class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No plants found in your garden.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +26,13 @@ SECRET_KEY = 'django-insecure-n3znom$!!grybg9re&&5v=#+@@%y!brr^^+@z)a$mph&z@0_k9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# For images for plants
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = "user_management.CustomUser"
 
 # Application definition
 
@@ -39,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'login',
+    'garden',
     'user_management',
     'rest_framework',
     'event_management'
@@ -56,11 +63,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mysite.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['main/templates'],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / "templates"],  # Global templates directory
+        'APP_DIRS': True,  # Allows Django to find "templates/" inside each app
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -117,10 +125,9 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # This is the folder where static files get collected
+STATICFILES_DIRS = [BASE_DIR / 'static',]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

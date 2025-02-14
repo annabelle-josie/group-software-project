@@ -1,8 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
-# from django.contrib.auth.forms import UserCreationForm
-# from django.urls import reverse_lazy
-# from django.views.generic import CreateView
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
@@ -13,15 +10,12 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from rest_framework.response import Response
-from django.contrib import messages
-from rest_framework.decorators import api_view
-from rest_framework import status
-from .models import *
-from .forms import QRCodeForm
 import qrcode
 from io import BytesIO
 import base64
+from django.contrib.auth.models import User
+from .forms import QRCodeForm
+from event_management.models import Events, EventParticipants
 
 def home(request):
     challenges = Challenge.objects.all()
@@ -39,11 +33,59 @@ def challenges(request):
 def garden(request):
     return render(request, "garden.html")
 
-def events(request):
-    return render(request, "events.html")
 
-def market(request):
-    return render(request, "market.html")
+
+def events(request):
+    user_events = EventParticipants.objects.filter(username=request.user)
+
+    events_with_progress = [
+        {
+            "title": event_participant.eventId.title,
+            "desc": event_participant.eventId.desc,
+            "startDate": event_participant.eventId.startDate,
+            "endDate": event_participant.eventId.endDate,
+            "rewardValue": event_participant.eventId.rewardValue,
+            "progress": event_participant.progress,
+            "status": event_participant.status,
+        }
+        for event_participant in user_events
+    ]
+
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+
+    if request.method == "POST" and is_gamekeeper:
+        title = request.POST["title"]
+        desc = request.POST["desc"]
+        noOfTasks = request.POST["noOfTasks"]
+        rewardValue = request.POST["rewardValue"]
+        startDate = request.POST["startDate"]
+        endDate = request.POST["endDate"]
+
+        new_event = Events.objects.create(
+            title=title,
+            desc=desc,
+            noOfTasks=noOfTasks,
+            rewardValue=rewardValue,
+            startDate=startDate,
+            endDate=endDate,
+            eventMaster=request.user
+        )
+
+        all_users = User.objects.all()
+        for user in all_users:
+            EventParticipants.objects.create(
+                username=user,
+                eventId=new_event,
+                progress=0, 
+                status="incomplete"  
+            )
+
+        return HttpResponseRedirect(request.path)
+    
+    return render(request, 'events.html', {
+        'events': events_with_progress,
+        'is_gamekeeper': is_gamekeeper
+    })
   
 def generate_qr(request):
     qr_image_base64 = None
