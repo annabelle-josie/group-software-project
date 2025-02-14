@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # from django.contrib.auth.forms import UserCreationForm
 # from django.urls import reverse_lazy
 # from django.views.generic import CreateView
@@ -22,6 +22,7 @@ from .forms import QRCodeForm
 import qrcode
 from io import BytesIO
 import base64
+from event_management.models import Events, EventParticipants
 
 def home(request):
     challenges = Challenge.objects.all()
@@ -39,8 +40,59 @@ def challenges(request):
 def garden(request):
     return render(request, "garden.html")
 
+
+
 def events(request):
-    return render(request, "events.html")
+    """Shows events where the user is a participant"""
+    user_events = EventParticipants.objects.filter(username=request.user)
+
+    events_with_progress = [
+        {
+            "title": event_participant.eventId.title,
+            "desc": event_participant.eventId.desc,
+            "startDate": event_participant.eventId.startDate,
+            "endDate": event_participant.eventId.endDate,
+            "rewardValue": event_participant.eventId.rewardValue,
+            "progress": event_participant.progress,
+            "status": event_participant.status,
+        }
+        for event_participant in user_events
+    ]
+
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+
+    return render(request, "events.html", {"events": events_with_progress, "is_gamekeeper": is_gamekeeper})
+
+
+def create_event(request):
+    if not request.user.groups.filter(name="gamekeeper").exists():
+        return redirect("events")  
+
+    if request.method == "POST":
+        title = request.POST["title"]
+        desc = request.POST["desc"]
+        noOfTasks = request.POST["noOfTasks"]
+        rewardValue = request.POST["rewardValue"]
+        startDate = request.POST["startDate"]
+        endDate = request.POST["endDate"]
+
+        Events.objects.create(
+            title=title,
+            desc=desc,
+            noOfTasks=noOfTasks,
+            rewardValue=rewardValue,
+            startDate=startDate,
+            endDate=endDate,
+            eventMaster=request.user,
+        )
+
+        return redirect("events")  
+
+    return render(request, "create_event.html") 
+
+
+
+
 
 def market(request):
     return render(request, "market.html")
