@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 # Create your models here.
 class Challenge(models.Model):
@@ -14,7 +14,7 @@ class Challenge(models.Model):
 
 
 class ChallengeParticipants(models.Model):
-    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     challengeId = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)
     
