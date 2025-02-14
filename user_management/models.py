@@ -23,6 +23,7 @@ class CustomUserManager(BaseUserManager):
     
 class CustomUser(AbstractUser):
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
+    owned_plants = models.ManyToManyField("garden.Plant", blank=True, related_name="owners")
     objects = CustomUserManager()
 
     def is_game_keeper(self):
@@ -114,6 +115,14 @@ def create_user_stats(sender, instance, created, **kwargs):
     """Automatically creates a UserStats entry for every new user."""
     if created:
         UserStats.objects.create(user=instance)
+
+@receiver(post_save, sender=CustomUser)
+def create_user_garden(sender, instance, created, **kwargs):
+    """Automatically creates a UserGarden for every new user."""
+    if created:
+        # Import here so that there isn't a circular import between garden and user_management
+        from garden.models import UserGarden
+        UserGarden.objects.create(user=instance)
 
 class FriendRequest(models.Model):
     senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)

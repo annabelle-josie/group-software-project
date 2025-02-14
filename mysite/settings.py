@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +25,10 @@ SECRET_KEY = 'django-insecure-n3znom$!!grybg9re&&5v=#+@@%y!brr^^+@z)a$mph&z@0_k9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# For images for plants
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 ALLOWED_HOSTS = []
 
@@ -58,11 +63,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'mysite.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['main/templates'],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / "templates"],  # Global templates directory
+        'APP_DIRS': True,  # Allows Django to find "templates/" inside each app
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

@@ -1,108 +1,27 @@
 {% extends 'base.html' %}
-{% load auth_extras %}
+{% load static %}
 
-{% block title %} Home {% endblock %}
+{% block title %} Garden {% endblock %}
 
 {% block content %}
-{% load static %}
-<h1>Garden Page</h1>
-
-<!--
-drop down box to seelect avalible plants 
-
-6 spots to put plants click on button chnage plant 
-redirect from edit you garden 
--->
+<h1>{{ user.username }}'s Garden</h1>
 
 <div class="row h-50">
     <div class="row h-50">
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p> plant 1</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}">
-        </div>
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p>plant 2</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}">
-        </div>
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p>plant 3</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}">
-           
-        </div>
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p>plant 4</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}">
-        </div>
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p>plant 5</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}" data-id="the plant id">
-        </div>
-        <div class="col-2" style=" background-color: rgb(255, 176, 176)">
-            <p>plant 6</p>
-            <img class="image" width=100% src="{% static 'soup.jpg' %}">
-        </div>
-        </div>
-        <form method="POST" style="visibility:hidden" id="select"> <!-- action="updateGarden" -->
-            {% csrf_token %}
-            <label for="itemType">avalible plants:</label>
-            <select name="itemType" id="itemType">
-                {% for item in plants %}
-                    <option value="{{ item.plantID }}">{{item.Name }}</option>
-                {% endfor %}
-                    <option>1280.png</option>
-                    <option>soup.jpg</option>
-               
-            </select>
-            <button type="submit" onclick="visible('hidden')">change</button>
-        </form>
+        {% for plant in plant_slots %}
+            <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
+                <p>Plant {{ forloop.counter }}</p>
+
+                {% if plant and plant.image %}
+                    <img class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                {% else %}
+                    <img class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No plants found in your garden.</p>
+        {% endfor %}
+    </div>
 </div>
-<script>
-    function visible(look){
-        document.getElementById("select").style.visibility = look;
-    }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get all remove buttons
-            const removeButtons = document.querySelectorAll('.image');
-
-            removeButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    // Get the itemType (barcode) from data attribute
-                    const plantID = button.getAttribute('data-id');
-                    alert("hi")
-                    visible('visible')
-                    
-                    
-                    // Confirm with the user before removing the item
-                    // const confirmEdit = confirm('edit plants');
-                    // if (confirmEdit) {
-                    //     // Send DELETE request using fetch
-                    //     fetch('/api/v1/removeFromShoppingList', {
-                    //         method: 'UPDATE',
-                    //         headers: {
-                    //             'Content-Type': 'application/json',
-                    //             'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
-                    //         },
-                    //         body: JSON.stringify({
-                    //             plantID: plantID // Pass the barcode as itemType
-                    //         }) 
-                    //     })
-                        // .then(response => {
-                        //     if (response.ok) {
-                        //         alert('Item removed successfully!');
-                        //         location.reload(); // Refresh the page after successful removal
-                        //     } else {
-                        //         alert('Error removing item.');
-                        //     }
-                        // })
-                        // .catch(error => {
-                        //     console.error('Error:', error);
-                        //     alert('Error removing item.');
-                        // });
-                    //}
-                });
-            });
-        });
-</script>
 
 {% endblock %}
