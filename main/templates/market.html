@@ -1,39 +1,98 @@
 {% extends 'base.html' %}
-{% load auth_extras %}
 {% load static %}
 
-{% block title %} Market {% endblock %}
+{% block title %}Market{% endblock %}
 
 {% block content %}
 
-<!-- Header Section -->
-<div class="h-50 row" style=" background-color: rgb(176, 239, 255)">
-    <img id="chosen-plant-image" class="mt-3 col-6" alt="Click a plant to select" src="{% static 'placeholder.jpg' %}" style="max-height: 80%; max-width: 80%; width: auto;">
-    <div id="chosen-plant-facts" class="col-6">
-        <p>Your Leaves: {{leaves}}</p>
-        <h1>Plants</h1>
-        <h2 id="chosen-plant-name">Name: </h2>
-        <h2 id="chosen-plant-cost">Cost: </h2>
-        <h2 id="chosen-plant-fact">Fun Fact: </h2>
-        <button class="btn btn-primary">Buy plant</button>
-    </div>
-</div>
+<div class="container-fluid">
+    <div class="row align-items-center text-center p-3" style="background-color: rgb(176, 239, 255);">
 
-<!-- Plant List Section -->
-<div class="h-50" style="background-color: rgb(255, 176, 221)">
-    <div class="row overflow-scroll" style="max-width: 100%; max-height: 100%;">
+        <!-- Image & Details Section -->
+        {% with plants.0 as first_plant %}
+        <div class="col-md-5 text-center">
+            <img id="chosen-plant-image" class="img-fluid rounded"
+                 src="{{ first_plant.image.url }}" 
+                 alt="{{ first_plant.name }}" 
+                 style="max-height: 300px; width: auto;">
+        </div>
+
+        <div class="col-md-7">
+            <p class="fw-bold text-center">Your Leaves: {{ leaves }}</p>
+            <h1 class="fw-bold text-center">Plants</h1>
+            <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
+            <h4 id="chosen-plant-cost"><strong>Cost:</strong> {{ first_plant.price }}</h4>
+            <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
+            <button class="btn btn-primary w-100">Buy plant</button>
+        </div>
+        {% endwith %}
+    </div>
+
+    <!-- Plant Selection Grid -->
+    <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
-            <button class="col-3" onClick='
-                document.getElementById("chosen-plant-image").setAttribute("src", "{{ plant.image.url }}");
-                document.getElementById("chosen-plant-name").innerHTML = "Name: {{ plant.name }}";
-                document.getElementById("chosen-plant-cost").innerHTML = "Cost: {{ plant.price }}";
-                document.getElementById("chosen-plant-fact").innerHTML = "Fact: {{ plant.fact }}";
-            '>
-                <img alt="{{ plant.name }}" src="{{ plant.image.url }}" width="100px">
-                <p>{{ plant.name }}</p>
-            </button>
+            <div class="plant-item"
+                 onclick="updatePlant('{{ plant.image.url }}', `{{ plant.name }}`, `{{ plant.price }}`, `{{ plant.fact }}`)">
+                <img class="img-fluid rounded shadow"
+                     src="{{ plant.image.url }}" 
+                     alt="{{ plant.name }}">
+                <p class="fw-bold text-dark">{{ plant.name }}</p>
+            </div>
         {% endfor %}
     </div>
 </div>
 
+<!-- JavaScript for Dynamic Plant Selection -->
+<script>
+    function updatePlant(image, name, cost, fact) {
+        document.getElementById("chosen-plant-image").src = image;
+        document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
+        document.getElementById("chosen-plant-cost").innerHTML = "<strong>Cost:</strong> " + cost;
+        document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+    }
+</script>
+
+<!-- Styling for Proper Mobile Layout -->
+<style>
+    /* Dynamic Grid Layout */
+    .plant-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        text-align: center;
+    }
+
+    .plant-item {
+        cursor: pointer;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .plant-item img {
+        max-width: 100px;
+        height: auto;
+    }
+
+    /* Improve Mobile View */
+    @media (max-width: 768px) {
+        .row {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .col-md-5, .col-md-7 {
+            width: 100%;
+        }
+
+        .plant-grid {
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        }
+
+        .btn {
+            font-size: 1rem;
+        }
+    }
+</style>
+
 {% endblock %}
+

@@ -32,7 +32,7 @@ def get_garden(request, user_id):
         return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
 
 def market_view(request):
-    plants = Plant.objects.all()  # Fetch all plants from DB
+    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
     
     current_leaves = 80  # Need to replace with a method to get that users leaves
     
