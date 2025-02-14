@@ -1,18 +1,16 @@
 {% extends 'base.html' %}
+{% load auth_extras %}
 {% load static %}
 
-{% block title %}Market{% endblock %}
+{% block title %} Market {% endblock %}
 
 {% block content %}
-<script>
-    // Optional script block for handling dynamic updates
-</script>
 
-<!-- Container for displaying the selected plant details -->
-<div class="h-50 row" style="background-color: rgb(176, 239, 255)">
-    <img id="chosen-plant-image" class="mt-3 col-6" alt="Click a plant to select" src="{% static 'default-image.jpg' %}" style="max-height: 80%; max-width: 80%; width: auto;">
+<!-- Header Section -->
+<div class="h-50 row" style=" background-color: rgb(176, 239, 255)">
+    <img id="chosen-plant-image" class="mt-3 col-6" alt="Click a plant to select" src="{% static 'placeholder.jpg' %}" style="max-height: 80%; max-width: 80%; width: auto;">
     <div id="chosen-plant-facts" class="col-6">
-        <p>Your Leaves: {{ leaves }}</p>
+        <p>Your Leaves: {{leaves}}</p>
         <h1>Plants</h1>
         <h2 id="chosen-plant-name">Name: </h2>
         <h2 id="chosen-plant-cost">Cost: </h2>
@@ -21,17 +19,17 @@
     </div>
 </div>
 
-<!-- Display available plants -->
+<!-- Plant List Section -->
 <div class="h-50" style="background-color: rgb(255, 176, 221)">
     <div class="row overflow-scroll" style="max-width: 100%; max-height: 100%;">
         {% for plant in plants %}
             <button class="col-3" onClick='
-                document.getElementById("chosen-plant-image").setAttribute("src", "{% static plant.image.url %}");
+                document.getElementById("chosen-plant-image").setAttribute("src", "{{ plant.image.url }}");
                 document.getElementById("chosen-plant-name").innerHTML = "Name: {{ plant.name }}";
                 document.getElementById("chosen-plant-cost").innerHTML = "Cost: {{ plant.price }}";
                 document.getElementById("chosen-plant-fact").innerHTML = "Fact: {{ plant.fact }}";
             '>
-                <img alt="{{ plant.name }}" src="{% static plant.image.url %}" width="100px">
+                <img alt="{{ plant.name }}" src="{{ plant.image.url }}" width="100px">
                 <p>{{ plant.name }}</p>
             </button>
         {% endfor %}
