@@ -43,7 +43,6 @@ def garden(request):
 
 
 def events(request):
-    """Shows events where the user is a participant"""
     user_events = EventParticipants.objects.filter(username=request.user)
 
     events_with_progress = [
@@ -61,14 +60,7 @@ def events(request):
 
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
-    return render(request, "events.html", {"events": events_with_progress, "is_gamekeeper": is_gamekeeper})
-
-
-def create_event(request):
-    if not request.user.groups.filter(name="gamekeeper").exists():
-        return redirect("events")  
-
-    if request.method == "POST":
+    if request.method == "POST" and is_gamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
@@ -76,22 +68,31 @@ def create_event(request):
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
 
-        Events.objects.create(
+        new_event = Events.objects.create(
             title=title,
             desc=desc,
             noOfTasks=noOfTasks,
             rewardValue=rewardValue,
             startDate=startDate,
             endDate=endDate,
-            eventMaster=request.user,
+            eventMaster=request.user
         )
 
-        return redirect("events")  
+        all_users = User.objects.all()
+        for user in all_users:
+            EventParticipants.objects.create(
+                username=user,
+                eventId=new_event,
+                progress=0, 
+                status="incomplete"  
+            )
 
-    return render(request, "create_event.html") 
-
-
-
+        return HttpResponseRedirect(request.path)
+    
+    return render(request, 'events.html', {
+        'events': events_with_progress,
+        'is_gamekeeper': is_gamekeeper
+    })
 
 
 def market(request):
