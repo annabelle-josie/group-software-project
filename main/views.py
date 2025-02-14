@@ -16,6 +16,9 @@ import base64
 from django.contrib.auth.models import User
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from garden.serializers import PlantSerializer
+from garden.models import Plant
+import json
 
 def home(request):
     challenges = Challenge.objects.all()
@@ -32,8 +35,6 @@ def challenges(request):
 
 def garden(request):
     return render(request, "garden.html")
-
-
 
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
@@ -128,3 +129,38 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+
+def market_view(request):
+    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
+    
+    current_leaves = 80  # Need to replace with a method to get that users leaves
+    
+    context = {
+        "plants": plants,
+        "leaves": current_leaves
+    }
+    return render(request, "market.html", context)
+
+@api_view(['POST'])
+def add_purchased_plant(request):
+    plant_array = []
+    plant_array.append(request.data.get('id'))
+    plant_array.append(request.data.get('name'))
+    plant_array.append(request.data.get('price'))
+    plant_array.append(request.data.get('image'))
+    plant_array.append(request.data.get('fact'))
+    print(plant_array)
+    serializer = PlantSerializer(data=plant_array)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
+# OK, so POSTMAN seems to think this works, only doesn't add it properly
+# I'm giving up
+# {"id" : "annabelle", 
+# "name" : "White Egret Orchid", 
+# "cost" : "30.00", 
+# "image" : "/media/plant_images/white-egret-orchid.jpg", 
+# "fact" : "In the language of flowers, it symbolizes the phrase, 'my thoughts will follow you into your dreams'."}

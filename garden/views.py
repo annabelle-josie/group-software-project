@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import UserGarden, Plant
-from .serializers import UserGardenSerializer
+from .serializers import UserGardenSerializer, PlantSerializer
 
 def garden_view(request):
     user_garden = UserGarden.objects.get(user=request.user)
@@ -30,15 +30,3 @@ def get_garden(request, user_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     except userGarden.DoesNotExist:
         return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
-
-def market_view(request):
-    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
-    
-    current_leaves = 80  # Need to replace with a method to get that users leaves
-    
-    context = {
-        "plants": plants,
-        "leaves": current_leaves
-    }
-    return render(request, "market.html", context)
-
