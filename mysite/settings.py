@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'login',
+    'garden',
     'user_management',
     'rest_framework',
     'event_management'
