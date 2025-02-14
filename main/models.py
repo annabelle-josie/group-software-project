@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 
 # Create your models here.
 class Challenge(models.Model):
@@ -14,7 +13,7 @@ class Challenge(models.Model):
 
 
 class ChallengeParticipants(models.Model):
-    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
     challengeId = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)
     
@@ -28,6 +27,7 @@ class ChallengeParticipants(models.Model):
     class Meta:
         verbose_name = "Challenge Members"
         verbose_name_plural = "Challenge Participants"  
+        unique_together = ("username", "challengeId")
 
     def __str__(self):
         return f"{self.username.username} - {self.challengeId.title}"
