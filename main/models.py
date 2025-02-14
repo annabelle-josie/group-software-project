@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Challenge(models.Model):
@@ -11,13 +12,23 @@ class Challenge(models.Model):
     def __str__(self):
         return self.title
 
-# class userGarden(models.Model):
-#     username= models.AutoField(primary_key=True)
-#     plant1Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     plant2Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     plant3Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     plant4Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     plant5Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     plant6Id= models.ForeignKey(plants,on_delete=models.CASCADE)
-#     def __str__(self):
-#             return self.username
+
+class ChallengeParticipants(models.Model):
+    username = models.ForeignKey(User, on_delete=models.CASCADE)
+    challengeId = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    progress = models.IntegerField(default=0)
+    
+    STATUS_CHOICES = [
+        ("incomplete", "Incomplete"),
+        ("complete", "Complete"),
+    ]
+    
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="incomplete")
+
+    class Meta:
+        verbose_name = "Challenge Members"
+        verbose_name_plural = "Challenge Participants"  
+
+    def __str__(self):
+        return f"{self.username.username} - {self.challengeId.title}"
+    

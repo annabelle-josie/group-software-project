@@ -1,10 +1,70 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %} Home {% endblock %}
-
 {% block content %}
+    <h1>Your Events</h1>
 
-<h1>Events Page</h1>
+    {% if events %}
+        <ul>
+            {% for event in events %}
+                <h2 onclick="toggleDetails('event-{{ forloop.counter }}')">
+                    {{ event.title }} ▼
+                </h2>
 
+                <div id="event-{{ forloop.counter }}" style="display: none; margin-left: 20px;">
+                    <p><strong>Description:</strong> {{ event.desc }}</p>
+                    <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                    <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                    <p><strong>Reward:</strong> ${{ event.rewardValue }}</p>
+                    <p><strong>Progress:</strong> {{ event.progress }}%</p>
+                    <p><strong>Status:</strong> 
+                        {% if event.status == "complete" %}
+                            Completed
+                        {% else %}
+                            In Progress
+                        {% endif %}
+                    </p>
+                </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no avilable events.</p>
+    {% endif %}
+
+    {% if is_gamekeeper %}
+        <h2>Create Event</h2>
+        <form method="post">
+            {% csrf_token %}
+            <label for="title">Title:</label>
+            <input type="text" name="title" required>
+
+            <label for="desc">Description:</label>
+            <textarea name="desc" required></textarea>
+
+            <label for="noOfTasks">Number of Tasks:</label>
+            <input type="number" name="noOfTasks" required>
+
+            <label for="rewardValue">Reward Value:</label>
+            <input type="number" name="rewardValue" max="1000" required>
+
+            <label for="startDate">Start Date:</label>
+            <input type="datetime-local" name="startDate" required>
+
+            <label for="endDate">End Date:</label>
+            <input type="datetime-local" name="endDate" required>
+
+            <button type="submit">Create Event</button>
+        </form>
+    {% endif %}
+
+    <script>
+        function toggleDetails(eventId) {
+            var details = document.getElementById(eventId);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    </script>
 {% endblock %}
