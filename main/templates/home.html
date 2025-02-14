@@ -42,7 +42,6 @@
         <button class="btn btn-primary mt-2" onclick="window.location.href='allchallenges'">See more tasks</button>
     </div>
 
-    <!-- QR Code Section -->
     <div class="col-md-6" style="background-color: rgb(200, 203, 255);">
         <button class="btn btn-primary mt-5" onclick="visible()">Scan QR Code</button>
         <div style="width:120px; display:none;" id="reader"></div>
@@ -93,11 +92,9 @@
     function onScanSuccess(decodedText, decodedResult) {
         console.log(`Scan result: ${decodedText}`, decodedResult);
         alert(decodedText);
-        html5QrcodeScanner.clear();
     }
 
     function onScanError(errorMessage) {
-        alert("QR code could not be found");
     }
 
     var html5QrcodeScanner = new Html5QrcodeScanner(
