@@ -33,5 +33,12 @@ def get_garden(request, user_id):
 
 def market_view(request):
     plants = Plant.objects.all()  # Fetch all plants from DB
-    print(plants)  # Debugging: Print in terminal to confirm retrieval
-    return render(request, "market.html", {"plants": plants})
+    
+    current_leaves = 80  # Need to replace with a method to get that users leaves
+    
+    context = {
+        "plants": plants,
+        "leaves": current_leaves
+    }
+    return render(request, "market.html", context)
+
