@@ -19,6 +19,7 @@ from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden
+from django.shortcuts import get_object_or_404
 from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
@@ -67,12 +68,14 @@ def events(request):
 
     events_with_progress = [
         {
+            "eventId": event_participant.eventId.eventId,
             "title": event_participant.eventId.title,
             "desc": event_participant.eventId.desc,
             "startDate": event_participant.eventId.startDate,
             "endDate": event_participant.eventId.endDate,
             "rewardValue": event_participant.eventId.rewardValue,
             "progress": event_participant.progress,
+            "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
         }
         for event_participant in user_events
@@ -108,11 +111,29 @@ def events(request):
             )
 
         return HttpResponseRedirect(request.path)
-    
+
     return render(request, 'events.html', {
         'events': events_with_progress,
         'is_gamekeeper': is_gamekeeper
     })
+
+def increment_progress(request, event_id):
+    """Handle the progress increment request."""
+    event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+
+    if event_participant:
+        event_participant.increment_progress()
+
+        # Prepare response data
+        response_data = {
+            'progress': event_participant.progress,
+            'totalTasks': event_participant.eventId.noOfTasks,
+            'status': event_participant.status,
+        }
+
+        return JsonResponse(response_data)
+
+    return JsonResponse({'error': 'Event participant not found.'}, status=404)
   
 def generate_qr(request):
     qr_image_base64 = None

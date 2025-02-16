@@ -2,79 +2,134 @@
 {% load auth_extras %}
 
 {% block content %}
-<div class="w-100 p-3 h-10" style="background-color: #eee;">
-    {% if user.is_authenticated %}
-        <h1>{{ user.username }}'s Events!</h1>
+    <div class="w-100 p-3 h-8" style="background-color: #eee;">
+        {% if user.is_authenticated %}
+            <h1>{{ user.username }}'s Events</h1>
+        {% else %}
+            <h1>Guest's Garden!</h1>
+        {% endif %}
+    </div>
+
+    <div class="container mt-4">
+    {% if events %}
+        <div class="accordion" id="eventAccordion">
+            {% for event in events %}
+                <div class="card">
+                    <div class="card-header" id="heading{{ forloop.counter }}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                    aria-controls="collapse{{ forloop.counter }}">
+                                {{ event.title }} ▼
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                         data-bs-parent="#eventAccordion">
+                        <div class="card-body">
+                            <p><strong>Description:</strong> {{ event.desc }}</p>
+                            <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                            <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                            <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                            
+                            <p><strong>Progress:</strong> 
+                                <span id="progress-{{ event.eventId }}">
+                                    {{ event.progress }}/{{ event.noOfTasks }}
+                                </span>
+                            </p>
+
+                            <p><strong>Status:</strong> 
+                                <span id="status-{{ event.eventId }}" 
+                                      class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
+                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
+                                </span>
+                            </p>
+
+                            <button class="btn btn-primary" onclick="incrementProgress({{ event.eventId }})"
+                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks %}style="display:none;"{% endif %}>
+                                Increase Progress
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
-        <h1>Guest's Garden!</h1>
+        <p class="alert alert-info">There are no available events.</p>
+    {% endif %}
+
+    {% if is_gamekeeper %}
+        <h2 class="mt-5">Create An Event</h2>
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="desc" class="form-label">Description:</label>
+                <textarea name="desc" class="form-control" required></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="noOfTasks" class="form-label">Number of Tasks:</label>
+                <input type="number" name="noOfTasks" class="form-control" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="rewardValue" class="form-label">Reward Value:</label>
+                <input type="number" name="rewardValue" class="form-control" max="1000" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="startDate" class="form-label">Start Date:</label>
+                <input type="datetime-local" name="startDate" class="form-control" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="endDate" class="form-label">End Date:</label>
+                <input type="datetime-local" name="endDate" class="form-control" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Event</button>
+        </form>
     {% endif %}
 </div>
 
-{% if events %}
-    <ul>
-        {% for event in events %}
-            <h2 onclick="toggleDetails('event-{{ forloop.counter }}')" style="cursor: pointer;">
-                {{ event.title }} ▼
-            </h2>
-
-            <div id="event-{{ forloop.counter }}" class="event-details">
-                <p><strong>Description:</strong> {{ event.desc }}</p>
-                <p><strong>Start Date:</strong> {{ event.startDate }}</p>
-                <p><strong>End Date:</strong> {{ event.endDate }}</p>
-                <p><strong>Reward:</strong> ${{ event.rewardValue }}</p>
-                <p><strong>Progress:</strong> {{ event.progress }}%</p>
-                <p><strong>Status:</strong> 
-                    {% if event.status == "complete" %}
-                        Completed
-                    {% else %}
-                        In Progress
-                    {% endif %}
-                </p>
-            </div>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>There are no available events.</p>
-{% endif %}
-
-{% if is_gamekeeper %}
-    <h2>Create Event</h2>
-    <form method="post">
-        {% csrf_token %}
-        
-        <label for="title">Title:</label>
-        <input type="text" name="title" required>
-
-        <label for="desc">Description:</label>
-        <textarea name="desc" required></textarea>
-
-        <label for="noOfTasks">Number of Tasks:</label>
-        <input type="number" name="noOfTasks" required>
-
-        <label for="rewardValue">Reward Value:</label>
-        <input type="number" name="rewardValue" max="1000" required>
-
-        <label for="startDate">Start Date:</label>
-        <input type="datetime-local" name="startDate" required>
-
-        <label for="endDate">End Date:</label>
-        <input type="datetime-local" name="endDate" required>
-
-        <button type="submit">Create Event</button>
-    </form>
-{% endif %}
-
-<style>
-    .event-details {
-        display: none;
-        margin-left: 20px;
-    }
-</style>
-
 <script>
-    function toggleDetails(eventId) {
-        var details = document.getElementById(eventId);
-        details.style.display = details.style.display === "none" ? "block" : "none";
-    }
+function incrementProgress(eventId) {
+    fetch(`/increment_progress/${eventId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            const progressElement = document.getElementById(`progress-${eventId}`);
+            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+
+            let statusElement = document.getElementById(`status-${eventId}`);
+            if (data.status === "complete") {
+                statusElement.innerText = "Completed";
+                statusElement.classList.remove("bg-warning");
+                statusElement.classList.add("bg-success");
+
+                document.querySelector(`button[onclick="incrementProgress(${eventId})"]`).disabled = true;
+            }
+        }
+    })
+    .catch(err => {
+        alert("There was an issue updating the progress.");
+        console.error(err);
+    });
+}
 </script>
+
 {% endblock %}
