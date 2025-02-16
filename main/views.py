@@ -24,6 +24,7 @@ import json
 
 User = get_user_model()
 
+@login_required(login_url="/auth/login")
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
@@ -36,6 +37,7 @@ def home(request):
 
     return render(request, "home.html", {"plant_slots": plant_slots})
 
+@login_required(login_url="/auth/login")
 def leaderboard(request):
     leaders = get_leaderboard(request).content
     context = json.loads(leaders)
@@ -49,6 +51,8 @@ def challenges(request):
 def garden(request):
     return render(request, "garden.html")
 
+
+@login_required(login_url="/auth/login")
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
 
