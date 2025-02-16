@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -40,16 +41,16 @@ class EventParticipants(models.Model):
     def __str__(self):
         return f"{self.username.username} - {self.eventId.title}"
 
-@receiver(post_save, sender=User)
-def assign_user_to_existing_events(sender, instance, created, **kwargs):
-    if created:  
-        existing_events = Events.objects.all()
-        for event in existing_events:
-            if not EventParticipants.objects.filter(username=instance, eventId=event).exists():
-                EventParticipants.objects.create(
-                    username=instance,
-                    eventId=event,
-                    progress=0,
-                    status="incomplete"
-                )
+    @receiver(post_save, sender=get_user_model())
+    def assign_user_to_existing_events(sender, instance, created, **kwargs):
+        if created:  
+            existing_events = Events.objects.all()
+            for event in existing_events:
+                if not EventParticipants.objects.filter(username=instance, eventId=event).exists():
+                    EventParticipants.objects.create(
+                        username=instance,
+                        eventId=event,
+                        progress=0,
+                        status="incomplete"
+                    )
 
