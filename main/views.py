@@ -153,3 +153,18 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+@api_view(['POST'])
+def remove_task(request):
+    task = request.data.get('tasks')
+    print("the point" +task)
+    try:
+        challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
+        tasks = int(task) -1
+        print(tasks)
+        newpoint =setattr(challenge,f'noOfTasks',tasks)
+        challenge.save()
+        return Response(status=status.HTTP_200_OK)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
