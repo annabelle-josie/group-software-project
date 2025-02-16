@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load auth_extras %}
 
 {% block title %}Market{% endblock %}
 
@@ -23,7 +24,7 @@
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
             <h4 id="chosen-plant-cost"><strong>Cost:</strong> {{ first_plant.price }}</h4>
             <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
-            <button class="btn btn-primary w-100">Buy plant</button>
+            <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ first_plant.name }}')">Buy plant</button>
         </div>
         {% endwith %}
     </div>
@@ -32,7 +33,7 @@
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
             <div class="plant-item"
-                 onclick="updatePlant('{{ plant.image.url }}', `{{ plant.name }}`, `{{ plant.price }}`, `{{ plant.fact }}`)">
+                 onclick="updatePlant('{{ plant.image.url }}', '{{ plant.name }}', '{{ plant.price }}', '{{ plant.fact }}', '{{user}}', '{{ plant }}')">
                 <img class="img-fluid rounded shadow"
                      src="{{ plant.image.url }}" 
                      alt="{{ plant.name }}">
@@ -44,11 +45,40 @@
 
 <!-- JavaScript for Dynamic Plant Selection -->
 <script>
-    function updatePlant(image, name, cost, fact) {
+    function updatePlant(image, name, cost, fact, user, plantObject) {
         document.getElementById("chosen-plant-image").src = image;
         document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
         document.getElementById("chosen-plant-cost").innerHTML = "<strong>Cost:</strong> " + cost;
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+
+        const onClickString = "buyPlant('" + user + "','" + name + "');"
+        document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
+    }
+
+    function buyPlant(userData, plantName){
+        fetch('api/add_purchased_plant', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
+                    },
+                    body: JSON.stringify({
+                        "user": userData, 
+                        "plantName": plantName
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Plant purchased successfully!');
+                        location.reload(); // Refresh the page after successful removal
+                    } else {
+                        alert('Error purchasing item.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error purchasing item.');
+                });
     }
 </script>
 
