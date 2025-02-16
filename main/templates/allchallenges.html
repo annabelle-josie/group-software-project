@@ -14,14 +14,15 @@
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                     <label class="form-check-label" for="flexCheckDefault">
-                        {{item.title}}-{{item.desc}}-has {{item.noOfTasks}} 
+                        {{item.title}}-{{item.desc}}-has {{item.noOfTasks}} points are {{item.rewardValue}}, 
                         <button class="remove-button btn btn-primary mt-1" data-id="{{item.challengeId}}" data-points="{{item.rewardValue}}">complete</button>
-              
                 </div>
-                <div>
-                    <p> {% empty %} no challenges left</p>
-                </div>
+                <p> {% empty %} no challenges left</p>
                 {% endfor %}
+                <div>
+                {{users}}
+                </div>
+                
             </li>
         </ul>
 </div>
@@ -34,19 +35,19 @@
                 // Get the itemType (barcode) from data attribute
                 const challengeId = button.getAttribute('data-id');
                 const points = button.getAttribute('data-points');
-                // add the points to points 
-                // Confirm with the user before removing the item
+                alert(challengeId)
                 const confirmRemove = confirm('Are you sure you have completed this task');
                 if (confirmRemove) {
                     // Send DELETE request using fetch
-                    fetch('/api/v1/removeChallenge', {
+                    fetch('api/v1/removeChallenge', {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
                         },
                         body: JSON.stringify({
-                            challengeId: challengeId // Pass the barcode as itemType
+                            challengeId: challengeId, // Pass the barcode as itemType
+                            points : points
                         }) 
                     })
                     .then(response => {

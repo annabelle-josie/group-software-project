@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from garden.models import UserGarden
+from user_management.models import UserStats
 
 def home(request):
     if not request.user.is_authenticated:
@@ -36,7 +37,13 @@ def leaderboard(request):
 
 def challenges(request):
     challenges = Challenge.objects.all()
-    context = {"challenge_list": challenges}
+    try:
+        users = UserStats.objects.get(user=request.user)
+        stuff =users.points
+    except:
+        stuff=[]
+    print(stuff)
+    context = {"challenge_list": challenges, "users":stuff}
     return render(request, "allchallenges.html",context)
 
 def garden(request):
@@ -131,8 +138,17 @@ def add_challenge(request):
 
 @api_view(['DELETE'])
 def remove_challenge(request):
+    point = request.data.get('points')
+    print("the point" +point)
+    print(request.user)
     try:
         challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
+        users = UserStats.objects.get(user=request.user)
+        points = int(point) + users.points
+        leaves = int(point) + users.leaves
+        newpoint =setattr(users,f'points',points)
+        newleaves =setattr(users,f'leaves',points)
+        users.save()
         challenge.delete()
         return Response(status=status.HTTP_200_OK)
     except:
