@@ -24,7 +24,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     email = models.EmailField(null=True, blank=True) # Allows no email, potentially remove in sprint 2
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
-    owned_plants = models.ManyToManyField("garden.Plant", blank=True, related_name="owners")
+    owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
 
     def is_game_keeper(self):

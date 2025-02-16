@@ -16,10 +16,17 @@ import base64
 from django.contrib.auth.models import User
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from garden.models import UserGarden
 
 def home(request):
+    user_garden = UserGarden.objects.get(user=request.user)
+    plant_slots = []
+    if user_garden:
+        for slot in range(1, 7):  # Loop through all 6 slots
+            plant = getattr(user_garden, f"plant{slot}Id", None)  # Get Plant object directly
+            plant_slots.append(plant)
     challenges = Challenge.objects.all()
-    context = {"challenge_list": challenges}
+    context = {"challenge_list": challenges, "plant_slots":plant_slots}
     return render(request, "home.html",context)
 
 def leaderboard(request):
