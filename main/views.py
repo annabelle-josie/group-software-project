@@ -16,11 +16,8 @@ import base64
 from django.contrib.auth.models import User
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
-from user_management.models import CustomUser
-from garden.serializers import PlantSerializer
+from user_management.models import CustomUser, UserStats
 from garden.models import Plant
-import json
-from decimal import Decimal
 
 def home(request):
     challenges = Challenge.objects.all()
@@ -137,7 +134,10 @@ def remove_challenge(request):
 def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
     
-    current_leaves = 80  # Need to replace with a method to get that users leaves
+    user = CustomUser.objects.get(username=request.user)
+    current_leaves = UserStats.objects.get(user_id=user.id).leaves
+
+    # current_leaves = 80  # Need to replace with a method to get that users leaves
     
     context = {
         "plants": plants,
@@ -151,22 +151,26 @@ def add_purchased_plant(request):
         plantName = request.data.get('plantName')
         userData = request.data.get('user')
 
-        print(plantName, userData)
-
         user = CustomUser.objects.get(username=userData)
         currentPlants = user.owned_plants.all()
         plant = Plant.objects.get(name=plantName)
+        userStatObj = UserStats.objects.get(user_id=user.id)
+        userLeaves = userStatObj.leaves
 
-        print("ahhhhhh")
-        ownList = []
-        for i in range(len(currentPlants)):
-            ownList.append(currentPlants[i])
-        ownList.append(plant)
+        if(plant.price < userLeaves):
+            ownList = []
+            for i in range(len(currentPlants)):
+                ownList.append(currentPlants[i])
+            ownList.append(plant)
 
-        print("jjsdkgah")
-        print(ownList)
-        user.owned_plants.set(ownList)
-        print("ajkdhfa")
-        return Response(status=status.HTTP_200_OK)
+            user.owned_plants.set(ownList)
+
+            newLeaves = userLeaves - plant.price
+            print(newLeaves)
+            userStatObj = setattr(userStatObj, "leaves", newLeaves)
+            return Response(status=status.HTTP_200_OK)
+        else:
+            print("YOU ARE BROKE (But not broken?)")
+            return Response(status=status.HTTP_400_BAD_REQUEST)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)

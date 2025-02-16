@@ -51,14 +51,8 @@
         document.getElementById("chosen-plant-cost").innerHTML = "<strong>Cost:</strong> " + cost;
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
 
-        const somehting = "buyPlant('" + user + "','" + name + "');"
-        document.getElementById("chosen-plant-buy").setAttribute("onClick", somehting);
-        // const buyButton = document.getElementById("chosen-plant-buy");
-        // buyButton.replaceWith(buyButton.cloneNode(true));
-        // document.getElementById("chosen-plant-buy").onClick = function() {
-        //     buyPlant(user, name);
-        // };
-        // alert("I did it")
+        const onClickString = "buyPlant('" + user + "','" + name + "');"
+        document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
     }
 
     function buyPlant(userData, plantName){
