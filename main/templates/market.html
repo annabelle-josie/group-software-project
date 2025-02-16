@@ -22,9 +22,9 @@
             <p class="fw-bold text-center">Your Leaves: {{ leaves }}</p>
             <h1 class="fw-bold text-center">Plants</h1>
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
-            <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ first_plant.price }}</h4>
+            <h4 id="chosen-plant-cost"><strong>Cost:</strong> {{ first_plant.price }}</h4>
             <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
-            <button class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ first_plant.id }}','{{ first_plant.image }}', '{{ first_plant.name }}', '{{ first_plant.price }}', '{{ first_plant.fact }}')">Buy plant</button>
+            <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ first_plant.name }}')">Buy plant</button>
         </div>
         {% endwith %}
     </div>
@@ -33,7 +33,7 @@
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
             <div class="plant-item"
-                 onclick="updatePlant('{{ plant.image.url }}', `{{ plant.name }}`, `{{ plant.price }}`, `{{ plant.fact }}`)">
+                 onclick="updatePlant('{{ plant.image.url }}', '{{ plant.name }}', '{{ plant.price }}', '{{ plant.fact }}', '{{user}}', '{{ plant }}')">
                 <img class="img-fluid rounded shadow"
                      src="{{ plant.image.url }}" 
                      alt="{{ plant.name }}">
@@ -45,14 +45,23 @@
 
 <!-- JavaScript for Dynamic Plant Selection -->
 <script>
-    function updatePlant(image, name, cost, fact) {
+    function updatePlant(image, name, cost, fact, user, plantObject) {
         document.getElementById("chosen-plant-image").src = image;
         document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
         document.getElementById("chosen-plant-cost").innerHTML = "<strong>Cost:</strong> " + cost;
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+
+        const somehting = "buyPlant('" + user + "','" + name + "');"
+        document.getElementById("chosen-plant-buy").setAttribute("onClick", somehting);
+        // const buyButton = document.getElementById("chosen-plant-buy");
+        // buyButton.replaceWith(buyButton.cloneNode(true));
+        // document.getElementById("chosen-plant-buy").onClick = function() {
+        //     buyPlant(user, name);
+        // };
+        // alert("I did it")
     }
 
-    function buyPlant(userData, plantid, image, name, price, fact){
+    function buyPlant(userData, plantName){
         fetch('api/add_purchased_plant', {
                     method: 'POST',
                     headers: {
@@ -60,12 +69,8 @@
                         'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
                     },
                     body: JSON.stringify({
-                        "user": {"userData" : userData}, 
-                        "plant": {"id" : plantid,
-                            "name" : name, 
-                            "price" : price, 
-                            "image" : image, 
-                            "fact" : fact }
+                        "user": userData, 
+                        "plantName": plantName
                     })
                 })
                 .then(response => {

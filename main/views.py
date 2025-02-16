@@ -148,25 +148,25 @@ def market_view(request):
 @api_view(['POST'])
 def add_purchased_plant(request):
     try:
-        plantData = request.data
-        plantName = plantData.get('plant').get('name')
-        userData = plantData.get('user').get('userData')
+        plantName = request.data.get('plantName')
+        userData = request.data.get('user')
+
+        print(plantName, userData)
+
         user = CustomUser.objects.get(username=userData)
         currentPlants = user.owned_plants.all()
         plant = Plant.objects.get(name=plantName)
+
+        print("ahhhhhh")
         ownList = []
         for i in range(len(currentPlants)):
             ownList.append(currentPlants[i])
         ownList.append(plant)
+
+        print("jjsdkgah")
         print(ownList)
         user.owned_plants.set(ownList)
+        print("ajkdhfa")
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
-# OK, so POSTMAN seems to think this works, only doesn't add it properly
-# I'm giving up
-# {"id" : "annabelle", 
-# "name" : "White Egret Orchid", 
-# "cost" : "30.00", 
-# "image" : "/media/plant_images/white-egret-orchid.jpg", 
-# "fact" : "In the language of flowers, it symbolizes the phrase, 'my thoughts will follow you into your dreams'."}
