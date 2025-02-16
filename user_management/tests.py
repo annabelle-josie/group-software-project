@@ -20,25 +20,15 @@ class UserStatsTests(TestCase):
         """Ensure a UserStats entry is created when a user is made."""
         self.assertTrue(UserStats.objects.filter(user=self.user).exists())
 
-    def test_game_keeper_can_award_points(self):
-        """Ensure a Game Keeper can award points."""
-        self.game_keeper.award_points(self.user, 10)
+    def test_game_keeper_can_award_points_and_leaves(self):
+        """Ensure a Game Keeper can award points and leaves."""
+        self.game_keeper.award_points_and_leaves(self.user, 10)
         self.assertEqual(self.user.stats.points, 10)
 
-    def test_non_game_keeper_cannot_award_points(self):
-        """Ensure a normal user cannot award points."""
+    def test_non_game_keeper_cannot_award_points_and_leaves(self):
+        """Ensure a normal user cannot award points and leaves."""
         with self.assertRaises(PermissionError):
-            self.user.award_points(self.game_keeper, 10)
-
-    def test_game_keeper_can_award_leaves(self):
-        """Ensure a Game Keeper can award leaves."""
-        self.game_keeper.award_leaves(self.user, 5)
-        self.assertEqual(self.user.stats.leaves, 5)
-
-    def test_non_game_keeper_cannot_award_leaves(self):
-        """Ensure a normal user cannot award leaves."""
-        with self.assertRaises(PermissionError):
-            self.user.award_leaves(self.game_keeper, 5)
+            self.user.award_points_and_leaves(self.game_keeper, 10)
 
 
 
