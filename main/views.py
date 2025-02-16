@@ -192,7 +192,7 @@ def remove_task(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
     
 
-
+@login_required(login_url="/auth/login")
 def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
     
@@ -229,7 +229,8 @@ def add_purchased_plant(request):
 
             newLeaves = userLeaves - plant.price
             print(newLeaves)
-            userStatObj = setattr(userStatObj, "leaves", newLeaves)
+            userStatObj.leaves = newLeaves
+            userStatObj.save()
             return Response(status=status.HTTP_200_OK)
         else:
             print("YOU ARE BROKE (But not broken?)")
