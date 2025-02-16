@@ -11,11 +11,10 @@
         {% for plant in plant_slots %}
             <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
                 <p>Plant {{ forloop.counter }}</p>
-
                 {% if plant and plant.image %}
-                    <img class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                    <img id="{{forloop.counter}}"class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
                 {% else %}
-                    <img class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
+                    <img id="{{ forloop.counter }}" class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
                 {% endif %}
             </div>
         {% empty %}
@@ -23,5 +22,32 @@
         {% endfor %}
     </div>
 </div>
+
+<form action="update_garden" method="post" style="visibility: hidden" name="submitform" id="submitform">
+    <p>Plant {{ forloop.counter }}</p>
+    {% csrf_token %}
+    <select name="plantname" id="plantname">
+        {% for plant in avalible %}
+    <option value="{{plant.name}}"> {{plant.name}}</option>
+    {% endfor %}
+    </select>
+    <input name="slot" id="slot" hidden value="0"> 
+    <button type="submit" onclick="style='visibility: hidden'">change</button>
+  </form>
+    <!-- create a drop down checkbox 
+    of user.avlible plants  -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const image = document.querySelectorAll('.image');
+        image.forEach(img => {
+            img.addEventListener('click', function () {
+                const id = img.getAttribute('id');
+                document.submitform.slot.value = id;
+            //    alert(id)
+               document.getElementById("submitform").style.visibility = "visible";
+            });
+        });
+    });
+</script>
 
 {% endblock %}
