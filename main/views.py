@@ -19,6 +19,8 @@ from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden
+from user_management.models import UserStats, CustomUser
+import json
 
 User = get_user_model()
 
@@ -37,12 +39,14 @@ def home(request):
 
 @login_required(login_url="/auth/login")
 def leaderboard(request):
-    return render(request, "leaderboard.html")
+    leaders = get_leaderboard(request).content
+    context = json.loads(leaders)
+    return render(request, "leaderboard.html", context)
 
 def challenges(request):
     challenges = Challenge.objects.all()
     context = {"challenge_list": challenges}
-    return render(request, "allchallenges.html",context)
+    return render(request, "allchallenges.html", context)
 
 def garden(request):
     return render(request, "garden.html")
@@ -142,3 +146,14 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_leaderboard(request):
+    leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
+    data = {'leaderboard': []}
+    for person in leaders:
+        id = person.user_id
+        username = CustomUser.objects.get(pk=id).get_username()
+        points = person.points
+        data['leaderboard'].append({'username': username, 'points': points})
+    return JsonResponse(data)
