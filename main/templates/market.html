@@ -33,7 +33,7 @@
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
             <div class="plant-item"
-                 onclick="updatePlant('{{ plant.image.url }}', '{{ plant.name }}', '{{ plant.price }}', '{{ plant.fact }}', '{{user}}', '{{ plant }}')">
+                 onclick='updatePlant("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
                 <img class="img-fluid rounded shadow"
                      src="{{ plant.image.url }}" 
                      alt="{{ plant.name }}">

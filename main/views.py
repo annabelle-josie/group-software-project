@@ -259,7 +259,7 @@ def add_purchased_plant(request):
         userStatObj = UserStats.objects.get(user_id=user.id)
         userLeaves = userStatObj.leaves
 
-        if(plant.price < userLeaves):
+        if(plant.price <= userLeaves):
             ownList = []
             for i in range(len(currentPlants)):
                 ownList.append(currentPlants[i])
@@ -268,7 +268,6 @@ def add_purchased_plant(request):
             user.owned_plants.set(ownList)
 
             newLeaves = userLeaves - plant.price
-            print(newLeaves)
             userStatObj.leaves = newLeaves
             userStatObj.save()
             return Response(status=status.HTTP_200_OK)
