@@ -31,19 +31,12 @@ class CustomUser(AbstractUser):
         """Check if the user belongs to the 'Game Keepers' group."""
         return self.groups.filter(name="Game Keepers").exists()
 
-    def award_points(self, target_user, amount):
-        """Allows Game Keepers to award points to other users."""
+    def award_points_and_leaves(self, target_user, amount):
+        """Allows Game Keepers to award points and leaves to other users."""
         if not self.is_game_keeper():
-            raise PermissionError("Only Game Keepers can award points.")
+            raise PermissionError("Only Game Keepers can award points or leaves.")
 
         target_user.stats.points += amount
-        target_user.stats.save()
-
-    def award_leaves(self, target_user, amount):
-        """Allows Game Keepers to award leaves to other users."""
-        if not self.is_game_keeper():
-            raise PermissionError("Only Game Keepers can award leaves.")
-
         target_user.stats.leaves += amount
         target_user.stats.save()
 

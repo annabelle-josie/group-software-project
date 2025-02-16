@@ -6,7 +6,9 @@ from .models import UserGarden, Plant
 from django.http import HttpResponseRedirect
 from user_management.models import CustomUser
 from .serializers import UserGardenSerializer
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url="/auth/login")
 def garden_view(request):
     user_garden = UserGarden.objects.get(user=request.user)
     users = CustomUser.objects.get(username= request.user)
@@ -47,7 +49,8 @@ def update_garden(request):
     except Plant.DoesNotExist:
         return Response({"error": "no "}, status=status.HTTP_404_NOT_FOUND)
     return HttpResponseRedirect(redirect_to="/garden")
-    
+
+@login_required(login_url="/auth/login")
 def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
     

@@ -13,6 +13,8 @@ urlpatterns = [
     path("market/", market_view, name="market"),
     path("api/v1/addChallenge", views.add_challenge),
     path("api/v1/removeChallenge", views.remove_challenge),
+    path("api/v1/removeTask", views.remove_task),
+    path("api/v1/leaderboard", views.get_leaderboard),
     path("auth/", include("login.urls")),  # Move login/signup to login app
     path('increment_progress/<int:event_id>/', views.increment_progress, name='increment_progress'),
 ]
