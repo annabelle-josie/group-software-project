@@ -17,9 +17,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from django.contrib.auth import get_user_model
 from garden.models import UserGarden
 from user_management.models import UserStats, CustomUser
 import json
+
+User = get_user_model()
 
 def home(request):
     if not request.user.is_authenticated:
@@ -82,7 +85,7 @@ def events(request):
             eventMaster=request.user
         )
 
-        all_users = User.objects.all()
+        all_users = User.objects.all()  
         for user in all_users:
             EventParticipants.objects.create(
                 username=user,
