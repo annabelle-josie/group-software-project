@@ -117,23 +117,42 @@ def events(request):
         'is_gamekeeper': is_gamekeeper
     })
 
+
+@login_required
 def increment_progress(request, event_id):
     """Handle the progress increment request."""
-    event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+    try:
+        event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+    except EventParticipants.DoesNotExist:
+        return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    if event_participant:
+    if event_participant.progress < event_participant.eventId.noOfTasks:
         event_participant.increment_progress()
 
-        # Prepare response data
-        response_data = {
-            'progress': event_participant.progress,
-            'totalTasks': event_participant.eventId.noOfTasks,
-            'status': event_participant.status,
-        }
+        
+        if event_participant.progress >= event_participant.eventId.noOfTasks:
+            event_participant.status = "complete"
+            event_participant.save()
 
-        return JsonResponse(response_data)
+      
+            user_stats = UserStats.objects.get(user=request.user)
+            user_stats.leaves += event_participant.eventId.rewardValue
+            user_stats.points += event_participant.eventId.rewardValue
+            user_stats.save()
 
-    return JsonResponse({'error': 'Event participant not found.'}, status=404)
+            return JsonResponse({
+                'progress': event_participant.progress,
+                'totalTasks': event_participant.eventId.noOfTasks,
+                'status': event_participant.status,
+                'rewardAdded': event_participant.eventId.rewardValue,
+                'newBalance': user_stats.leaves
+            })
+
+    return JsonResponse({
+        'progress': event_participant.progress,
+        'totalTasks': event_participant.eventId.noOfTasks,
+        'status': event_participant.status
+    })
   
 def generate_qr(request):
     qr_image_base64 = None
