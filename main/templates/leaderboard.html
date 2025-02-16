@@ -1,10 +1,14 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %} Home {% endblock %}
+{% block title %} Leaderboards {% endblock %}
 
 {% block content %}
 
 <h1>Leaderboard Page</h1>
+
+{% for item in leaderboard %}
+<p>{{item.username}} {{item.points}}</p>
+{% endfor %}
 
 {% endblock %}
