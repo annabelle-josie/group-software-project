@@ -30,13 +30,25 @@
                             <p><strong>Description:</strong> {{ event.desc }}</p>
                             <p><strong>Start Date:</strong> {{ event.startDate }}</p>
                             <p><strong>End Date:</strong> {{ event.endDate }}</p>
-                            <p><strong>Reward:</strong> ${{ event.rewardValue }}</p>
-                            <p><strong>Progress:</strong> {{ event.progress }}%</p>
-                            <p><strong>Status:</strong> 
-                                <span class="badge {% if event.status == 'complete' %}bg-success{% else %}bg-warning{% endif %}">
-                                    {% if event.status == "complete" %}Completed{% else %}In Progress{% endif %}
+                            <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                            
+                            <p><strong>Progress:</strong> 
+                                <span id="progress-{{ event.eventId }}">
+                                    {{ event.progress }}/{{ event.noOfTasks }}
                                 </span>
                             </p>
+
+                            <p><strong>Status:</strong> 
+                                <span id="status-{{ event.eventId }}" 
+                                      class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
+                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
+                                </span>
+                            </p>
+
+                            <button class="btn btn-primary" onclick="incrementProgress({{ event.eventId }})"
+                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks %}style="display:none;"{% endif %}>
+                                Increase Progress
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -85,4 +97,39 @@
         </form>
     {% endif %}
 </div>
+
+<script>
+function incrementProgress(eventId) {
+    fetch(`/increment_progress/${eventId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error: " + data.error);
+        } else {
+            const progressElement = document.getElementById(`progress-${eventId}`);
+            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+
+            let statusElement = document.getElementById(`status-${eventId}`);
+            if (data.status === "complete") {
+                statusElement.innerText = "Completed";
+                statusElement.classList.remove("bg-warning");
+                statusElement.classList.add("bg-success");
+
+                document.querySelector(`button[onclick="incrementProgress(${eventId})"]`).disabled = true;
+            }
+        }
+    })
+    .catch(err => {
+        alert("There was an issue updating the progress.");
+        console.error(err);
+    });
+}
+</script>
+
 {% endblock %}

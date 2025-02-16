@@ -40,6 +40,14 @@ class EventParticipants(models.Model):
 
     def __str__(self):
         return f"{self.username.username} - {self.eventId.title}"
+    
+    def increment_progress(self):
+        if self.progress < self.eventId.noOfTasks:
+            self.progress += 1
+            if self.progress == self.eventId.noOfTasks:
+                self.status = "complete"
+            self.save()
+
 
     @receiver(post_save, sender=get_user_model())
     def assign_user_to_existing_events(sender, instance, created, **kwargs):

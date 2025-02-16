@@ -14,4 +14,5 @@ urlpatterns = [
     path("api/v1/addChallenge", views.add_challenge),
     path("api/v1/removeChallenge", views.remove_challenge),
     path("auth/", include("login.urls")),  # Move login/signup to login app
+    path('increment_progress/<int:event_id>/', views.increment_progress, name='increment_progress'),
 ]
