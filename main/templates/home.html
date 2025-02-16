@@ -2,7 +2,7 @@
 {% load auth_extras %}
 
 {% block title %} Home {% endblock %}
-
+{% load static %}
 {% block content %}
 <div class="w-100 p-3 h-50" style="background-color: #eee;">
     {% if user.is_authenticated %}
@@ -16,6 +16,19 @@
     {% else %}
         <p>You are a User.</p>
     {% endif %}
+        <div class="row h-50">
+            {% for plant in plant_slots %}
+                <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
+                    {% if plant and plant.image %}
+                        <img class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                    {% else %}
+                        <img class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="empty_slot">
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>you have not created a garden yet go to the garden page </p>
+            {% endfor %}
+        </div>
 </div>
 
 <div class="row">
@@ -58,7 +71,7 @@
                 const points = button.getAttribute('data-points');
                 const confirmRemove = confirm('Are you sure you have completed this task');
                 if (confirmRemove) {
-                    fetch('/api/v1/removeChallenge', {
+                    fetch('api/v1/removeChallenge', {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',

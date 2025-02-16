@@ -12,6 +12,8 @@ urlpatterns = [
     path("market/", views.market_view, name="market"),
     path("api/v1/addChallenge", views.add_challenge),
     path("api/v1/removeChallenge", views.remove_challenge),
+    path("api/v1/removeTask", views.remove_task),
+    path("api/v1/leaderboard", views.get_leaderboard),
     path("auth/", include("login.urls")),  # Move login/signup to login app
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),
 ]

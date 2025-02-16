@@ -24,26 +24,19 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     email = models.EmailField(null=True, blank=True) # Allows no email, potentially remove in sprint 2
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
-    owned_plants = models.ManyToManyField("garden.Plant", blank=True, related_name="owners")
+    owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
 
     def is_game_keeper(self):
         """Check if the user belongs to the 'Game Keepers' group."""
         return self.groups.filter(name="Game Keepers").exists()
 
-    def award_points(self, target_user, amount):
-        """Allows Game Keepers to award points to other users."""
+    def award_points_and_leaves(self, target_user, amount):
+        """Allows Game Keepers to award points and leaves to other users."""
         if not self.is_game_keeper():
-            raise PermissionError("Only Game Keepers can award points.")
+            raise PermissionError("Only Game Keepers can award points or leaves.")
 
         target_user.stats.points += amount
-        target_user.stats.save()
-
-    def award_leaves(self, target_user, amount):
-        """Allows Game Keepers to award leaves to other users."""
-        if not self.is_game_keeper():
-            raise PermissionError("Only Game Keepers can award leaves.")
-
         target_user.stats.leaves += amount
         target_user.stats.save()
 
