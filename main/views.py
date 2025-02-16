@@ -209,7 +209,7 @@ def market_view(request):
 
 @api_view(['POST'])
 def add_purchased_plant(request):
-    try:
+    # try:
         plantName = request.data.get('plantName')
         userData = request.data.get('user')
 
@@ -235,5 +235,5 @@ def add_purchased_plant(request):
         else:
             print("YOU ARE BROKE (But not broken?)")
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    except:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    # except:
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)
