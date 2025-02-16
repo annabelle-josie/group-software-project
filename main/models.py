@@ -4,7 +4,7 @@ from django.db import models
 class Challenge(models.Model):
     challengeId = models.AutoField(primary_key=True)
     title= models.CharField(max_length=50)
-    desc= models.CharField(max_length=50)
+    desc= models.CharField(max_length=500)
     noOfTasks= models.IntegerField()
     rewardValue= models.IntegerField()
 

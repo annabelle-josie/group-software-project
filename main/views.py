@@ -17,9 +17,15 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from django.contrib.auth import get_user_model
 from garden.models import UserGarden
+from user_management.models import UserStats, CustomUser
+import json
+
+User = get_user_model()
 from user_management.models import UserStats
 
+@login_required(login_url="/auth/login")
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
@@ -32,8 +38,12 @@ def home(request):
 
     return render(request, "home.html", {"plant_slots": plant_slots})
 
+@login_required(login_url="/auth/login")
 def leaderboard(request):
-    return render(request, "leaderboard.html")
+    context = get_leaderboard(request).content
+    context = json.loads(context)
+    context['points'] = UserStats.objects.get(user_id=request.user.id).points
+    return render(request, "leaderboard.html", context)
 
 def challenges(request):
     challenges = Challenge.objects.all()
@@ -42,15 +52,14 @@ def challenges(request):
         stuff =users.points
     except:
         stuff=[]
-    print(stuff)
     context = {"challenge_list": challenges, "users":stuff}
-    return render(request, "allchallenges.html",context)
+    return render(request, "allchallenges.html", context)
 
 def garden(request):
     return render(request, "garden.html")
 
 
-
+@login_required(login_url="/auth/login")
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
 
@@ -87,7 +96,7 @@ def events(request):
             eventMaster=request.user
         )
 
-        all_users = User.objects.all()
+        all_users = User.objects.all()  
         for user in all_users:
             EventParticipants.objects.create(
                 username=user,
@@ -153,6 +162,17 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_leaderboard(request):
+    leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
+    data = {'leaderboard': []}
+    for person in leaders:
+        id = person.user_id
+        username = CustomUser.objects.get(pk=id).get_username()
+        points = person.points
+        data['leaderboard'].append({'username': username, 'points': points})
+    return JsonResponse(data)
     
 
 @api_view(['POST'])

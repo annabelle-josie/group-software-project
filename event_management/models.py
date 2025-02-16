@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
 
 
 class Events(models.Model):
@@ -13,7 +12,7 @@ class Events(models.Model):
     rewardValue = models.IntegerField()
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
-    eventMaster = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    eventMaster = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Events"
@@ -23,7 +22,7 @@ class Events(models.Model):
         return self.title
 
 class EventParticipants(models.Model):
-    username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
     eventId = models.ForeignKey(Events, on_delete=models.CASCADE)
     progress = models.IntegerField(default=0)
     STATUS_CHOICES = [
