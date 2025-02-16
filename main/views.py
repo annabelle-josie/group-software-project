@@ -23,6 +23,7 @@ from user_management.models import UserStats, CustomUser
 import json
 
 User = get_user_model()
+from user_management.models import UserStats
 
 @login_required(login_url="/auth/login")
 def home(request):
@@ -46,7 +47,12 @@ def leaderboard(request):
 
 def challenges(request):
     challenges = Challenge.objects.all()
-    context = {"challenge_list": challenges}
+    try:
+        users = UserStats.objects.get(user=request.user)
+        stuff =users.points
+    except:
+        stuff=[]
+    context = {"challenge_list": challenges, "users":stuff}
     return render(request, "allchallenges.html", context)
 
 def garden(request):
@@ -141,8 +147,17 @@ def add_challenge(request):
 
 @api_view(['DELETE'])
 def remove_challenge(request):
+    point = request.data.get('points')
+    print("the point" +point)
+    print(request.user)
     try:
         challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
+        users = UserStats.objects.get(user=request.user)
+        points = int(point) + users.points
+        leaves = int(point) + users.leaves
+        newpoint =setattr(users,f'points',points)
+        newleaves =setattr(users,f'leaves',points)
+        users.save()
         challenge.delete()
         return Response(status=status.HTTP_200_OK)
     except:
@@ -158,3 +173,18 @@ def get_leaderboard(request):
         points = person.points
         data['leaderboard'].append({'username': username, 'points': points})
     return JsonResponse(data)
+    
+
+@api_view(['POST'])
+def remove_task(request):
+    task = request.data.get('tasks')
+    print("the point" +task)
+    try:
+        challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
+        tasks = int(task) -1
+        print(tasks)
+        newpoint =setattr(challenge,f'noOfTasks',tasks)
+        challenge.save()
+        return Response(status=status.HTTP_200_OK)
+    except:
+        return Response(status=status.HTTP_404_NOT_FOUND)
