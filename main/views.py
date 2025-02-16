@@ -16,6 +16,7 @@ import base64
 from django.contrib.auth.models import User
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from user_management.models import CustomUser
 from garden.serializers import PlantSerializer
 from garden.models import Plant
 import json
@@ -146,24 +147,22 @@ def market_view(request):
 
 @api_view(['POST'])
 def add_purchased_plant(request):
-    # plant_array = []
-    # plant_array.append(int(request.data.get('id')))
-    # plant_array.append(request.data.get('name'))
-    # plant_array.append(int(request.data.get('price')))
-    # plant_array.append(request.data.get('image'))
-    # plant_array.append(request.data.get('fact'))
-    # print(plant_array)
-    # serializer = PlantSerializer(data=plant_array)
-    serializer = PlantSerializer(data=request.data)
-    print(serializer.is_valid())
-    print(serializer)
-    if serializer.is_valid():
-        print("I got here")
-        serializer.save()
-        # Go into user 
+    try:
+        plantData = request.data
+        plantName = plantData.get('plant').get('name')
+        userData = plantData.get('user').get('userData')
+        user = CustomUser.objects.get(username=userData)
+        currentPlants = user.owned_plants.all()
+        plant = Plant.objects.get(name=plantName)
+        ownList = []
+        for i in range(len(currentPlants)):
+            ownList.append(currentPlants[i])
+        ownList.append(plant)
+        print(ownList)
+        user.owned_plants.set(ownList)
         return Response(status=status.HTTP_200_OK)
-    print("Nope fucked up")
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 # OK, so POSTMAN seems to think this works, only doesn't add it properly
 # I'm giving up
 # {"id" : "annabelle", 

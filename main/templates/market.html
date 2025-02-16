@@ -24,7 +24,7 @@
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
             <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ first_plant.price }}</h4>
             <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
-            <button class="btn btn-primary w-100" onClick="buyPlant('{{first_plant.id}}','{{ first_plant.image }}', '{{ first_plant.name }}', '{{ first_plant.price }}', '{{ first_plant.fact }}')">Buy plant</button>
+            <button class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ first_plant.id }}','{{ first_plant.image }}', '{{ first_plant.name }}', '{{ first_plant.price }}', '{{ first_plant.fact }}')">Buy plant</button>
         </div>
         {% endwith %}
     </div>
@@ -52,7 +52,7 @@
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
     }
 
-    function buyPlant(id, image, name, price, fact){
+    function buyPlant(userData, plantid, image, name, price, fact){
         fetch('api/add_purchased_plant', {
                     method: 'POST',
                     headers: {
@@ -60,11 +60,12 @@
                         'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
                     },
                     body: JSON.stringify({
-                        "id" : id, 
-                        "name" : name, 
-                        "price" : price, 
-                        "image" : image, 
-                        "fact" : fact
+                        "user": {"userData" : userData}, 
+                        "plant": {"id" : plantid,
+                            "name" : name, 
+                            "price" : price, 
+                            "image" : image, 
+                            "fact" : fact }
                     })
                 })
                 .then(response => {
