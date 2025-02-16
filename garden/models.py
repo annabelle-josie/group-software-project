@@ -2,7 +2,7 @@ from django.db import models
 
 class Plant(models.Model):
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.IntegerField()
     image = models.ImageField(upload_to="plant_images/")
     fact = models.TextField()
     onMarket = models.BooleanField(default=True)

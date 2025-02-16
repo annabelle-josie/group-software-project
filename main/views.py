@@ -19,13 +19,16 @@ from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden
+from django.shortcuts import get_object_or_404
 from user_management.models import UserStats, CustomUser
+from garden.models import Plant
 import json
 
 User = get_user_model()
 from user_management.models import UserStats
 
 @login_required(login_url="/auth/login")
+
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
@@ -65,12 +68,14 @@ def events(request):
 
     events_with_progress = [
         {
+            "eventId": event_participant.eventId.eventId,
             "title": event_participant.eventId.title,
             "desc": event_participant.eventId.desc,
             "startDate": event_participant.eventId.startDate,
             "endDate": event_participant.eventId.endDate,
             "rewardValue": event_participant.eventId.rewardValue,
             "progress": event_participant.progress,
+            "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
         }
         for event_participant in user_events
@@ -106,11 +111,29 @@ def events(request):
             )
 
         return HttpResponseRedirect(request.path)
-    
+
     return render(request, 'events.html', {
         'events': events_with_progress,
         'is_gamekeeper': is_gamekeeper
     })
+
+def increment_progress(request, event_id):
+    """Handle the progress increment request."""
+    event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+
+    if event_participant:
+        event_participant.increment_progress()
+
+        # Prepare response data
+        response_data = {
+            'progress': event_participant.progress,
+            'totalTasks': event_participant.eventId.noOfTasks,
+            'status': event_participant.status,
+        }
+
+        return JsonResponse(response_data)
+
+    return JsonResponse({'error': 'Event participant not found.'}, status=404)
   
 def generate_qr(request):
     qr_image_base64 = None
@@ -188,3 +211,50 @@ def remove_task(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+@login_required(login_url="/auth/login")
+def market_view(request):
+    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
+    
+    user = CustomUser.objects.get(username=request.user)
+    current_leaves = UserStats.objects.get(user_id=user.id).leaves
+
+    # current_leaves = 80  # Need to replace with a method to get that users leaves
+    
+    context = {
+        "plants": plants,
+        "leaves": current_leaves
+    }
+    return render(request, "market.html", context)
+
+@api_view(['POST'])
+def add_purchased_plant(request):
+    # try:
+        plantName = request.data.get('plantName')
+        userData = request.data.get('user')
+
+        user = CustomUser.objects.get(username=userData)
+        currentPlants = user.owned_plants.all()
+        plant = Plant.objects.get(name=plantName)
+        userStatObj = UserStats.objects.get(user_id=user.id)
+        userLeaves = userStatObj.leaves
+
+        if(plant.price < userLeaves):
+            ownList = []
+            for i in range(len(currentPlants)):
+                ownList.append(currentPlants[i])
+            ownList.append(plant)
+
+            user.owned_plants.set(ownList)
+
+            newLeaves = userLeaves - plant.price
+            print(newLeaves)
+            userStatObj.leaves = newLeaves
+            userStatObj.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            print("YOU ARE BROKE (But not broken?)")
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    # except:
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)
