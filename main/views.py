@@ -14,20 +14,22 @@ import qrcode
 from io import BytesIO
 import base64
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from garden.models import UserGarden
 
 def home(request):
-    user_garden = UserGarden.objects.get(user=request.user)
-    plant_slots = []
-    if user_garden:
-        for slot in range(1, 7):  # Loop through all 6 slots
-            plant = getattr(user_garden, f"plant{slot}Id", None)  # Get Plant object directly
-            plant_slots.append(plant)
-    challenges = Challenge.objects.all()
-    context = {"challenge_list": challenges, "plant_slots":plant_slots}
-    return render(request, "home.html",context)
+    if not request.user.is_authenticated:
+        return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
+
+    try:
+        user_garden = UserGarden.objects.get(user=request.user)
+        plant_slots = [getattr(user_garden, f"plant{slot}Id", None) for slot in range(1, 7)]
+    except UserGarden.DoesNotExist:
+        plant_slots = []
+
+    return render(request, "home.html", {"plant_slots": plant_slots})
 
 def leaderboard(request):
     return render(request, "leaderboard.html")
