@@ -7,8 +7,26 @@
 
 <h1>Leaderboard Page</h1>
 
-{% for item in leaderboard %}
-<p>{{item.username}} {{item.points}}</p>
-{% endfor %}
+<table style="background-color:#eee" border="1px solid black">
+    <tr>
+        <th>Rank</th>
+        <th>Username</th>
+        <th>Points</th>
+    </tr>
+    {% for item in leaderboard %}
+    <tr>
+        <td>{{forloop.counter}}</td>
+        <td>{{item.username}}</td>
+        <td>{{item.points}}</td>
+    </tr>
+    {% endfor %}
+    {% if user.is_authenticated %}
+    <tr>
+        <td>You</td>
+        <td>{{user.username}}</td>
+        <td>{{points}}</td>
+    </tr>
+    {% endif %}
+  </table>
 
 {% endblock %}

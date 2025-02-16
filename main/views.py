@@ -39,8 +39,9 @@ def home(request):
 
 @login_required(login_url="/auth/login")
 def leaderboard(request):
-    leaders = get_leaderboard(request).content
-    context = json.loads(leaders)
+    context = get_leaderboard(request).content
+    context = json.loads(context)
+    context['points'] = UserStats.objects.get(user_id=request.user.id).points
     return render(request, "leaderboard.html", context)
 
 def challenges(request):
