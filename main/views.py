@@ -288,7 +288,7 @@ def mychallenges(request):
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
         'challenge_list': challenge_in_progress})
-=======
+        
 @login_required(login_url="/auth/login")
 def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
