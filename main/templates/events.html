@@ -45,10 +45,19 @@
                                 </span>
                             </p>
 
-                            <button class="btn btn-primary" onclick="incrementProgress({{ event.eventId }})"
-                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks %}style="display:none;"{% endif %}>
-                                Increase Progress
-                            </button>
+                            {% if event.isQR %}
+                                <div id="reader-{{ event.eventId }}" class="qr-scanner-container">
+                                    <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
+                                        Scan QR Code
+                                    </button>
+                                    <div id="reader-{{ event.eventId }}-reader" style="width: 100%; height: 300px;"></div>
+                                </div>
+                            {% else %}
+                                <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
+                                    Increment Progress
+                                </button>
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>
@@ -74,8 +83,16 @@
             </div>
             
             <div class="mb-3">
+                <label for="qrCode" class="form-label">Event Type:</label>
+                <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
+                    <option value="qr">QR Code Event</option>
+                    <option value="non-qr">Non-QR Event</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
                 <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                <input type="number" name="noOfTasks" class="form-control" required>
+                <input type="number" name="noOfTasks" id="noOfTasks" class="form-control" required>
             </div>
             
             <div class="mb-3">
@@ -98,38 +115,101 @@
     {% endif %}
 </div>
 
-<script>
-function incrementProgress(eventId) {
-    fetch(`/increment_progress/${eventId}/`, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert("Error: " + data.error);
-        } else {
-            const progressElement = document.getElementById(`progress-${eventId}`);
-            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-            let statusElement = document.getElementById(`status-${eventId}`);
+<script>
+    function toggleTaskInput(selectElement) {
+        const noOfTasksInput = document.getElementById('noOfTasks');
+        if (selectElement.value === 'qr') {
+            noOfTasksInput.value = 1;  // Automatically set number of tasks to 1 for QR Code events
+            noOfTasksInput.setAttribute('readonly', 'readonly');  // Disable input
+        } else {
+            noOfTasksInput.removeAttribute('readonly');  // Enable input for non-QR events
+        }
+    }
+
+    function startScanner(eventId) {
+        // Initially hide the button and reader if completed
+        const statusElement = document.getElementById(`status-${eventId}`);
+        if (statusElement && statusElement.innerText === "Completed") {
+            document.querySelector(`#reader-${eventId}`).style.display = "none";
+            const incrementButton = document.querySelector(`#increment-${eventId}`);
+            if (incrementButton) incrementButton.style.display = "none";
+        } else {
+            document.querySelector(`#reader-${eventId} button`).style.display = "none";
+            document.querySelector(`#reader-${eventId}-reader`).style.display = "block";
+
+            var html5QrcodeScanner = new Html5QrcodeScanner(
+                `reader-${eventId}-reader`, { fps: 10, qrbox: 200 });
+
+            html5QrcodeScanner.render(function(decodedText, decodedResult) {
+                console.log(`Scan result: ${decodedText}`, decodedResult);
+                fetch(`/increment_progress/${eventId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ qrCode: decodedText })  
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "complete") {
+                        const statusElement = document.getElementById(`status-${eventId}`);
+                        statusElement.innerText = "Completed";
+                        statusElement.classList.remove("bg-warning");
+                        statusElement.classList.add("bg-success");
+
+                        document.querySelector(`#reader-${eventId}`).style.display = "none";
+                        const incrementButton = document.querySelector(`#increment-${eventId}`);
+                        if (incrementButton) {
+                            incrementButton.style.display = "none";
+                        }
+                    }
+
+                    const progressElement = document.getElementById(`progress-${eventId}`);
+                    progressElement.innerText = `${data.progress}/${data.totalTasks}`;  
+                })
+                .catch(err => {
+                    alert("There was an issue updating the progress.");
+                    console.error(err);
+                });
+            });
+        }
+    }
+
+    function incrementProgress(eventId) {
+        fetch(`/increment_progress/${eventId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ qrCode: null })  
+        })
+        .then(response => response.json())
+        .then(data => {
             if (data.status === "complete") {
+                const statusElement = document.getElementById(`status-${eventId}`);
                 statusElement.innerText = "Completed";
                 statusElement.classList.remove("bg-warning");
                 statusElement.classList.add("bg-success");
-                document.querySelector(`button[onclick="incrementProgress(${eventId})"]`).disabled = true;
-                location.reload();
-            }
-        }
-    })
-    .catch(err => {
-        alert("There was an issue updating the progress.");
-        console.error(err);
-    });
-}
-</script>
 
+                document.querySelector(`#reader-${eventId}`).style.display = "none";
+                const incrementButton = document.querySelector(`#increment-${eventId}`);
+                if (incrementButton) {
+                    incrementButton.style.display = "none";
+                }
+            }
+
+            const progressElement = document.getElementById(`progress-${eventId}`);
+            progressElement.innerText = `${data.progress}/${data.totalTasks}`;  
+        })
+        .catch(err => {
+            alert("There was an issue incrementing the progress.");
+            console.error(err);
+        });
+    }
+
+</script>
 {% endblock %}

@@ -80,6 +80,7 @@ def events(request):
             "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
             "eventQR": event_participant.eventId.eventQR,
+            "isQR": event_participant.eventId.isQR,  
         }
         for event_participant in user_events
     ]
@@ -93,7 +94,10 @@ def events(request):
         rewardValue = request.POST["rewardValue"]
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
+        isQR = request.POST["qrCode"] == "qr"  
 
+
+        eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
         new_event = Events.objects.create(
             title=title,
@@ -103,7 +107,8 @@ def events(request):
             startDate=startDate,
             endDate=endDate,
             eventMaster=request.user,
-            eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80))
+            eventQR=eventQR,
+            isQR=isQR
         )
 
         all_users = User.objects.all()  
@@ -123,41 +128,61 @@ def events(request):
     })
 
 
+
 @login_required
 def increment_progress(request, event_id):
     """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+        event = event_participant.eventId
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    if event_participant.progress < event_participant.eventId.noOfTasks:
-        event_participant.increment_progress()
+    # Get the JSON data from the request body
+    try:
+        data = json.loads(request.body)
+        qr_code = data.get('qrCode')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-        
-        if event_participant.progress >= event_participant.eventId.noOfTasks:
+    # Check if it's a QR event or non-QR event
+    if event.isQR:
+        # If it's a QR event, check if the QR code matches
+        if not qr_code or qr_code != event.eventQR:
+            return JsonResponse({'error': 'Invalid QR code.'}, status=400)
+
+    # Increment the progress if the QR code is correct (or if it's a non-QR event)
+    if event_participant.progress < event.noOfTasks:
+        event_participant.progress += 1  # Increment progress directly if there's no increment function
+        event_participant.save()
+
+        # Check if the participant has completed the event
+        if event_participant.progress >= event.noOfTasks:
             event_participant.status = "complete"
             event_participant.save()
 
-      
+            # Update user stats with reward and points
             user_stats = UserStats.objects.get(user=request.user)
-            user_stats.leaves += event_participant.eventId.rewardValue
-            user_stats.points += event_participant.eventId.rewardValue
+            user_stats.leaves += event.rewardValue
+            user_stats.points += event.rewardValue
             user_stats.save()
 
             return JsonResponse({
                 'progress': event_participant.progress,
-                'totalTasks': event_participant.eventId.noOfTasks,
+                'totalTasks': event.noOfTasks,
                 'status': event_participant.status,
-                'rewardAdded': event_participant.eventId.rewardValue,
+                'rewardAdded': event.rewardValue,
                 'newBalance': user_stats.leaves
             })
 
+    # Return current progress if not completed
     return JsonResponse({
         'progress': event_participant.progress,
-        'totalTasks': event_participant.eventId.noOfTasks,
+        'totalTasks': event.noOfTasks,
         'status': event_participant.status
     })
+
+
   
 def generate_qr(request):
     qr_image_base64 = None
