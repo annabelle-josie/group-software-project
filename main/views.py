@@ -47,7 +47,6 @@ def home(request):
             "rewardValue": challenge_participant.challengeId.rewardValue,
             "progress": challenge_participant.progress,
             "noOfTasks":challenge_participant.challengeId.noOfTasks,
-            "status": challenge_participant.status,
             "id": challenge_participant.challengeId.challengeId,
         }
         for challenge_participant in user_challenge
