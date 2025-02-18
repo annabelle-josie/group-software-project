@@ -42,13 +42,12 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                             <label class="form-check-label" for="flexCheckDefault">
-                                {{ item.title }} - {{ item.desc }} - has {{ item.noOfTasks }} 
-                            </label>
-                            <button class="remove-button btn btn-primary mt-1" data-id="{{ item.challengeId }}" data-points="{{ item.rewardValue }}">Complete</button>
+                                {{item.id}}, {{item.title}}-{{item.desc}}-has {{item.progress}}/{{item.noOfTasks}}, you will get {{item.rewardValue}}, 
+                                <button class="remove-button btn btn-primary mt-1" progress="{{item.progress}}" data-tasks="{{item.noOfTasks}}" data-id="{{item.id}}" data-points="{{item.rewardValue}}">complete</button>
                         </div>
                     {% endif %}
-                {% empty %}
-                    <p>No challenges left</p>
+                    {% empty %}
+                        <p>No challenges left</p>
                 {% endfor %}
             </li>
         </ul>
@@ -62,29 +61,64 @@
 </div>
 
 <script>
-    // Handling the "See more tasks" button functionality and QR code scanning.
+    // Handling the "See more tasks" button functionality and QR code scanning
     document.addEventListener('DOMContentLoaded', function () {
+        // Get all remove buttons
         const removeButtons = document.querySelectorAll('.remove-button');
         removeButtons.forEach(button => {
             button.addEventListener('click', function () {
+                // Get the itemType (barcode) from data attribute
                 const challengeId = button.getAttribute('data-id');
                 const points = button.getAttribute('data-points');
+                const tasks = button.getAttribute('data-tasks')
+                const progress = button.getAttribute('progress')
                 const confirmRemove = confirm('Are you sure you have completed this task');
                 if (confirmRemove) {
+                    if (tasks ==(progress+1)){
+                    // Send DELETE request using fetch
                     fetch('api/v1/removeChallenge', {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
                         },
-                        body: JSON.stringify({ challengeId: challengeId })
+                        body: JSON.stringify({
+                            challengeId: challengeId, // Pass the barcode as itemType
+                            points : points
+                        }) 
                     })
                     .then(response => {
                         if (response.ok) {
-                            alert('Task completed!');
-                            location.reload();
+                            alert('challenge completed!');
+                            location.reload(); // Refresh the page after successful removal
                         } else {
-                            alert('Error completing task.');
+                            alert('Error completing challenge.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error completing challenge.');
+                    });
+                }
+            else {
+                    // Send DELETE request using fetch
+                    fetch('api/v1/removeTask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
+                        },
+                        body: JSON.stringify({
+                            // tasks: tasks, // Pass the barcode as itemType
+                            challengeId: challengeId
+                        }) 
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('task completed!');
+                            location.reload(); // Refresh the page after successful removal
+                        } else {
+                            alert('Error completing taskh.');
                         }
                     })
                     .catch(error => {
@@ -92,6 +126,8 @@
                         alert('Error completing task.');
                     });
                 }
+                
+            }
             });
         });
     });
