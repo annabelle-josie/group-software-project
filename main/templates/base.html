@@ -1,63 +1,84 @@
 <html lang="en">
-
 <head>
     <title>{% block title %}{% endblock %}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto my-2 my-lg-0">
-            <li class="nav-item active">
-                <a class="nav-link" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/garden">Garden</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/events">Events</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/leaderboard">Leaderboard</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/market">Market</a>
-            </li>
-            
+<!-- Bootstrap Navbar -->
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <!-- Navbar Brand (Username + Leaves) -->
+        <a class="navbar-brand me-auto" href="#"> 
             {% if user.is_authenticated %}
-                <li class="nav-item d-flex align-items-center"> <!-- Forces vertical alignment -->
-                    <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
-                        {% csrf_token %}
-                        <button type="submit" class="nav-link btn btn-link p-0 m-0" style="border: none; background: none;">
-                            Log Out
-                        </button>
-                    </form>
-                </li>
+                Welcome, {{ user.username }} | Leaves: {{ user.stats.leaves }}
             {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                </li>
+                Guest
             {% endif %}
-        </ul>
+        </a>
+
+        <!-- Toggler button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto text-end">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/garden">Garden</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/events">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/leaderboard">Leaderboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/market">Market</a>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <!-- Log Out Button (Using JavaScript for POST request) -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" id="logoutButton">Log Out</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </nav>
 
-    {% block content %}
-    {% endblock %}
+{% block content %}
+{% endblock %}
     
-    
-</body>
+<!-- JavaScript to handle logout without a form -->
+<script>
+    document.getElementById("logoutButton").addEventListener("click", function (event) {
+        event.preventDefault();  // Prevent normal link behavior
+        fetch("{% url 'logout' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            credentials: "same-origin"
+        }).then(response => {
+            if (response.ok) {
+                window.location.href = "/";  // Redirect to home after logout
+            }
+        }).catch(error => console.error("Logout failed", error));
+    });
+</script>
 
+</body>
 </html>

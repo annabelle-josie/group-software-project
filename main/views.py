@@ -17,8 +17,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
+from django.contrib.auth import get_user_model
 from garden.models import UserGarden
 from user_management.models import CustomUser, UserStats
+from django.shortcuts import get_object_or_404
+from user_management.models import UserStats, CustomUser
+from garden.models import Plant
+import json
+
+User = get_user_model()
+
+@login_required(login_url="/auth/login")
 
 def home(request):
     if not request.user.is_authenticated:
@@ -45,26 +54,41 @@ def home(request):
     ]
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
+@login_required(login_url="/auth/login")
 def leaderboard(request):
-    return render(request, "leaderboard.html")
+    context = get_leaderboard(request).content
+    context = json.loads(context)
+    context['points'] = UserStats.objects.get(user_id=request.user.id).points
+    return render(request, "leaderboard.html", context)
 
+def challenges(request):
+    challenges = Challenge.objects.all()
+    try:
+        users = UserStats.objects.get(user=request.user)
+        stuff =users.points
+    except:
+        stuff=[]
+    context = {"challenge_list": challenges, "users":stuff}
+    return render(request, "allchallenges.html", context)
 
 def garden(request):
     return render(request, "garden.html")
 
 
-
+@login_required(login_url="/auth/login")
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
 
     events_with_progress = [
         {
+            "eventId": event_participant.eventId.eventId,
             "title": event_participant.eventId.title,
             "desc": event_participant.eventId.desc,
             "startDate": event_participant.eventId.startDate,
             "endDate": event_participant.eventId.endDate,
             "rewardValue": event_participant.eventId.rewardValue,
             "progress": event_participant.progress,
+            "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
         }
         for event_participant in user_events
@@ -90,7 +114,7 @@ def events(request):
             eventMaster=request.user
         )
 
-        all_users = User.objects.all()
+        all_users = User.objects.all()  
         for user in all_users:
             EventParticipants.objects.create(
                 username=user,
@@ -100,10 +124,47 @@ def events(request):
             )
 
         return HttpResponseRedirect(request.path)
-    
+
     return render(request, 'events.html', {
         'events': events_with_progress,
         'is_gamekeeper': is_gamekeeper
+    })
+
+
+@login_required
+def increment_progress(request, event_id):
+    """Handle the progress increment request."""
+    try:
+        event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+    except EventParticipants.DoesNotExist:
+        return JsonResponse({'error': 'Event participant not found.'}, status=404)
+
+    if event_participant.progress < event_participant.eventId.noOfTasks:
+        event_participant.increment_progress()
+
+        
+        if event_participant.progress >= event_participant.eventId.noOfTasks:
+            event_participant.status = "complete"
+            event_participant.save()
+
+      
+            user_stats = UserStats.objects.get(user=request.user)
+            user_stats.leaves += event_participant.eventId.rewardValue
+            user_stats.points += event_participant.eventId.rewardValue
+            user_stats.save()
+
+            return JsonResponse({
+                'progress': event_participant.progress,
+                'totalTasks': event_participant.eventId.noOfTasks,
+                'status': event_participant.status,
+                'rewardAdded': event_participant.eventId.rewardValue,
+                'newBalance': user_stats.leaves
+            })
+
+    return JsonResponse({
+        'progress': event_participant.progress,
+        'totalTasks': event_participant.eventId.noOfTasks,
+        'status': event_participant.status
     })
   
 def generate_qr(request):
@@ -176,6 +237,17 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_leaderboard(request):
+    leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
+    data = {'leaderboard': []}
+    for person in leaders:
+        id = person.user_id
+        username = CustomUser.objects.get(pk=id).get_username()
+        points = person.points
+        data['leaderboard'].append({'username': username, 'points': points})
+    return JsonResponse(data)
     
 
 @api_view(['POST'])
@@ -195,8 +267,7 @@ def remove_task(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-
+   
 
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
@@ -217,3 +288,48 @@ def mychallenges(request):
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
         'challenge_list': challenge_in_progress})
+=======
+@login_required(login_url="/auth/login")
+def market_view(request):
+    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
+    
+    user = CustomUser.objects.get(username=request.user)
+    current_leaves = UserStats.objects.get(user_id=user.id).leaves
+
+    # current_leaves = 80  # Need to replace with a method to get that users leaves
+    
+    context = {
+        "plants": plants,
+        "leaves": current_leaves
+    }
+    return render(request, "market.html", context)
+
+@api_view(['POST'])
+def add_purchased_plant(request):
+    # try:
+        plantName = request.data.get('plantName')
+        userData = request.data.get('user')
+
+        user = CustomUser.objects.get(username=userData)
+        currentPlants = user.owned_plants.all()
+        plant = Plant.objects.get(name=plantName)
+        userStatObj = UserStats.objects.get(user_id=user.id)
+        userLeaves = userStatObj.leaves
+
+        if(plant.price <= userLeaves):
+            ownList = []
+            for i in range(len(currentPlants)):
+                ownList.append(currentPlants[i])
+            ownList.append(plant)
+
+            user.owned_plants.set(ownList)
+
+            newLeaves = userLeaves - plant.price
+            userStatObj.leaves = newLeaves
+            userStatObj.save()
+            return Response(status=status.HTTP_200_OK)
+        else:
+            print("YOU ARE BROKE (But not broken?)")
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    # except:
+    #     return Response(status=status.HTTP_400_BAD_REQUEST)
