@@ -5,6 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from django.contrib import messages
 from .models import *
+import secrets
+import string
 from .serializers import *
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
@@ -77,6 +79,7 @@ def events(request):
             "progress": event_participant.progress,
             "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
+            "eventQR": event_participant.eventId.eventQR,
         }
         for event_participant in user_events
     ]
@@ -91,6 +94,7 @@ def events(request):
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
 
+
         new_event = Events.objects.create(
             title=title,
             desc=desc,
@@ -98,7 +102,8 @@ def events(request):
             rewardValue=rewardValue,
             startDate=startDate,
             endDate=endDate,
-            eventMaster=request.user
+            eventMaster=request.user,
+            eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80))
         )
 
         all_users = User.objects.all()  

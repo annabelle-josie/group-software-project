@@ -13,6 +13,7 @@ class Events(models.Model):
     rewardValue = models.IntegerField()
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
+    eventQR = models.CharField(max_length=100, default=None, null=True)
     eventMaster = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
 
     class Meta:
