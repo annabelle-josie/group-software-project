@@ -32,7 +32,6 @@ User = get_user_model()
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
-
     try:
         user_garden = UserGarden.objects.get(user=request.user)
         plant_slots = [getattr(user_garden, f"plant{slot}Id", None) for slot in range(1, 7)]
@@ -47,6 +46,7 @@ def home(request):
             "rewardValue": challenge_participant.challengeId.rewardValue,
             "progress": challenge_participant.progress,
             "noOfTasks":challenge_participant.challengeId.noOfTasks,
+            "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
         }
         for challenge_participant in user_challenge
@@ -140,12 +140,10 @@ def increment_progress(request, event_id):
 
     if event_participant.progress < event_participant.eventId.noOfTasks:
         event_participant.increment_progress()
-
         
         if event_participant.progress >= event_participant.eventId.noOfTasks:
             event_participant.status = "complete"
             event_participant.save()
-
       
             user_stats = UserStats.objects.get(user=request.user)
             user_stats.leaves += event_participant.eventId.rewardValue
@@ -185,11 +183,22 @@ def generate_qr(request):
             buffer = BytesIO()
             img.save(buffer, format='PNG')
             qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
-            img.save("main/qrcodes/"+text+".png")
+            location = "main/qrcodes/"+text+".png"
+            img.save(location)
+            # to download to computer
+            # response = HttpResponse(location, content_type='application/force-download')
+            # response['Content-Disposition'] = f'attachment; filename="qrcode.png"'
+            # return response
     else:
         form = QRCodeForm()
     
     return render(request, 'qr.html', {'form': form, 'qr_image_base64': qr_image_base64})
+
+# def save_image(request):
+#     # image = request.data.get("qrcode")
+#     print("i work ")
+#     #
+#     return response
 
 def add_challenge(request):
     if request.method == "POST":
@@ -197,12 +206,14 @@ def add_challenge(request):
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
+        qrvalue = request.POST["qrvalue"]
 
         new_challenge = Challenge.objects.create(
             title=title,
             desc=desc,
             noOfTasks=noOfTasks,
             rewardValue=rewardValue,
+            qrvalue= qrvalue,
         )
         all_users = CustomUser.objects.all()
         for user in all_users:

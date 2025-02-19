@@ -12,6 +12,7 @@ class Challenge(models.Model):
     desc= models.CharField(max_length=500)
     noOfTasks= models.IntegerField()
     rewardValue= models.IntegerField()
+    qrvalue = models.CharField(max_length=50)
 
     def __str__(self):
         return self.title
@@ -19,7 +20,7 @@ class Challenge(models.Model):
 class challengeForm(ModelForm):
     class Meta:
         model = Challenge
-        fields = ['title', 'desc','noOfTasks','rewardValue']
+        fields = ['title', 'desc','noOfTasks','rewardValue','qrvalue']
 
 class ChallengeParticipants(models.Model):
     username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
