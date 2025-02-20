@@ -138,50 +138,47 @@ def increment_progress(request, event_id):
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    # Get the JSON data from the request body
     try:
         data = json.loads(request.body)
         qr_code = data.get('qrCode')
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-    # Check if it's a QR event or non-QR event
-    if event.isQR:
-        # If it's a QR event, check if the QR code matches
-        if not qr_code or qr_code != event.eventQR:
-            return JsonResponse({'error': 'Invalid QR code.'}, status=400)
+    if event.isQR and (not qr_code or qr_code != event.eventQR):
+        return JsonResponse({'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True}, status=400)
 
-    # Increment the progress if the QR code is correct (or if it's a non-QR event)
     if event_participant.progress < event.noOfTasks:
-        event_participant.progress += 1  # Increment progress directly if there's no increment function
+        event_participant.progress += 1  
+        if event_participant.progress >= event.noOfTasks:  
+            event_participant.status = "complete"
         event_participant.save()
 
-        # Check if the participant has completed the event
-        if event_participant.progress >= event.noOfTasks:
-            event_participant.status = "complete"
-            event_participant.save()
+    if event_participant.status == "complete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += event.rewardValue
+        user_stats.points += event.rewardValue
+        user_stats.save()
 
-            # Update user stats with reward and points
-            user_stats = UserStats.objects.get(user=request.user)
-            user_stats.leaves += event.rewardValue
-            user_stats.points += event.rewardValue
-            user_stats.save()
+        return JsonResponse({
+            'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True 
+        })
 
-            return JsonResponse({
-                'progress': event_participant.progress,
-                'totalTasks': event.noOfTasks,
-                'status': event_participant.status,
-                'rewardAdded': event.rewardValue,
-                'newBalance': user_stats.leaves
-            })
-
-    # Return current progress if not completed
     return JsonResponse({
         'progress': event_participant.progress,
         'totalTasks': event.noOfTasks,
-        'status': event_participant.status
+        'status': event_participant.status,
+        'completed': False
     })
-
 
   
 def generate_qr(request):
