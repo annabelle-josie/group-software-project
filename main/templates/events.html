@@ -90,8 +90,8 @@
             <div class="mb-3">
                 <label for="qrCode" class="form-label">Event Type:</label>
                 <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
-                    <option value="qr">QR Code Event</option>
                     <option value="non-qr">Non-QR Event</option>
+                    <option value="qr">QR Code Event</option>
                 </select>
             </div>
             
@@ -231,6 +231,7 @@
                 }
                 endDateInput.setAttribute("min", startDateInput.value);
             });
+            
         });
 
 
