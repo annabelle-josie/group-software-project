@@ -19,7 +19,7 @@
         </div>
 
         <div class="col-md-7">
-            <p class="fw-bold text-center">Your Leaves: {{ leaves }}</p>
+            <p class="fw-bold text-center">Your Leaves: {{ user.stats.leaves }}</p>
             <h1 class="fw-bold text-center">Plants</h1>
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
             <h4 id="chosen-plant-cost"><strong>Cost:</strong> {{ first_plant.price }}</h4>
@@ -33,7 +33,7 @@
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
             <div class="plant-item"
-                 onclick="updatePlant('{{ plant.image.url }}', '{{ plant.name }}', '{{ plant.price }}', '{{ plant.fact }}', '{{user}}', '{{ plant }}')">
+                 onclick='updatePlant("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
                 <img class="img-fluid rounded shadow"
                      src="{{ plant.image.url }}" 
                      alt="{{ plant.name }}">

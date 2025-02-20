@@ -21,13 +21,13 @@ from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden
+from user_management.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
 from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
 
 User = get_user_model()
-from user_management.models import UserStats
 
 @login_required(login_url="/auth/login")
 
@@ -40,8 +40,20 @@ def home(request):
         plant_slots = [getattr(user_garden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except UserGarden.DoesNotExist:
         plant_slots = []
+    user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
 
-    return render(request, "home.html", {"plant_slots": plant_slots})
+    challenge_in_progress = [
+        {
+            "title": challenge_participant.challengeId.title,
+            "desc": challenge_participant.challengeId.desc,
+            "rewardValue": challenge_participant.challengeId.rewardValue,
+            "progress": challenge_participant.progress,
+            "noOfTasks":challenge_participant.challengeId.noOfTasks,
+            "id": challenge_participant.challengeId.challengeId,
+        }
+        for challenge_participant in user_challenge
+    ]
+    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
 @login_required(login_url="/auth/login")
 def leaderboard(request):
@@ -206,28 +218,48 @@ def generate_qr(request):
     
     return render(request, 'qr.html', {'form': form, 'qr_image_base64': qr_image_base64})
 
-@api_view(['POST'])
 def add_challenge(request):
-    serializer = ChallengeSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(status=status.HTTP_200_OK)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "POST":
+        title = request.POST["title"]
+        desc = request.POST["desc"]
+        noOfTasks = request.POST["noOfTasks"]
+        rewardValue = request.POST["rewardValue"]
+
+        new_challenge = Challenge.objects.create(
+            title=title,
+            desc=desc,
+            noOfTasks=noOfTasks,
+            rewardValue=rewardValue,
+        )
+        all_users = CustomUser.objects.all()
+        for user in all_users:
+            ChallengeParticipants.objects.create(
+                username=user,
+                challengeId=new_challenge,
+                progress=0, 
+                status="incomplete"  
+            )
+
+    return HttpResponseRedirect(redirect_to="/allchallenges")
+    
 
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
-    print("the point" +point)
+    print("the point" + point)
     print(request.user)
     try:
-        challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
+        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
         users = UserStats.objects.get(user=request.user)
         points = int(point) + users.points
         leaves = int(point) + users.leaves
+        mystatus = user_challenge.status
+        print(mystatus)
         newpoint =setattr(users,f'points',points)
         newleaves =setattr(users,f'leaves',points)
+        newchallenge =setattr(user_challenge,f'status',"complete")
         users.save()
-        challenge.delete()
+        user_challenge.save()
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
@@ -246,19 +278,43 @@ def get_leaderboard(request):
 
 @api_view(['POST'])
 def remove_task(request):
-    task = request.data.get('tasks')
-    print("the point" +task)
+    print("hi")
+    challengeIds =request.data.get('challengeId')
+    print(challengeIds)
+    print(request.user)
     try:
         challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
-        tasks = int(task) -1
-        print(tasks)
-        newpoint =setattr(challenge,f'noOfTasks',tasks)
-        challenge.save()
+        print(challenge)
+        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
+        user = user_challenge.progress +1 
+        print(user)
+        newprogrress =setattr(user_challenge,f'progress',user)
+        user_challenge.save()
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
+   
 
+def mychallenges(request):
+    user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
+
+    challenge_in_progress = [
+        {
+            "title": challenge_participant.challengeId.title,
+            "desc": challenge_participant.challengeId.desc,
+            "rewardValue": challenge_participant.challengeId.rewardValue,
+            "progress": challenge_participant.progress,
+            "noOfTasks":challenge_participant.challengeId.noOfTasks,
+            "status": challenge_participant.status,
+            "id": challenge_participant.challengeId.challengeId,
+        }
+        for challenge_participant in user_challenge
+    ]
+    
+    return render(request, 'allchallenges.html', {
+        'form':challengeForm(),
+        'challenge_list': challenge_in_progress})
+        
 @login_required(login_url="/auth/login")
 def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
@@ -286,7 +342,7 @@ def add_purchased_plant(request):
         userStatObj = UserStats.objects.get(user_id=user.id)
         userLeaves = userStatObj.leaves
 
-        if(plant.price < userLeaves):
+        if(plant.price <= userLeaves):
             ownList = []
             for i in range(len(currentPlants)):
                 ownList.append(currentPlants[i])
@@ -295,7 +351,6 @@ def add_purchased_plant(request):
             user.owned_plants.set(ownList)
 
             newLeaves = userLeaves - plant.price
-            print(newLeaves)
             userStatObj.leaves = newLeaves
             userStatObj.save()
             return Response(status=status.HTTP_200_OK)
