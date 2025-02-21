@@ -145,10 +145,19 @@ def events(request):
     })
 
 
+def delete_event(request, event_id):
+    if request.method == "DELETE":
+        event = get_object_or_404(Events, eventId=event_id)
+        if request.user.username == event.eventMaster or request.user.is_superuser:
+            event.delete()
+            return JsonResponse({"success": True})
+        else:
+            return JsonResponse({"success": False, "error": "Permission denied"}, status=403)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 @login_required
 def increment_progress(request, event_id):
-    """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
         event = event_participant.eventId

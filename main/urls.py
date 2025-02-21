@@ -17,4 +17,5 @@ urlpatterns = [
     path("auth/", include("login.urls")),  # Move login/signup to login app
     path('increment_progress/<int:event_id>/', views.increment_progress, name='increment_progress'),
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),
+    path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
 ]
