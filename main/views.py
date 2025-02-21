@@ -344,8 +344,6 @@ def market_view(request):
     
     user = CustomUser.objects.get(username=request.user)
     current_leaves = UserStats.objects.get(user_id=user.id).leaves
-
-    # current_leaves = 80  # Need to replace with a method to get that users leaves
     
     context = {
         "plants": plants,
