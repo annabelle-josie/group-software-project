@@ -4,7 +4,15 @@
 {% block title %} Garden {% endblock %}
 
 {% block content %}
-<h1>{{ user.username }}'s Garden</h1>
+<h1>{% if user.is_authenticated %}
+    {% if user.username|last != "s" %}
+        <h1>{{ user.username }}'s Garden</h1>
+    {% else %}
+        <h1>{{ user.username }}' Garden</h1>
+    {% endif %}
+{% else %}
+    <h1>Guest's Garden!</h1>
+{% endif %}</h1>
 
 <div class="row h-50">
     <div class="row h-50">
