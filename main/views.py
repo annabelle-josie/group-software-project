@@ -353,7 +353,7 @@ def market_view(request):
     }
     return render(request, "market.html", context)
 
-# function to add a purchased plant, returns a JSON response that indicates success or failure
+# function to add a purchased plant, returns a JSON response that indicates success or failure and updates the user's owned plants and leaves
 @api_view(['POST'])
 def add_purchased_plant(request):
     # try:
