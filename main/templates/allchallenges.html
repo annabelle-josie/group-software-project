@@ -9,6 +9,9 @@
 {% else %}
     <h1>you are not logged on</h1>
 {% endif %}
+{% if is_gamekeeper %}
+    <h2> scroll to create new challenges</h2>
+{% endif %}
 
 <div class="row h-100">
     <div class="col-10" style="background-color: rgb(255, 176, 176)">
@@ -33,11 +36,16 @@
     </div>
 </div>
 
+{% if is_gamekeeper %}
+<div class="container">
+<h1> create new challenge</h1>
 <form action="addChallenge" method="POST">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="submit">submit</button>
 </form>
+</div>
+{% endif %}
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>

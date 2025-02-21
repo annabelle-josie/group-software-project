@@ -1,9 +1,8 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.forms import ModelForm 
+from django.contrib.auth import get_user_model
 
 # Create your models here.
 class Challenge(models.Model):
@@ -42,15 +41,17 @@ class ChallengeParticipants(models.Model):
     def __str__(self):
         return f"{self.username.username} - {self.challengeId.title}"
     
-@receiver(post_save, sender=User)
-def assign_user_to_existing_challenges(sender, instance, created, **kwargs):
-    if created:  
-        existing_challenges = Challenge.objects.all()
-        for challenge in existing_challenges:
-            if not ChallengeParticipants.objects.filter(username=instance, challengeId=challenge).exists():
-                ChallengeParticipants.objects.create(
-                    username=instance,
-                    challengeId=challenge,
-                    progress=0,
-                    status="incomplete"
-                )
+    @receiver(post_save, sender=get_user_model())
+    def assign_user_to_existing_challenges(sender, instance, created, **kwargs):
+        if created:  
+            existing_challenges = Challenge.objects.all()
+            for challenge in existing_challenges:
+                if not ChallengeParticipants.objects.filter(username=instance, challengeId=challenge).exists():
+                    ChallengeParticipants.objects.create(
+                        username=instance,
+                        challengeId=challenge,
+                        progress=0,
+                        status="incomplete"
+                    )
+
+

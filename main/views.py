@@ -201,7 +201,9 @@ def generate_qr(request):
 #     return response
 
 def add_challenge(request):
-    if request.method == "POST":
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+
+    if request.method == "POST" and is_gamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
@@ -223,7 +225,6 @@ def add_challenge(request):
                 progress=0, 
                 status="incomplete"  
             )
-
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
 
@@ -281,6 +282,7 @@ def remove_task(request):
 
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
     challenge_in_progress = [
         {
@@ -297,7 +299,7 @@ def mychallenges(request):
     
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
-        'challenge_list': challenge_in_progress})
+        'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper})
         
 @login_required(login_url="/auth/login")
 def market_view(request):
