@@ -5,6 +5,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from django.contrib import messages
 from .models import *
+import secrets
+import string
 from .serializers import *
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
@@ -89,6 +91,8 @@ def events(request):
             "progress": event_participant.progress,
             "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
+            "eventQR": event_participant.eventId.eventQR,
+            "isQR": event_participant.eventId.isQR,  
         }
         for event_participant in user_events
     ]
@@ -102,6 +106,10 @@ def events(request):
         rewardValue = request.POST["rewardValue"]
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
+        isQR = request.POST["qrCode"] == "qr"  
+
+
+        eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
         new_event = Events.objects.create(
             title=title,
@@ -110,7 +118,9 @@ def events(request):
             rewardValue=rewardValue,
             startDate=startDate,
             endDate=endDate,
-            eventMaster=request.user
+            eventMaster=request.user,
+            eventQR=eventQR,
+            isQR=isQR
         )
 
         all_users = User.objects.all()  
@@ -130,41 +140,58 @@ def events(request):
     })
 
 
+
 @login_required
 def increment_progress(request, event_id):
     """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+        event = event_participant.eventId
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    if event_participant.progress < event_participant.eventId.noOfTasks:
-        event_participant.increment_progress()
+    try:
+        data = json.loads(request.body)
+        qr_code = data.get('qrCode')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-        
-        if event_participant.progress >= event_participant.eventId.noOfTasks:
+    if event.isQR and (not qr_code or qr_code != event.eventQR):
+        return JsonResponse({'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True}, status=400)
+
+    if event_participant.progress < event.noOfTasks:
+        event_participant.progress += 1  
+        if event_participant.progress >= event.noOfTasks:  
             event_participant.status = "complete"
-            event_participant.save()
+        event_participant.save()
 
-      
-            user_stats = UserStats.objects.get(user=request.user)
-            user_stats.leaves += event_participant.eventId.rewardValue
-            user_stats.points += event_participant.eventId.rewardValue
-            user_stats.save()
+    if event_participant.status == "complete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += event.rewardValue
+        user_stats.points += event.rewardValue
+        user_stats.save()
 
-            return JsonResponse({
-                'progress': event_participant.progress,
-                'totalTasks': event_participant.eventId.noOfTasks,
-                'status': event_participant.status,
-                'rewardAdded': event_participant.eventId.rewardValue,
-                'newBalance': user_stats.leaves
-            })
+        return JsonResponse({
+            'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True 
+        })
 
     return JsonResponse({
         'progress': event_participant.progress,
-        'totalTasks': event_participant.eventId.noOfTasks,
-        'status': event_participant.status
+        'totalTasks': event.noOfTasks,
+        'status': event_participant.status,
+        'completed': False
     })
+
   
 def generate_qr(request):
     qr_image_base64 = None

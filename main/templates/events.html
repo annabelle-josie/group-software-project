@@ -45,10 +45,24 @@
                                 </span>
                             </p>
 
-                            <button class="btn btn-primary" onclick="incrementProgress({{ event.eventId }})"
-                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks %}style="display:none;"{% endif %}>
-                                Increase Progress
-                            </button>
+                            {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                            <div id="reader-{{ event.eventId }}" class="p-2">
+                                <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
+                                    Scan QR Code
+                                </button>
+                                <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                            </div>
+                            
+                            
+                            {% else %}
+                                {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                                    <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
+                                        Increment Progress
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+
+
                         </div>
                     </div>
                 </div>
@@ -74,8 +88,16 @@
             </div>
             
             <div class="mb-3">
+                <label for="qrCode" class="form-label">Event Type:</label>
+                <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
+                    <option value="non-qr">Non-QR Event</option>
+                    <option value="qr">QR Code Event</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
                 <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                <input type="number" name="noOfTasks" class="form-control" required>
+                <input type="number" name="noOfTasks" id="noOfTasks" class="form-control" required>
             </div>
             
             <div class="mb-3">
@@ -85,12 +107,12 @@
             
             <div class="mb-3">
                 <label for="startDate" class="form-label">Start Date:</label>
-                <input type="datetime-local" name="startDate" class="form-control" required>
+                <input type="datetime-local" name="startDate" id="startDate" class="form-control" required>
             </div>
             
             <div class="mb-3">
                 <label for="endDate" class="form-label">End Date:</label>
-                <input type="datetime-local" name="endDate" class="form-control" required>
+                <input type="datetime-local" name="endDate" id="endDate" class="form-control" required>
             </div>
             
             <button type="submit" class="btn btn-primary">Create Event</button>
@@ -98,38 +120,121 @@
     {% endif %}
 </div>
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 <script>
-function incrementProgress(eventId) {
-    fetch(`/increment_progress/${eventId}/`, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert("Error: " + data.error);
+    function toggleTaskInput(selectElement) {
+        const noOfTasksInput = document.getElementById('noOfTasks');
+        if (selectElement.value === 'qr') {
+            noOfTasksInput.value = 1;  
+            noOfTasksInput.setAttribute('readonly', 'readonly'); 
         } else {
-            const progressElement = document.getElementById(`progress-${eventId}`);
-            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
-
-            let statusElement = document.getElementById(`status-${eventId}`);
-            if (data.status === "complete") {
-                statusElement.innerText = "Completed";
-                statusElement.classList.remove("bg-warning");
-                statusElement.classList.add("bg-success");
-                document.querySelector(`button[onclick="incrementProgress(${eventId})"]`).disabled = true;
-                location.reload();
-            }
+            noOfTasksInput.removeAttribute('readonly');  
         }
-    })
-    .catch(err => {
-        alert("There was an issue updating the progress.");
-        console.error(err);
-    });
-}
-</script>
+    }
 
+    function startScanner(eventId) {
+        const readerContainer = document.getElementById(`reader-${eventId}-reader`);
+        const button = document.querySelector(`#reader-${eventId} button`);
+
+        button.style.display = "none";  
+        readerContainer.style.display = "block"; 
+
+        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
+
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            `reader-${eventId}-reader`, { fps: 10, qrbox: qrBoxSize });
+
+        html5QrcodeScanner.render(function(decodedText, decodedResult) {
+            console.log(`Scan result: ${decodedText}`, decodedResult);
+            fetch(`/increment_progress/${eventId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ qrCode: decodedText })  
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "complete") {
+                    const statusElement = document.getElementById(`status-${eventId}`);
+                    statusElement.innerText = "Completed";
+                    statusElement.classList.remove("bg-warning");
+                    statusElement.classList.add("bg-success");
+
+                    readerContainer.innerHTML = "";
+                    readerContainer.style.display = "none";
+                    button.style.display = "none";
+                    window.location.reload();
+                }
+
+                const progressElement = document.getElementById(`progress-${eventId}`);
+                progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+            })
+            .catch(err => {
+                alert("There was an issue updating the progress.");
+                console.error(err);
+            });
+        });
+    }
+
+
+
+        function incrementProgress(eventId) {
+            fetch(`/increment_progress/${eventId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ qrCode: null })  
+            })
+            .then(response => response.json())
+            .then(data => {
+                const progressElement = document.getElementById(`progress-${eventId}`);
+                progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+
+                if (data.completed) {  
+                    const statusElement = document.getElementById(`status-${eventId}`);
+                    statusElement.innerText = "Completed";
+                    statusElement.classList.remove("bg-warning");
+                    statusElement.classList.add("bg-success");
+
+                    const incrementButton = document.getElementById(`increment-${eventId}`);
+                    if (incrementButton) {
+                        incrementButton.style.display = "none";  
+                    }
+
+                    window.location.reload(); 
+                }
+            })
+            .catch(err => {
+                alert("There was an issue incrementing the progress.");
+                console.error(err);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            let now = new Date();
+            let minDateTime = now.toISOString().slice(0, 16); 
+
+            let startDateInput = document.getElementById("startDate");
+            let endDateInput = document.getElementById("endDate");
+
+            startDateInput.setAttribute("min", minDateTime);
+            endDateInput.setAttribute("min", minDateTime);
+
+            startDateInput.addEventListener("input", function () {
+                if (endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+                endDateInput.setAttribute("min", startDateInput.value);
+            });
+            
+        });
+
+
+
+</script>
 {% endblock %}

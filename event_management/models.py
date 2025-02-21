@@ -13,6 +13,8 @@ class Events(models.Model):
     rewardValue = models.IntegerField()
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
+    eventQR = models.CharField(max_length=100, default=None, null=True)
+    isQR = models.BooleanField(default=False) 
     eventMaster = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
 
     class Meta:
@@ -41,12 +43,6 @@ class EventParticipants(models.Model):
     def __str__(self):
         return f"{self.username.username} - {self.eventId.title}"
     
-    def increment_progress(self):
-        if self.progress < self.eventId.noOfTasks:
-            self.progress += 1
-            if self.progress == self.eventId.noOfTasks:
-                self.status = "complete"
-            self.save()
 
 
     @receiver(post_save, sender=get_user_model())
