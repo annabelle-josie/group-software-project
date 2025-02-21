@@ -256,7 +256,6 @@ def add_challenge(request):
             )
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
-
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
@@ -289,7 +288,6 @@ def get_leaderboard(request):
         data['leaderboard'].append({'username': username, 'points': points})
     return JsonResponse(data)
     
-
 @api_view(['POST'])
 def remove_task(request):
     print("hi")
@@ -308,7 +306,6 @@ def remove_task(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
    
-
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
@@ -335,13 +332,17 @@ def market_view(request):
     plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
     
     user = CustomUser.objects.get(username=request.user)
-    current_leaves = UserStats.objects.get(user_id=user.id).leaves
-
-    # current_leaves = 80  # Need to replace with a method to get that users leaves
+    currentLeaves = UserStats.objects.get(user_id=user.id).leaves
+    currentPlants = user.owned_plants.all()
+    print(currentPlants)
+    ownedList = []
+    for i in range(len(currentPlants)):
+        ownedList.append(currentPlants[i])
     
     context = {
         "plants": plants,
-        "leaves": current_leaves
+        "leaves": currentLeaves,
+        "ownedPlants" : ownedList
     }
     return render(request, "market.html", context)
 
@@ -370,7 +371,5 @@ def add_purchased_plant(request):
             userStatObj.save()
             return Response(status=status.HTTP_200_OK)
         else:
-            print("YOU ARE BROKE (But not broken?)")
+            # User doesn't have enough leaves to purchase plant
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    # except:
-    #     return Response(status=status.HTTP_400_BAD_REQUEST)
