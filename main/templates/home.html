@@ -6,10 +6,14 @@
 {% block content %}
 <div class="w-100 p-3 h-50" style="background-color: #eee;">
     {% if user.is_authenticated %}
-        <h1>{{ user.username }}'s Garden!</h1>
-    {% else %}
-        <h1>Guest's Garden!</h1>
-    {% endif %}
+            {% if user.username|last != "s" %}
+                <h1>{{ user.username }}'s Garden</h1>
+            {% else %}
+                <h1>{{ user.username }}' Garden</h1>
+            {% endif %}
+        {% else %}
+            <h1>Guest's Garden!</h1>
+        {% endif %}
 
     {% if request.user|has_group:"Game Keepers" %} 
         <p>You are a Game Keeper.</p>

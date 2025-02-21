@@ -6,9 +6,13 @@
 {% block content %}
 <h1>all challenges</h1>
 {% if user.is_authenticated %}
-    <h1>{{ user.username }}'s challenges!</h1>
-{% else %}
-    <h1>Guest's Garden!</h1>
+        {% if user.username|last != "s" %}
+            <h1>{{ user.username }}'s challenges!</h1>
+        {% else %}
+            <h1>{{ user.username }}' challenges!</h1>
+        {% endif %}
+    {% else %}
+        <h1>Guest's Garden!</h1>
 {% endif %}
 
 <div class="row h-100">

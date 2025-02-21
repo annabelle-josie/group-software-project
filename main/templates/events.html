@@ -4,69 +4,126 @@
 {% block content %}
     <div class="w-100 p-3 h-8" style="background-color: #eee;">
         {% if user.is_authenticated %}
-            <h1>{{ user.username }}'s Events</h1>
+            {% if user.username|last != "s" %}
+                <h1>{{ user.username }}'s Events</h1>
+            {% else %}
+                <h1>{{ user.username }}' Events</h1>
+            {% endif %}
         {% else %}
-            <h1>Guest's Garden!</h1>
+            <h1>Guest's Events!</h1>
         {% endif %}
     </div>
+
 
     <div class="container mt-4">
     {% if events %}
         <div class="accordion" id="eventAccordion">
             {% for event in events %}
-                <div class="card">
-                    <div class="card-header" id="heading{{ forloop.counter }}">
-                        <h2 class="mb-0">
-                            <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
-                                    aria-controls="collapse{{ forloop.counter }}">
-                                {{ event.title }} ▼
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
-                         data-bs-parent="#eventAccordion">
-                        <div class="card-body">
-                            <p><strong>Description:</strong> {{ event.desc }}</p>
-                            <p><strong>Start Date:</strong> {{ event.startDate }}</p>
-                            <p><strong>End Date:</strong> {{ event.endDate }}</p>
-                            <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
-                            
-                            <p><strong>Progress:</strong> 
-                                <span id="progress-{{ event.eventId }}">
-                                    {{ event.progress }}/{{ event.noOfTasks }}
-                                </span>
-                            </p>
-
-                            <p><strong>Status:</strong> 
-                                <span id="status-{{ event.eventId }}" 
-                                      class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
-                                    {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
-                                </span>
-                            </p>
-
-                            {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
-                            <div id="reader-{{ event.eventId }}" class="p-2">
-                                <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
-                                    Scan QR Code
+                {% if not is_gamekeeper %}
+                    <div class="card">
+                        <div class="card-header" id="heading{{ forloop.counter }}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                        aria-controls="collapse{{ forloop.counter }}">
+                                    {{ event.title }} ▼
                                 </button>
-                                <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-                            </div>
-                            
-                            
-                            {% else %}
-                                {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
-                                    <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
-                                        Increment Progress
-                                    </button>
-                                {% endif %}
-                            {% endif %}
+                            </h2>
+                        </div>
+                        <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                            data-bs-parent="#eventAccordion">
+                                <div class="card-body">
+                                    <p><strong>Description:</strong> {{ event.desc }}</p>
+                                    <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                                    <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                                    <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                                    <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                                    
+                                    <p><strong>Progress:</strong> 
+                                        <span id="progress-{{ event.eventId }}">
+                                            {{ event.progress }}/{{ event.noOfTasks }}
+                                        </span>
+                                    </p>
 
+                                    <p><strong>Status:</strong> 
+                                        <span id="status-{{ event.eventId }}" 
+                                            class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
+                                            {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
+                                        </span>
+                                    </p>
 
+                                    {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                                        <div id="reader-{{ event.eventId }}" class="p-2">
+                                            <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
+                                                Scan QR Code
+                                            </button>
+                                            <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                                        </div>
+                                    {% else %}
+                                        {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                                            <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
+                                                Increment Progress
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% else %}
+                    {% if event.eventMaster == user.username %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ forloop.counter }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                            aria-controls="collapse{{ forloop.counter }}">
+                                        {{ event.title }} ▼
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                                data-bs-parent="#eventAccordion">
+                                    <div class="card-body">
+                                        <p><strong>Description:</strong> {{ event.desc }}</p>
+                                        <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                                        <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                                        <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                                        <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                                        <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
+                                        {% if event.eventQRImage %}
+                                            <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
+                                            <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
+                                            <p></p>
+                                        {% endif %}
+                                    </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ forloop.counter }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                            aria-controls="collapse{{ forloop.counter }}">
+                                        {{ event.title }} ▼
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                                data-bs-parent="#eventAccordion">
+                                    <div class="card-body">
+                                        <p><strong>Description:</strong> {{ event.desc }}</p>
+                                        <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                                        <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                                        <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                                        <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                                        <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
+                                    </div>
+                            </div>
+                        </div>
+                    {% endif %}
+            {% endif %}
+        {% endfor %}
         </div>
     {% else %}
         <p class="alert alert-info">There are no available events.</p>
@@ -91,7 +148,7 @@
                 <label for="qrCode" class="form-label">Event Type:</label>
                 <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
                     <option value="non-qr">Non-QR Event</option>
-                    <option value="qr">QR Code Event</option>
+                    <option value="qr">QR Event</option>
                 </select>
             </div>
             
@@ -117,6 +174,8 @@
             
             <button type="submit" class="btn btn-primary">Create Event</button>
         </form>
+
+        
     {% endif %}
 </div>
 
@@ -173,7 +232,7 @@
                 progressElement.innerText = `${data.progress}/${data.totalTasks}`;
             })
             .catch(err => {
-                alert("There was an issue updating the progress.");
+                alert("Invalid QR Code. Please try again.");
                 console.error(err);
             });
         });
