@@ -93,6 +93,7 @@ def events(request):
             "status": event_participant.status,
             "eventQR": event_participant.eventId.eventQR,
             "isQR": event_participant.eventId.isQR,  
+            "eventMaster": event_participant.eventId.eventMaster.username,
         }
         for event_participant in user_events
     ]
@@ -191,7 +192,6 @@ def increment_progress(request, event_id):
         'status': event_participant.status,
         'completed': False
     })
-
   
 def generate_qr(request):
     qr_image_base64 = None
