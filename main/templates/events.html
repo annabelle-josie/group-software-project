@@ -69,36 +69,61 @@
                                 </div>
                         </div>
                     </div>
-                {% elif event.eventMaster == user.username %}
-                    <div class="card">
-                        <div class="card-header" id="heading{{ forloop.counter }}">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
-                                        aria-controls="collapse{{ forloop.counter }}">
-                                    {{ event.title }} ▼
-                                </button>
-                            </h2>
+                {% else %}
+                    {% if event.eventMaster == user.username %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ forloop.counter }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                            aria-controls="collapse{{ forloop.counter }}">
+                                        {{ event.title }} ▼
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                                data-bs-parent="#eventAccordion">
+                                    <div class="card-body">
+                                        <p><strong>Description:</strong> {{ event.desc }}</p>
+                                        <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                                        <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                                        <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                                        <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                                        <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
+                                        {% if event.eventQRImage %}
+                                            <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
+                                            <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
+                                            <p></p>
+                                        {% endif %}
+                                    </div>
+                            </div>
                         </div>
-                        <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
-                            data-bs-parent="#eventAccordion">
-                                <div class="card-body">
-                                    <p><strong>Description:</strong> {{ event.desc }}</p>
-                                    <p><strong>Start Date:</strong> {{ event.startDate }}</p>
-                                    <p><strong>End Date:</strong> {{ event.endDate }}</p>
-                                    <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
-                                    <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
-                                    <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
-                                    {% if event.eventQRImage %}
-                                        <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
-                                        <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
-                                        <p></p>
-                                    {% endif %}
-                                </div>
+                    {% else %}
+                        <div class="card">
+                            <div class="card-header" id="heading{{ forloop.counter }}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link text-decoration-none" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" 
+                                            aria-controls="collapse{{ forloop.counter }}">
+                                        {{ event.title }} ▼
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" 
+                                data-bs-parent="#eventAccordion">
+                                    <div class="card-body">
+                                        <p><strong>Description:</strong> {{ event.desc }}</p>
+                                        <p><strong>Start Date:</strong> {{ event.startDate }}</p>
+                                        <p><strong>End Date:</strong> {{ event.endDate }}</p>
+                                        <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                                        <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                                        <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
+                                    </div>
+                            </div>
                         </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
+                    {% endif %}
+            {% endif %}
+        {% endfor %}
         </div>
     {% else %}
         <p class="alert alert-info">There are no available events.</p>
@@ -123,7 +148,7 @@
                 <label for="qrCode" class="form-label">Event Type:</label>
                 <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
                     <option value="non-qr">Non-QR Event</option>
-                    <option value="qr">QR Code Event</option>
+                    <option value="qr">QR Event</option>
                 </select>
             </div>
             
