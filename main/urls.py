@@ -6,6 +6,7 @@ urlpatterns = [
     path("qr", views.generate_qr, name="qr"),  # Keep home in main
     path("leaderboard", views.leaderboard, name="leaderboard"),
     path("allchallenges", views.mychallenges, name="allchallenges"),
+    # path("save", views.save_image,name="save" ),
     path("garden/", include("garden.urls")),
     path("events", views.events, name="events"),
     path("market/", views.market_view, name="market"),
