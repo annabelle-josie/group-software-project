@@ -4,11 +4,16 @@
 {% block content %}
     <div class="w-100 p-3 h-8" style="background-color: #eee;">
         {% if user.is_authenticated %}
-            <h1>{{ user.username }}'s Events</h1>
+            {% if user.username|last != "s" %}
+                <h1>{{ user.username }}'s Events</h1>
+            {% else %}
+                <h1>{{ user.username }}' Events</h1>
+            {% endif %}
         {% else %}
-            <h1>Guest's Garden!</h1>
+            <h1>Guest's Events!</h1>
         {% endif %}
     </div>
+
 
     <div class="container mt-4">
     {% if events %}
@@ -173,7 +178,7 @@
                 progressElement.innerText = `${data.progress}/${data.totalTasks}`;
             })
             .catch(err => {
-                alert("There was an issue updating the progress.");
+                alert("Invalid QR Code. Please try again.");
                 console.error(err);
             });
         });
