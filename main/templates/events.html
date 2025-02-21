@@ -89,8 +89,10 @@
                                     <p><strong>Reward:</strong> {{ event.rewardValue }}</p>
                                     <p><strong>Event Master:</strong> {{ event.eventMaster }}</p>
                                     <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
-                                    {% if event.eventQR is not none %}
-                                        <p><strong>Event QR Code:</strong> {{ event.eventQR }} </p>
+                                    {% if event.eventQRImage %}
+                                        <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
+                                        <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
+                                        <p></p>
                                     {% endif %}
                                 </div>
                         </div>

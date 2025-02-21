@@ -92,6 +92,7 @@ def events(request):
             "noOfTasks": event_participant.eventId.noOfTasks,
             "status": event_participant.status,
             "eventQR": event_participant.eventId.eventQR,
+            "eventQRImage": event_participant.eventId.eventQRImage.url if event_participant.eventId.eventQRImage else None,
             "isQR": event_participant.eventId.isQR,  
             "eventMaster": event_participant.eventId.eventMaster.username,
         }
@@ -109,7 +110,6 @@ def events(request):
         endDate = request.POST["endDate"]
         isQR = request.POST["qrCode"] == "qr"  
 
-
         eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
         new_event = Events.objects.create(
@@ -123,6 +123,10 @@ def events(request):
             eventQR=eventQR,
             isQR=isQR
         )
+
+        if isQR:
+            new_event.generate_qr_image()
+            new_event.save()
 
         all_users = User.objects.all()  
         for user in all_users:
@@ -192,6 +196,8 @@ def increment_progress(request, event_id):
         'status': event_participant.status,
         'completed': False
     })
+
+
   
 def generate_qr(request):
     qr_image_base64 = None
