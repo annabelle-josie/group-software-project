@@ -67,5 +67,9 @@ class EventParticipants(models.Model):
                     )
 
     def increment_progress(self):
-        self.progress += 1 
+        if self.progress < self.eventId.noOfTasks:
+            self.progress += 1
+        if self.progress == self.eventId.noOfTasks:
+            self.status = "complete"
         self.save()
+
