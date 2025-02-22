@@ -256,7 +256,6 @@ def add_challenge(request):
             )
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
-
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
@@ -289,7 +288,6 @@ def get_leaderboard(request):
         data['leaderboard'].append({'username': username, 'points': points})
     return JsonResponse(data)
     
-
 @api_view(['POST'])
 def remove_task(request):
     print("hi")
@@ -308,7 +306,6 @@ def remove_task(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
    
-
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
@@ -330,21 +327,29 @@ def mychallenges(request):
         'form':challengeForm(),
         'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper})
         
+'''Market: only availble if logged in (otherwise nowhere to purchase plant to)
+Retrieves all plants available on the market, plants owned by a given user and their points
+These are then returned to the front-end within context to the market.html template
+'''
 @login_required(login_url="/auth/login")
 def market_view(request):
-    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
-    
+    # Fetching all plants, plants owned by the user, and how many leaves that user has
+    plants = Plant.objects.filter(onMarket=True)   # Fetch from DB only plants that are allowed to be on market
     user = CustomUser.objects.get(username=request.user)
-    current_leaves = UserStats.objects.get(user_id=user.id).leaves
-
-    # current_leaves = 80  # Need to replace with a method to get that users leaves
+    currentLeaves = UserStats.objects.get(user_id=user.id).leaves
+    ownedPlants = user.owned_plants.all()
     
     context = {
         "plants": plants,
-        "leaves": current_leaves
+        "leaves": currentLeaves,
+        "ownedPlants" : ownedPlants
     }
     return render(request, "market.html", context)
 
+'''Used by the front-end to purchase a plant.
+Plant passed in the request along with the user. This data is used to find the matching plant in the database and 
+add it to the user's owned plant list provided the user can afford to buy the plant.
+'''
 @api_view(['POST'])
 def add_purchased_plant(request):
     # try:
@@ -357,20 +362,24 @@ def add_purchased_plant(request):
         userStatObj = UserStats.objects.get(user_id=user.id)
         userLeaves = userStatObj.leaves
 
-        if(plant.price <= userLeaves):
+        if(plant.price <= userLeaves): # If the user can afford the plant
+            # Create a list of plants, and add the new one to it
             ownList = []
             for i in range(len(currentPlants)):
                 ownList.append(currentPlants[i])
             ownList.append(plant)
 
+            # Set that appended list as the new list belonging to the user
             user.owned_plants.set(ownList)
 
+            #Adjust the users leaf count
             newLeaves = userLeaves - plant.price
             userStatObj.leaves = newLeaves
+            
+            # Save the user's leaf count
             userStatObj.save()
+
+            # Send confirmation to front-end that the purchase was successful
             return Response(status=status.HTTP_200_OK)
-        else:
-            print("YOU ARE BROKE (But not broken?)")
+        else: # If the user cannot afford it, send back a bad response and abort purchase
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    # except:
-    #     return Response(status=status.HTTP_400_BAD_REQUEST)
