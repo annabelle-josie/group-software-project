@@ -34,7 +34,6 @@ User = get_user_model()
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
-
     try:
         user_garden = UserGarden.objects.get(user=request.user)
         plant_slots = [getattr(user_garden, f"plant{slot}Id", None) for slot in range(1, 7)]
@@ -49,6 +48,7 @@ def home(request):
             "rewardValue": challenge_participant.challengeId.rewardValue,
             "progress": challenge_participant.progress,
             "noOfTasks":challenge_participant.challengeId.noOfTasks,
+            "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
         }
         for challenge_participant in user_challenge
@@ -164,40 +164,25 @@ def increment_progress(request, event_id):
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    try:
-        data = json.loads(request.body)
-        qr_code = data.get('qrCode')
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
-
-    if event.isQR and (not qr_code or qr_code != event.eventQR):
-        return JsonResponse({'progress': event_participant.progress,
-            'totalTasks': event.noOfTasks,
-            'status': event_participant.status,
-            'rewardAdded': event.rewardValue,
-            'newBalance': user_stats.leaves,
-            'completed': True}, status=400)
-
-    if event_participant.progress < event.noOfTasks:
-        event_participant.progress += 1  
-        if event_participant.progress >= event.noOfTasks:  
+    if event_participant.progress < event_participant.eventId.noOfTasks:
+        event_participant.increment_progress()
+        
+        if event_participant.progress >= event_participant.eventId.noOfTasks:
             event_participant.status = "complete"
-        event_participant.save()
+            event_participant.save()
+      
+            user_stats = UserStats.objects.get(user=request.user)
+            user_stats.leaves += event_participant.eventId.rewardValue
+            user_stats.points += event_participant.eventId.rewardValue
+            user_stats.save()
 
-    if event_participant.status == "complete":
-        user_stats = UserStats.objects.get(user=request.user)
-        user_stats.leaves += event.rewardValue
-        user_stats.points += event.rewardValue
-        user_stats.save()
-
-        return JsonResponse({
-            'progress': event_participant.progress,
-            'totalTasks': event.noOfTasks,
-            'status': event_participant.status,
-            'rewardAdded': event.rewardValue,
-            'newBalance': user_stats.leaves,
-            'completed': True 
-        })
+            return JsonResponse({
+                'progress': event_participant.progress,
+                'totalTasks': event_participant.eventId.noOfTasks,
+                'status': event_participant.status,
+                'rewardAdded': event_participant.eventId.rewardValue,
+                'newBalance': user_stats.leaves
+            })
 
     return JsonResponse({
         'progress': event_participant.progress,
@@ -227,24 +212,39 @@ def generate_qr(request):
             buffer = BytesIO()
             img.save(buffer, format='PNG')
             qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
-            img.save("main/qrcodes/"+text+".png")
+            location = "main/qrcodes/"+text+".png"
+            img.save(location)
+            # to download to computer
+            # response = HttpResponse(location, content_type='application/force-download')
+            # response['Content-Disposition'] = f'attachment; filename="qrcode.png"'
+            # return response
     else:
         form = QRCodeForm()
     
     return render(request, 'qr.html', {'form': form, 'qr_image_base64': qr_image_base64})
 
+# def save_image(request):
+#     # image = request.data.get("qrcode")
+#     print("i work ")
+#     #
+#     return response
+
 def add_challenge(request):
-    if request.method == "POST":
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+
+    if request.method == "POST" and is_gamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
+        qrvalue = request.POST["qrvalue"]
 
         new_challenge = Challenge.objects.create(
             title=title,
             desc=desc,
             noOfTasks=noOfTasks,
             rewardValue=rewardValue,
+            qrvalue= qrvalue,
         )
         all_users = CustomUser.objects.all()
         for user in all_users:
@@ -254,7 +254,6 @@ def add_challenge(request):
                 progress=0, 
                 status="incomplete"  
             )
-
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
 
@@ -312,6 +311,7 @@ def remove_task(request):
 
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
+    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
     challenge_in_progress = [
         {
@@ -328,7 +328,7 @@ def mychallenges(request):
     
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
-        'challenge_list': challenge_in_progress})
+        'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper})
         
 @login_required(login_url="/auth/login")
 def market_view(request):
