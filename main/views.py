@@ -158,31 +158,47 @@ def delete_event(request, event_id):
 
 @login_required
 def increment_progress(request, event_id):
+    """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
         event = event_participant.eventId
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    if event_participant.progress < event_participant.eventId.noOfTasks:
-        event_participant.increment_progress()
-        
-        if event_participant.progress >= event_participant.eventId.noOfTasks:
-            event_participant.status = "complete"
-            event_participant.save()
-      
-            user_stats = UserStats.objects.get(user=request.user)
-            user_stats.leaves += event_participant.eventId.rewardValue
-            user_stats.points += event_participant.eventId.rewardValue
-            user_stats.save()
+    try:
+        data = json.loads(request.body)
+        qr_code = data.get('qrCode')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-            return JsonResponse({
-                'progress': event_participant.progress,
-                'totalTasks': event_participant.eventId.noOfTasks,
-                'status': event_participant.status,
-                'rewardAdded': event_participant.eventId.rewardValue,
-                'newBalance': user_stats.leaves
-            })
+    if event.isQR and (not qr_code or qr_code != event.eventQR):
+        return JsonResponse({'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True}, status=400)
+
+    if event_participant.progress < event.noOfTasks:
+        event_participant.progress += 1  
+        if event_participant.progress >= event.noOfTasks:  
+            event_participant.status = "complete"
+        event_participant.save()
+
+    if event_participant.status == "complete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += event.rewardValue
+        user_stats.points += event.rewardValue
+        user_stats.save()
+
+        return JsonResponse({
+            'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True 
+        })
 
     return JsonResponse({
         'progress': event_participant.progress,

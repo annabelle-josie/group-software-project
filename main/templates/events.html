@@ -258,15 +258,16 @@
             const progressElement = document.getElementById(`progress-${eventId}`);
             progressElement.innerText = `${data.progress}/${data.totalTasks}`;
 
-            if (data.progress >= data.totalTasks) {  
+            if (data.completed) {  
                 const statusElement = document.getElementById(`status-${eventId}`);
                 statusElement.innerText = "Completed";
                 statusElement.classList.remove("bg-warning");
                 statusElement.classList.add("bg-success");
 
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1);  
+                const incrementButton = document.getElementById(`increment-${eventId}`);
+                if (incrementButton) {
+                    incrementButton.style.display = "none";  
+                }
             }
         })
         .catch(err => {
