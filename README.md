@@ -1,23 +1,59 @@
-# group-software-project
+# Down2Earth
 
-Coursework for ECM2434
+This is the Down2Earth web application. This web application is a scrum-based Django project designed as an interactive sustainability game. Users create an account and log in to access a daily task system that encourages eco-friendly activities. Completing tasks and attending events earns them **leaves**, which can be used to purchase flowers for their personal garden, and points that are used for the leaderboard.
 
+Coursework for ECM2434 at the University of Exeter
 Group: Alvin and the MicroChipmunks
 Members: Andy, Amy, Annabelle, David, James, Jason, Oliver
 
-## Dependencies
+## **Key Features**
 
-It is assumed that the most recent version of Python (Python 3.13.2) is installed for this project. The following dependancies must also be installed
+- **Daily Tasks**: Users complete environmentally friendly challenges to earn rewards.
+- **Personal Garden**: An empty garden that can be customized by purchasing flowers using leaf points.
+- **Marketplace**: Users can unlock new plants and decorations using their earned points.
+- **Leaderboard**: A ranking system that allows players to compare their sustainability efforts with others.
+- **Events**: Users can attend real-world sustainability events to earn additional rewards.
 
-1. django
-2. qrcode[PIL]
+The application uses multiple SQLite databases to store and manage data. The gamified approach encourages players to adopt sustainable habits while competing in a friendly, engaging way.
 
-## How to run this project
+## Requirements
 
-There are two ways to run this project. Either through a python virtual environment or by the command line code
+Before running the project, make sure you have the following installed:
 
-Command Line:
-Inside the group-software-project directory type the following
+- **Python 3.10+**  
+- **pip**  
+- **Virtual Environment (venv)**  
+  *(Recommended for dependency management)*
+- **SQLite**
+
+## Setup Instructions
+
+To run this Django-based web application locally, follow the steps below.
+
+### How to Run the Project
+
+**Download the package from the repository**  
+*(Ensure you have access to the latest version of the project.)*
+
+### 1. Install Dependencies
+
+Install the required dependencies listed in requirements.txt:
+
+```console
+pip install -r requirements.txt
+```
+
+### 2. Apply Migrations
+
+Navigate to the group-software-project folder and set up the database schema:
+
+```console
+python manage.py migrate
+```
+
+### 3. Run the Server
+
+Still within the group-software-project folder start the server with the command:
 
 ```console
 python manage.py runserver
