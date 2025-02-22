@@ -66,3 +66,6 @@ class EventParticipants(models.Model):
                         status="incomplete"
                     )
 
+    def increment_progress(self):
+        self.progress += 1 
+        self.save()

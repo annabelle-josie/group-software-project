@@ -258,18 +258,15 @@
             const progressElement = document.getElementById(`progress-${eventId}`);
             progressElement.innerText = `${data.progress}/${data.totalTasks}`;
 
-            if (data.completed) {  
+            if (data.progress >= data.totalTasks) {  
                 const statusElement = document.getElementById(`status-${eventId}`);
                 statusElement.innerText = "Completed";
                 statusElement.classList.remove("bg-warning");
                 statusElement.classList.add("bg-success");
 
-                const incrementButton = document.getElementById(`increment-${eventId}`);
-                if (incrementButton) {
-                    incrementButton.style.display = "none";  
-                }
-
-                window.location.reload(); 
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1);  
             }
         })
         .catch(err => {
@@ -277,6 +274,7 @@
             console.error(err);
         });
     }
+
 
     document.addEventListener("DOMContentLoaded", function () {
         let now = new Date();
