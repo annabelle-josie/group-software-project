@@ -3,7 +3,9 @@
 This is the Down2Earth web application. This web application is a scrum-based Django project designed as an interactive sustainability game. Users create an account and log in to access a daily task system that encourages eco-friendly activities. Completing tasks and attending events earns them **leaves**, which can be used to purchase flowers for their personal garden, and points that are used for the leaderboard.
 
 Coursework for ECM2434 at the University of Exeter
+
 Group: Alvin and the MicroChipmunks
+
 Members: Andy, Amy, Annabelle, David, James, Jason, Oliver
 
 ## **Key Features**
