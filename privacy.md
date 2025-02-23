@@ -24,7 +24,7 @@ This summary provides key points from our Privacy Notice, but you can find out m
 - **In what situations and with which parties do we share personal information?** We may share information in specific situations and with specific third parties. Learn more about when and with whom we share your personal information.
 - **How do we keep your information safe?** We have adequate organisational and technical processes and procedures in place to protect your personal information. However, no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other unauthorised third parties will not be able to defeat our security and improperly collect, access, steal, or modify your information. Learn more about how we keep your information safe.
 - **What are your rights?** Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information. Learn more about your privacy rights.
-- **How do you exercise your rights?** The easiest way to exercise your rights is by visiting at969@exeter.ac.uk, or by contacting us. We will consider and act upon any request in accordance with applicable data protection laws.
+- **How do you exercise your rights?** The easiest way to exercise your rights is by contacting at969@exeter.ac.uk. We will consider and act upon any request in accordance with applicable data protection laws.
 - **Want to learn more about what we do with any information we collect?** Review the Privacy Notice in full.
 
 ## TABLE OF CONTENTS
