@@ -19,7 +19,7 @@ class Challenge(models.Model):
 
     def __str__(self):
         return self.title  # String representation of the challenge
-    def generate_qr_image(self):
+    def generateQrImage(self):
         if self.qrvalue:
             qr = qrcode.make(self.qrvalue)
             buffer = BytesIO()

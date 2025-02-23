@@ -121,7 +121,7 @@ def create_userGarden(sender, instance, created, **kwargs):
         from garden.models import UserGarden, Plant  # Prevent circular imports
         
         try:
-            default_plant = Plant.objects.get(name="Potted Plant")  # Change "Sunflower" to your default plant
+            default_plant = Plant.objects.get(name="Potted Plant")  
         except Plant.DoesNotExist:
             default_plant = None  # If the plant isn't found, leave slots empty
         
