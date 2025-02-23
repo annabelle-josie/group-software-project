@@ -98,6 +98,10 @@
                                         </a>
                                             <p></p>
                                         {% endif %}
+                                        <button class="btn btn-primary" onclick="deleteEvent({{ event.eventId }})">
+                                            Delete Event
+                                        </button>
+
                                     </div>
                             </div>
                         </div>
@@ -243,60 +247,83 @@
 
 
 
-        function incrementProgress(eventId) {
-            fetch(`/increment_progress/${eventId}/`, {
-                method: "POST",
+    function incrementProgress(eventId) {
+        fetch(`/increment_progress/${eventId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ qrCode: null })  
+        })
+        .then(response => response.json())
+        .then(data => {
+            const progressElement = document.getElementById(`progress-${eventId}`);
+            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+
+            if (data.completed) {  
+                const statusElement = document.getElementById(`status-${eventId}`);
+                statusElement.innerText = "Completed";
+                statusElement.classList.remove("bg-warning");
+                statusElement.classList.add("bg-success");
+
+                const incrementButton = document.getElementById(`increment-${eventId}`);
+                if (incrementButton) {
+                    incrementButton.style.display = "none";  
+                }
+
+                window.location.reload(); 
+            }
+        })
+        .catch(err => {
+            alert("There was an issue incrementing the progress.");
+            console.error(err);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let now = new Date();
+        let minDateTime = now.toISOString().slice(0, 16); 
+
+        let startDateInput = document.getElementById("startDate");
+        let endDateInput = document.getElementById("endDate");
+
+        startDateInput.setAttribute("min", minDateTime);
+        endDateInput.setAttribute("min", minDateTime);
+
+        startDateInput.addEventListener("input", function () {
+            if (endDateInput.value < startDateInput.value) {
+                endDateInput.value = startDateInput.value;
+            }
+            endDateInput.setAttribute("min", startDateInput.value);
+        });
+        
+    });
+
+    function deleteEvent(eventId) {
+        if (confirm("Are you sure you want to delete this event?")) {
+            fetch(`/delete_event/${eventId}/`, {
+                method: "DELETE",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}",
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ qrCode: null })  
+                }
             })
             .then(response => response.json())
             .then(data => {
-                const progressElement = document.getElementById(`progress-${eventId}`);
-                progressElement.innerText = `${data.progress}/${data.totalTasks}`;
-
-                if (data.completed) {  
-                    const statusElement = document.getElementById(`status-${eventId}`);
-                    statusElement.innerText = "Completed";
-                    statusElement.classList.remove("bg-warning");
-                    statusElement.classList.add("bg-success");
-
-                    const incrementButton = document.getElementById(`increment-${eventId}`);
-                    if (incrementButton) {
-                        incrementButton.style.display = "none";  
-                    }
-
-                    window.location.reload(); 
+                if (data.success) {
+                    alert("Event deleted successfully.");
+                    window.location.reload();  
+                } else {
+                    alert("Error deleting event.");
                 }
             })
             .catch(err => {
-                alert("There was an issue incrementing the progress.");
+                alert("There was an issue deleting the event.");
                 console.error(err);
             });
         }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            let now = new Date();
-            let minDateTime = now.toISOString().slice(0, 16); 
-
-            let startDateInput = document.getElementById("startDate");
-            let endDateInput = document.getElementById("endDate");
-
-            startDateInput.setAttribute("min", minDateTime);
-            endDateInput.setAttribute("min", minDateTime);
-
-            startDateInput.addEventListener("input", function () {
-                if (endDateInput.value < startDateInput.value) {
-                    endDateInput.value = startDateInput.value;
-                }
-                endDateInput.setAttribute("min", startDateInput.value);
-            });
-            
-        });
-
-
+    }
 
 </script>
 {% endblock %}

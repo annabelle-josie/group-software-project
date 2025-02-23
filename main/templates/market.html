@@ -32,13 +32,23 @@
     <!-- Plant Selection Grid -->
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
+        {% if plant in ownedPlants %}
             <div class="plant-item"
-                 onclick='updatePlant("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
+            onclick='updatePlantOwned( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.cost }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}", "")'>
                 <img class="img-fluid rounded shadow"
-                     src="{{ plant.image.url }}" 
-                     alt="{{ plant.name }}">
+                    src="{{ plant.image.url }}" 
+                    alt="{{ plant.name }}">
+                <p class="fw-bold text-dark">OWNED: {{ plant.name }}</p>
+            </div>
+        {% else %}
+            <div class="plant-item"
+            onclick='updatePlant( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.cost }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
+                <img class="img-fluid rounded shadow"
+                    src="{{ plant.image.url }}" 
+                    alt="{{ plant.name }}">
                 <p class="fw-bold text-dark">{{ plant.name }}</p>
             </div>
+        {%endif%}
         {% endfor %}
     </div>
 </div>
@@ -53,6 +63,20 @@
 
         const onClickString = "buyPlant('" + user + "','" + name + "');"
         document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
+        document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-primary w-100");
+        document.getElementById("chosen-plant-buy").innerHTML = "Buy plant";
+    }
+    
+    function updatePlantOwned(image, name, cost, fact, user, plantObject) {
+        document.getElementById("chosen-plant-image").src = image;
+        document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
+        document.getElementById("chosen-plant-cost").innerHTML = "<strong>Cost:</strong> " + cost;
+        document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+
+        const onClickString = "#"
+        document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
+        document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-danger w-100");
+        document.getElementById("chosen-plant-buy").innerHTML = "Owned";
     }
 
     function buyPlant(userData, plantName){
