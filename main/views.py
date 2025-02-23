@@ -14,7 +14,6 @@ from django.views.generic import CreateView
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden

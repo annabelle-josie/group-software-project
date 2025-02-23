@@ -57,9 +57,6 @@
             </li>
         </ul>
         <button class="btn btn-primary mt-2" onclick="window.location.href='allchallenges'">See more tasks</button>
-        {% if request.user|has_group:"Game Keepers" %} 
-        <button class="btn btn-primary mt-2" onclick="window.location.href='createchallenge'">create challenge</button>
-        {% endif %}
     </div>
 
     <div class="col-md-6" style="background-color: rgb(200, 203, 255);">
