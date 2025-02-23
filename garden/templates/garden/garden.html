@@ -16,7 +16,7 @@
 
 <div class="row h-50">
     <div class="row h-50">
-        {% for plant in plant_slots %}
+        {% for plant in plantSlots %}
             <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
                 <p>Plant {{ forloop.counter }}</p>
                 {% if plant and plant.image %}
@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<form action="update_garden" method="post" style="visibility: hidden" name="submitform" id="submitform">
+<form action="updateGarden" method="post" style="visibility: hidden" name="submitform" id="submitform">
     <p>Plant {{ forloop.counter }}</p>
     {% csrf_token %}
     <select name="plantname" id="plantname">
