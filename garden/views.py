@@ -15,14 +15,14 @@ def gardenView(request):
     userGarden = UserGarden.objects.get(user=request.user)
     users = CustomUser.objects.get(username= request.user)
     avalible = users.owned_plants.all().values()
-    plant_slots = []
+    plantSlots = []
     if userGarden:
         for slot in range(1, 7):  # Loop through all 6 slots
             plant = getattr(userGarden, f"plant{slot}Id", None)  # Get Plant object directly
             #print(f"Plant Slot {slot}: {plant}")  # Debugging line
-            plant_slots.append(plant)
-    print("Final Plant Slots:", plant_slots)  # Debugging line
-    return render(request, "garden/garden.html", {"plant_slots": plant_slots,"avalible":avalible})
+            plantSlots.append(plant)
+    print("Final Plant Slots:", plantSlots)  # Debugging line
+    return render(request, "garden/garden.html", {"plantSlots": plantSlots,"avalible":avalible})
 
 @api_view(["GET"])
 def get_garden(request, user_id):
@@ -34,7 +34,7 @@ def get_garden(request, user_id):
     except userGarden.DoesNotExist:
         return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
     
-def update_garden(request):
+def updateGarden(request):
     """View to updte the user's garden with a new plant"""
     # print("hello")
     plantname = request.POST.get('plantname')
