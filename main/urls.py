@@ -19,4 +19,5 @@ urlpatterns = [
     path("auth/", include("login.urls")),  # Include login app URLs
     path('increment_progress/<int:event_id>/', views.increment_progress, name='increment_progress'),  # Increment progress endpoint
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),  # Add purchased plant endpoint
+    path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
 ]
