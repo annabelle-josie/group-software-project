@@ -21,12 +21,12 @@
         <ul class="list-group">
             {% for item in challenge_list %}
             <li class="list-group-item">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                    <label class="form-check-label" for="flexCheckDefault">
-                        {{ item.id }}, {{ item.title }} - {{ item.desc }} - has {{ item.progress }}/{{ item.noOfTasks }}, you will get {{ item.rewardValue }}
-                    </label>
-                    <button class="remove-button btn btn-primary mt-1" progress="{{ item.progress }}" data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" data-points="{{ item.rewardValue }}">complete</button>
+                <div >
+                    {{ item.title }} - {{ item.desc }} - {{ item.progress }}/{{ item.noOfTasks }} , {{ item.rewardValue }} points
+                    {%if item.qrvalue != '' %}
+                       QR needed
+                    {% endif %}
+                    <button class="remove-button btn btn-primary mt-1" qr= "{{item.qrvalue}}" progress="{{ item.progress }}" data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" data-points="{{ item.rewardValue }}">complete</button>
                 </div>
             </li>
             {% empty %}
@@ -34,13 +34,30 @@
             {% endfor %}
         </ul>
     </div>
-</div>
+    <div class="col-2" style="background-color: rgb(200, 203, 255);">
+        <h1>Scan QR Code</h1>
+        <div  id="reader" qrcode="0"></div>
+    </div>
 
+{% if is_gamekeeper %}
+<div class = "col-md-6">
+<h1> create new challenge</h1>
 <form action="addChallenge" method="POST">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="submit">submit</button>
 </form>
+</div>
+{% endif %}
+{% if challenges.QRImage%}
+<div class = "col-md-6" id="qrimage">
+    click to image download qr code for {{challenges.title}}
+    <a href="{{challenges.QRImage.url}}" target="_blank"> 
+    <img src="{{challenges.QRImage.url}}" style="width: 100px;"/>
+</a>
+</div>
+{% endif %}
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -53,6 +70,9 @@
                 const progress = button.getAttribute('progress');
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
+                    if (qr== '' || qr==value){
+                        alert(value)
+                        document.getElementById("reader").setAttribute('qrcode',"0");
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
                             method: 'DELETE',
@@ -101,9 +121,32 @@
                             alert('Error completing task.');
                         });
                     }
+            
+                }else if(value == "0") {
+                        alert("you have not scanned a qr code")
+                    }
+                else{
+                    alert("this is not the correct qr code for this challenge")
                 }
+            }
             });
         });
     });
+
+    // If found you qr code
+    function onScanSuccess(decodeText, decodeResult) {
+        alert("You Qr is : " + decodeText, decodeResult);
+        document.getElementById("reader").setAttribute('qrcode',decodeText);
+    }
+    let htmlscanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbos: 250 }
+    );
+    htmlscanner.render(onScanSuccess);
+
+    function visible(){
+        document.getElementById("qrimage").style.display="block";
+    }
+
 </script>
 {% endblock %}

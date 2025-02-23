@@ -4,15 +4,16 @@ from . import views
 # URL patterns for the main application
 urlpatterns = [
     path("", views.home, name="home"),  # Home page
-    path("qr", views.generate_qr, name="qr"),  # QR code generation page
+    # path("qr", views.generate_qr, name="qr"),  # QR code generation page
     path("leaderboard", views.leaderboard, name="leaderboard"),  # Leaderboard page
     path("allchallenges", views.mychallenges, name="allchallenges"),  # All challenges page
+    # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),
     path("garden/", include("garden.urls")),  # Include garden app URLs
     path("events", views.events, name="events"),  # Events page
     path("market/", views.market_view, name="market"),  # Market page
     path("addChallenge", views.add_challenge),  # Add challenge endpoint
-    path("api/v1/addChallenge", views.add_challenge),  # API endpoint to add challenge
+    # path("api/v1/addChallenge", views.add_challenge),  # API endpoint to add challenge
     path("api/v1/removeChallenge", views.remove_challenge),  # API endpoint to remove challenge
     path("api/v1/removeTask", views.remove_task),  # API endpoint to remove task
     path("api/v1/leaderboard", views.get_leaderboard),  # API endpoint to get leaderboard
