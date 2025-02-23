@@ -20,8 +20,10 @@
             {% for item in challenge_list %}
             <li class="list-group-item">
                 <div >
-                        {{ item.id }}, {{ item.title }} - {{ item.desc }} - has {{ item.progress }}/{{ item.noOfTasks }}, you will get {{ item.rewardValue }}
-                    </label>
+                    {{ item.title }} - {{ item.desc }} - {{ item.progress }}/{{ item.noOfTasks }} , {{ item.rewardValue }} points
+                    {%if item.qrvalue != '' %}
+                       QR needed
+                    {% endif %}
                     <button class="remove-button btn btn-primary mt-1" qr= "{{item.qrvalue}}" progress="{{ item.progress }}" data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" data-points="{{ item.rewardValue }}">complete</button>
                 </div>
             </li>
@@ -34,10 +36,9 @@
         <h1>Scan QR Code</h1>
         <div  id="reader" qrcode="0"></div>
     </div>
-</div>
 
 {% if is_gamekeeper %}
-<div class="container">
+<div class = "col-md-6">
 <h1> create new challenge</h1>
 <form action="addChallenge" method="POST">
     {% csrf_token %}
@@ -46,6 +47,15 @@
 </form>
 </div>
 {% endif %}
+{% if challenges.QRImage%}
+<div class = "col-md-6" id="qrimage">
+    click to image download qr code for {{challenges.title}}
+    <a href="{{challenges.QRImage.url}}" target="_blank"> 
+    <img src="{{challenges.QRImage.url}}" style="width: 100px;"/>
+</a>
+</div>
+{% endif %}
+</div>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
@@ -62,11 +72,8 @@
                 const value =  document.getElementById("reader").getAttribute('qrcode')
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
-                    alert(value)
-                    if(value == "0") {
-                        alert("you have not scanned a qr code")
-                    }
-                    else if (qr == value){
+                    if (qr== '' || qr==value){
+                        alert(value)
                         document.getElementById("reader").setAttribute('qrcode',"0");
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
@@ -116,7 +123,11 @@
                             alert('Error completing task.');
                         });
                     }
-                }else{
+            
+                }else if(value == "0") {
+                        alert("you have not scanned a qr code")
+                    }
+                else{
                     alert("this is not the correct qr code for this challenge")
                 }
             }
@@ -135,6 +146,9 @@
     );
     htmlscanner.render(onScanSuccess);
 
+    function visible(){
+        document.getElementById("qrimage").style.display="block";
+    }
 
 </script>
 {% endblock %}

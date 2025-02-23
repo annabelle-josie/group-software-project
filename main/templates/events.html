@@ -92,7 +92,10 @@
                                         <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
                                         {% if event.eventQRImage %}
                                             <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
+                                            <a href="{{ event.eventQRImage }}">
                                             <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
+                                            {{ event.eventQRImage }}
+                                        </a>
                                             <p></p>
                                         {% endif %}
                                     </div>

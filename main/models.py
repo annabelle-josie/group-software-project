@@ -3,6 +3,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.forms import ModelForm 
 from django.contrib.auth import get_user_model
+import qrcode
+from io import BytesIO
+from django.core.files.base import ContentFile
 
 # Create your models here.
 class Challenge(models.Model):
@@ -11,10 +14,17 @@ class Challenge(models.Model):
     desc= models.CharField(max_length=500)
     noOfTasks= models.IntegerField()
     rewardValue= models.IntegerField()
-    qrvalue = models.CharField(max_length=50)
+    qrvalue = models.CharField(max_length=50, default=None, null=True, blank=True)
+    QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)  
 
     def __str__(self):
         return self.title
+    def generate_qr_image(self):
+        if self.qrvalue:
+            qr = qrcode.make(self.qrvalue)
+            buffer = BytesIO()
+            qr.save(buffer, format="PNG")
+            self.QRImage.save(f"Cqr_{self.challengeId}.png", ContentFile(buffer.getvalue()), save=False)
     
 class challengeForm(ModelForm):
     class Meta:

@@ -44,7 +44,10 @@
                 {% for item in challenge_list %}
                     {% if forloop.counter <= 4 %}
                         <div>
-                                {{item.id}}, {{item.title}}-{{item.desc}}-has {{item.progress}}/{{item.noOfTasks}}, you will get {{item.rewardValue}}, 
+                            {{ item.title }} - {{ item.desc }} - {{ item.progress }}/{{ item.noOfTasks }} , {{ item.rewardValue }} points
+                                {%if item.qrvalue != '' %}
+                                   QR needed
+                                {% endif %}
                                 <button class="remove-button btn btn-primary mt-1" qr="{{item.qrvalue}}" progress="{{item.progress}}" data-tasks="{{item.noOfTasks}}" data-id="{{item.id}}" data-points="{{item.rewardValue}}">complete</button>
                         </div>
                     {% endif %}
@@ -54,6 +57,9 @@
             </li>
         </ul>
         <button class="btn btn-primary mt-2" onclick="window.location.href='allchallenges'">See more tasks</button>
+        {% if request.user|has_group:"Game Keepers" %} 
+        <button class="btn btn-primary mt-2" onclick="window.location.href='createchallenge'">create challenge</button>
+        {% endif %}
     </div>
 
     <div class="col-md-6" style="background-color: rgb(200, 203, 255);">
@@ -76,11 +82,7 @@
                 const value =  document.getElementById("reader").getAttribute('qrcode')
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
-                    alert(value)
-                    if(value == "0") {
-                        alert("you have not scanned a qr code")
-                    }
-                    else if (qr == value){
+                    if (qr== '' || qr==value){
                         document.getElementById("reader").setAttribute('qrcode',"0");
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
@@ -130,7 +132,11 @@
                             alert('Error completing task.');
                         });
                     }
-                }else{
+            
+                }else if(value == "0") {
+                        alert("you have not scanned a qr code")
+                    }
+                else{
                     alert("this is not the correct qr code for this challenge")
                 }
             }

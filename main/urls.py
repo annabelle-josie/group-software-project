@@ -3,15 +3,16 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),  # Keep home in main
-    path("qr", views.generate_qr, name="qr"),  # Keep home in main
+    # path("qr", views.generate_qr, name="qr"),  # Keep home in main
     path("leaderboard", views.leaderboard, name="leaderboard"),
     path("allchallenges", views.mychallenges, name="allchallenges"),
+    # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),
     path("garden/", include("garden.urls")),
     path("events", views.events, name="events"),
     path("market/", views.market_view, name="market"),
     path("addChallenge", views.add_challenge),
-    path("api/v1/addChallenge", views.add_challenge),
+    # path("api/v1/addChallenge", views.add_challenge),
     path("api/v1/removeChallenge", views.remove_challenge),
     path("api/v1/removeTask", views.remove_task),
     path("api/v1/leaderboard", views.get_leaderboard),
