@@ -24,7 +24,7 @@
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
             <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ first_plant.price }}</h4>
             <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
-        {% if first_plant in ownedPlants %}
+        {% if first_plant in owned_plants %}
             <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
                 <button id="chosen-plant-buy" class="btn btn-danger w-100" onClick="">Owned</button>
         {% else %}
@@ -41,7 +41,7 @@
      <!-- Display all avaialble plants -->
     <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
         {% for plant in plants %}
-        {% if plant in ownedPlants %}
+        {% if plant in owned_plants %}
         <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
             <div class="plant-item"
             onclick='updatePlantOwned( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
