@@ -11,25 +11,25 @@
 
         <!-- Image & Details Section - shows selected plant's information -->
         <!-- If no plant is selected (on first load of page) show the 0th plant -->
-        {% with plants.0 as first_plant %}
+        {% with plants.0 as firstPlant %}
         <div class="col-md-5 text-center">
             <img id="chosen-plant-image" class="img-fluid rounded"
-                src="{{ first_plant.image.url }}" 
-                alt="{{ first_plant.name }}" 
+                src="{{ firstPlant.image.url }}" 
+                alt="{{ firstPlant.name }}" 
                 style="max-height: 300px; width: auto;">
         </div>
         <div class="col-md-7">
             <p class="fw-bold text-center">Your Leaves: {{ user.stats.leaves }}</p>
             <h1 class="fw-bold text-center">Plants</h1>
-            <h3 id="chosen-plant-name"><strong>Name:</strong> {{ first_plant.name }}</h3>
-            <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ first_plant.price }}</h4>
-            <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ first_plant.fact }}</p>
-        {% if first_plant in ownedPlants %}
+            <h3 id="chosen-plant-name"><strong>Name:</strong> {{ firstPlant.name }}</h3>
+            <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ firstPlant.price }}</h4>
+            <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ firstPlant.fact }}</p>
+        {% if firstPlant in ownedPlants %}
             <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
                 <button id="chosen-plant-buy" class="btn btn-danger w-100" onClick="">Owned</button>
         {% else %}
         <!-- Otherwise let them buy the plant as usual -->
-            <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ first_plant.name }}')">Buy plant</button>
+            <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ firstPlant.name }}')">Buy plant</button>
         {%endif%}
     </div>
 
