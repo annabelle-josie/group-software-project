@@ -28,7 +28,7 @@ class Events(models.Model):
     def __str__(self):
         return self.title # String representation of the event
 
-    def generate_qr_image(self):
+    def generateQrImage(self):
         """Generate QR code image for the event"""
         if self.eventQR:
             qr = qrcode.make(self.eventQR)
@@ -57,7 +57,7 @@ class EventParticipants(models.Model):
         return f"{self.username.username} - {self.eventId.title}" # String representation of the event participant
 
     @receiver(post_save, sender=get_user_model())
-    def assign_user_to_existing_events(sender, instance, created, **kwargs):
+    def assignUserToExistingEvents(sender, instance, created, **kwargs):
         """Assign user to existing events"""
         if created:  
             existing_events = Events.objects.all() # Get all existing events
@@ -70,7 +70,7 @@ class EventParticipants(models.Model):
                         status="incomplete"
                     ) # Assign the new user to the existing event(s)
 
-    def increment_progress(self):
+    def incrementProgress(self):
         if self.progress < self.eventId.noOfTasks:
             self.progress += 1
         if self.progress == self.eventId.noOfTasks:
