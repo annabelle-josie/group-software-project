@@ -10,15 +10,15 @@ from django.contrib.auth.decorators import login_required
 
 
 @login_required(login_url="/auth/login")
-def garden_view(request):
+def gardenView(request):
     """View to display the garden on the main page"""
-    user_garden = UserGarden.objects.get(user=request.user)
+    userGarden = UserGarden.objects.get(user=request.user)
     users = CustomUser.objects.get(username= request.user)
     avalible = users.owned_plants.all().values()
     plant_slots = []
-    if user_garden:
+    if userGarden:
         for slot in range(1, 7):  # Loop through all 6 slots
-            plant = getattr(user_garden, f"plant{slot}Id", None)  # Get Plant object directly
+            plant = getattr(userGarden, f"plant{slot}Id", None)  # Get Plant object directly
             #print(f"Plant Slot {slot}: {plant}")  # Debugging line
             plant_slots.append(plant)
     print("Final Plant Slots:", plant_slots)  # Debugging line

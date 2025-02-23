@@ -33,8 +33,8 @@ def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
     try:
-        user_garden = UserGarden.objects.get(user=request.user)
-        plant_slots = [getattr(user_garden, f"plant{slot}Id", None) for slot in range(1, 7)]
+        userGarden = UserGarden.objects.get(user=request.user)
+        plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except UserGarden.DoesNotExist:
         plant_slots = []
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
@@ -114,7 +114,7 @@ def events(request):
         )
 
         if isQR:
-            new_event.generate_qr_image()
+            new_event.generateQrImage()
             new_event.save()
 
         all_users = User.objects.all()  
@@ -147,7 +147,7 @@ def delete_event(request, event_id):
 
 # increment progress view, increments the progress of an event participant and returns a JSON response for if user is not valid or success
 @login_required
-def increment_progress(request, event_id):
+def incrementProgress(request, event_id):
     """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
@@ -245,7 +245,7 @@ def add_challenge(request):
             rewardValue=rewardValue,
             qrvalue= qrvalue,
         )
-        new_challenge.generate_qr_image()
+        new_challenge.generateQrImage()
         new_challenge.save()
         all_users = CustomUser.objects.all()
         for user in all_users:

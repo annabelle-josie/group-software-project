@@ -213,7 +213,7 @@
 
         html5QrcodeScanner.render(function(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
-            fetch(`/increment_progress/${eventId}/`, {
+            fetch(`/incrementProgress/${eventId}/`, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}",
@@ -248,7 +248,7 @@
 
 
     function incrementProgress(eventId) {
-        fetch(`/increment_progress/${eventId}/`, {
+        fetch(`/incrementProgress/${eventId}/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",
