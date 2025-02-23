@@ -112,15 +112,33 @@ class UserStats(models.Model):
 def create_user_stats(sender, instance, created, **kwargs):
     """Automatically creates a UserStats entry for every new user."""
     if created:
-        UserStats.objects.create(user=instance)
+        UserStats.objects.create(user=instance, leaves=50, points=50)
 
 @receiver(post_save, sender=CustomUser)
 def create_userGarden(sender, instance, created, **kwargs):
     """Automatically creates a UserGarden for every new user."""
     if created:
-        # Import here so that there isn't a circular import between garden and user_management
-        from garden.models import UserGarden
-        UserGarden.objects.create(user=instance)
+        from garden.models import UserGarden, Plant  # Prevent circular imports
+        
+        try:
+            default_plant = Plant.objects.get(name="Potted Plant")  # Change "Sunflower" to your default plant
+        except Plant.DoesNotExist:
+            default_plant = None  # If the plant isn't found, leave slots empty
+        
+        # Create the UserGarden with the default plant in all six slots
+        UserGarden.objects.create(
+            user=instance,
+            plant1Id=default_plant,
+            plant2Id=default_plant,
+            plant3Id=default_plant,
+            plant4Id=default_plant,
+            plant5Id=default_plant,
+            plant6Id=default_plant,
+        )
+
+        # Also add this plant to the owned plants list
+        if default_plant:
+            instance.owned_plants.add(default_plant)
 
 class FriendRequest(models.Model):
     """Model to store friend requests with a status."""
