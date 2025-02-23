@@ -4,15 +4,18 @@
 {% block title %}challenges{% endblock %}
 
 {% block content %}
-<h1>all challenges</h1>
+<h1>All Challenges</h1>
 {% if user.is_authenticated %}
     {% if user.username|last != "s" %}
-        <h1>{{ user.username }}'s challenges!</h1>
+        <h1>{{ user.username }}'s Challenges!</h1>
     {% else %}
-        <h1>{{ user.username }}' challenges!</h1>
+        <h1>{{ user.username }}' Challenges!</h1>
     {% endif %}
 {% else %}
-    <h1>Guest's Garden!</h1>
+    <h1>You are not logged on.</h1>
+{% endif %}
+{% if is_gamekeeper %}
+    <h2>Scroll to create new challenges.</h2>
 {% endif %}
 
 <div class="row h-100">
@@ -41,17 +44,17 @@
 
 {% if is_gamekeeper %}
 <div class = "col-md-6">
-<h1> create new challenge</h1>
+<h1> Create new challenge</h1>
 <form action="addChallenge" method="POST">
     {% csrf_token %}
     {{ form }}
-    <button type="submit" class="submit">submit</button>
+    <button type="submit" class="submit">Submit</button>
 </form>
 </div>
 {% endif %}
 {% if challenges.QRImage%}
 <div class = "col-md-6" id="qrimage">
-    click to image download qr code for {{challenges.title}}
+    Click to image download qr code for {{challenges.title}}
     <a href="{{challenges.QRImage.url}}" target="_blank"> 
     <img src="{{challenges.QRImage.url}}" style="width: 100px;"/>
 </a>

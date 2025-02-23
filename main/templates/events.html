@@ -10,7 +10,7 @@
                 <h1>{{ user.username }}' Events</h1>
             {% endif %}
         {% else %}
-            <h1>Guest's Events!</h1>
+            <h1>You are not logged on.</h1>
         {% endif %}
     </div>
 
@@ -92,16 +92,14 @@
                                         <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
                                         {% if event.eventQRImage %}
                                             <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
-                                            <a href="{{ event.eventQRImage }}">
+                                        <a href="{{ event.eventQRImage }}">
                                             <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
-                                            {{ event.eventQRImage }}
                                         </a>
                                             <p></p>
                                         {% endif %}
                                         <button class="btn btn-primary" onclick="deleteEvent({{ event.eventId }})">
                                             Delete Event
                                         </button>
-
                                     </div>
                             </div>
                         </div>
