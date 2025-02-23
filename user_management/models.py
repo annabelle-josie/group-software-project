@@ -115,7 +115,7 @@ def create_user_stats(sender, instance, created, **kwargs):
         UserStats.objects.create(user=instance)
 
 @receiver(post_save, sender=CustomUser)
-def create_user_garden(sender, instance, created, **kwargs):
+def create_userGarden(sender, instance, created, **kwargs):
     """Automatically creates a UserGarden for every new user."""
     if created:
         # Import here so that there isn't a circular import between garden and user_management
