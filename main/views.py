@@ -27,10 +27,12 @@ from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
 
+# Create views here
+
 User = get_user_model()
 
+# home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
-
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
@@ -55,6 +57,7 @@ def home(request):
     ]
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
+# leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
 def leaderboard(request):
     context = get_leaderboard(request).content
@@ -62,6 +65,7 @@ def leaderboard(request):
     context['points'] = UserStats.objects.get(user_id=request.user.id).points
     return render(request, "leaderboard.html", context)
 
+# challenges view, displays all challenges and returns the allchallenges page
 def challenges(request):
     challenges = Challenge.objects.all()
     try:
@@ -72,10 +76,11 @@ def challenges(request):
     context = {"challenge_list": challenges, "users":stuff}
     return render(request, "allchallenges.html", context)
 
+# garden view, returns the garden page
 def garden(request):
     return render(request, "garden.html")
 
-
+# events view, displays all events (incl. progress, dynamic content, etc) and returns the events page
 @login_required(login_url="/auth/login")
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
@@ -144,7 +149,7 @@ def events(request):
         'is_gamekeeper': is_gamekeeper
     })
 
-
+# function to delete an event, returns a JSON response that indicates success or failure
 def delete_event(request, event_id):
     if request.method == "DELETE":
         event = get_object_or_404(Events, eventId=event_id)
@@ -156,6 +161,7 @@ def delete_event(request, event_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+# increment progress view, increments the progress of an event participant and returns a JSON response for if user is not valid or success
 @login_required
 def increment_progress(request, event_id):
     """Handle the progress increment request."""
@@ -207,8 +213,7 @@ def increment_progress(request, event_id):
         'completed': False
     })
 
-
-  
+# function to generate a QR code, returns a QR code image in base64 format from qr html page
 def generate_qr(request):
     qr_image_base64 = None
     if request.method == 'POST':
@@ -239,6 +244,7 @@ def generate_qr(request):
     
     return render(request, 'qr.html', {'form': form, 'qr_image_base64': qr_image_base64})
 
+# function to add a challenge, returns a redirect to the allchallenges page
 # def save_image(request):
 #     # image = request.data.get("qrcode")
 #     print("i work ")
@@ -272,6 +278,7 @@ def add_challenge(request):
             )
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
+# function to delete a challenge, returns a JSON response that indicates success or failure
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
@@ -293,6 +300,7 @@ def remove_challenge(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+# function to get the leaderboard, returns a JSON response with the top 10 users with the most points
 @api_view(['GET'])
 def get_leaderboard(request):
     leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
@@ -304,6 +312,7 @@ def get_leaderboard(request):
         data['leaderboard'].append({'username': username, 'points': points})
     return JsonResponse(data)
     
+# function to remove a task from a challenge, returns a JSON response that indicates success or failure
 @api_view(['POST'])
 def remove_task(request):
     print("hi")
@@ -322,6 +331,7 @@ def remove_task(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
    
+# function to view user's challenges, returns a list of challenges that the user is currently participating in
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
@@ -361,6 +371,7 @@ def market_view(request):
         "ownedPlants" : ownedPlants
     }
     return render(request, "market.html", context)
+
 
 '''Used by the front-end to purchase a plant.
 Plant passed in the request along with the user. This data is used to find the matching plant in the database and 

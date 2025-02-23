@@ -8,8 +8,10 @@ from user_management.models import CustomUser
 from .serializers import UserGardenSerializer, PlantSerializer
 from django.contrib.auth.decorators import login_required
 
+
 @login_required(login_url="/auth/login")
 def garden_view(request):
+    """View to display the garden on the main page"""
     user_garden = UserGarden.objects.get(user=request.user)
     users = CustomUser.objects.get(username= request.user)
     avalible = users.owned_plants.all().values()
@@ -33,7 +35,8 @@ def get_garden(request, user_id):
         return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
     
 def update_garden(request):
-    print("hello")
+    """View to updte the user's garden with a new plant"""
+    # print("hello")
     plantname = request.POST.get('plantname')
     slot = request.POST.get('slot')
     print(slot)
