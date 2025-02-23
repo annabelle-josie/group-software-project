@@ -1,28 +1,32 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %}all challenges{% endblock %}
+{% block title %}challenges{% endblock %}
 
 {% block content %}
+<h1>all challenges</h1>
 {% if user.is_authenticated %}
-    <h1> all {{ user.username }}'s challenges!</h1>
+    {% if user.username|last != "s" %}
+        <h1>{{ user.username }}'s challenges!</h1>
+    {% else %}
+        <h1>{{ user.username }}' challenges!</h1>
+    {% endif %}
 {% else %}
-    <h1>you are not logged on</h1>
-{% endif %}
-{% if is_gamekeeper %}
-    <h2> scroll to create new challenges</h2>
+    <h1>Guest's Garden!</h1>
 {% endif %}
 
 <div class="row h-100">
-    <div class="col-10" style="background-color: rgb(255, 176, 176)">
+    <div class="col-12" style="background-color: rgb(255, 176, 176)">
         <h2 class="mt-2">Current Tasks</h2>
         <ul class="list-group">
             {% for item in challenge_list %}
             <li class="list-group-item">
-                <div >
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                    <label class="form-check-label" for="flexCheckDefault">
                         {{ item.id }}, {{ item.title }} - {{ item.desc }} - has {{ item.progress }}/{{ item.noOfTasks }}, you will get {{ item.rewardValue }}
                     </label>
-                    <button class="remove-button btn btn-primary mt-1" qr= "{{item.qrvalue}}" progress="{{ item.progress }}" data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" data-points="{{ item.rewardValue }}">complete</button>
+                    <button class="remove-button btn btn-primary mt-1" progress="{{ item.progress }}" data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" data-points="{{ item.rewardValue }}">complete</button>
                 </div>
             </li>
             {% empty %}
@@ -30,26 +34,15 @@
             {% endfor %}
         </ul>
     </div>
-    <div class="col-2" style="background-color: rgb(200, 203, 255);">
-        <h1>Scan QR Code</h1>
-        <div  id="reader" qrcode="0"></div>
-    </div>
 </div>
 
-{% if is_gamekeeper %}
-<div class="container">
-<h1> create new challenge</h1>
 <form action="addChallenge" method="POST">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="submit">submit</button>
 </form>
-</div>
-{% endif %}
 
-<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
-    // Handling the "See more tasks" button functionality and QR code scanning
     document.addEventListener('DOMContentLoaded', function () {
         const removeButtons = document.querySelectorAll('.remove-button');
         removeButtons.forEach(button => {
@@ -58,16 +51,8 @@
                 const points = button.getAttribute('data-points');
                 const tasks = button.getAttribute('data-tasks');
                 const progress = button.getAttribute('progress');
-                const qr = button.getAttribute('qr');
-                const value =  document.getElementById("reader").getAttribute('qrcode')
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
-                    alert(value)
-                    if(value == "0") {
-                        alert("you have not scanned a qr code")
-                    }
-                    else if (qr == value){
-                        document.getElementById("reader").setAttribute('qrcode',"0");
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
                             method: 'DELETE',
@@ -116,25 +101,9 @@
                             alert('Error completing task.');
                         });
                     }
-                }else{
-                    alert("this is not the correct qr code for this challenge")
                 }
-            }
             });
         });
     });
-
-    // If found you qr code
-    function onScanSuccess(decodeText, decodeResult) {
-        alert("You Qr is : " + decodeText, decodeResult);
-        document.getElementById("reader").setAttribute('qrcode',decodeText);
-    }
-    let htmlscanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbos: 250 }
-    );
-    htmlscanner.render(onScanSuccess);
-
-
 </script>
 {% endblock %}

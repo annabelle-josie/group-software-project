@@ -158,12 +158,12 @@
             
             <div class="mb-3">
                 <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                <input type="number" name="noOfTasks" id="noOfTasks" class="form-control" required>
+                <input type="number" name="noOfTasks" id="noOfTasks" max="20" min="1" class="form-control" required>
             </div>
             
             <div class="mb-3">
                 <label for="rewardValue" class="form-label">Reward Value:</label>
-                <input type="number" name="rewardValue" class="form-control" max="1000" required>
+                <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
             </div>
             
             <div class="mb-3">
@@ -263,7 +263,7 @@
                 statusElement.innerText = "Completed";
                 statusElement.classList.remove("bg-warning");
                 statusElement.classList.add("bg-success");
-
+                window.location.reload();
                 const incrementButton = document.getElementById(`increment-${eventId}`);
                 if (incrementButton) {
                     incrementButton.style.display = "none";  
