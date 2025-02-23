@@ -45,10 +45,18 @@
                     {% if forloop.counter <= 4 %}
                         <div>
                             {{ item.title }} - {{ item.desc }} - {{ item.progress }}/{{ item.noOfTasks }} , {{ item.rewardValue }} points
-                                {%if item.qrvalue != '' %}
-                                   QR needed
+                                {% if item.isQR %}
+                                    <div id="reader-{{item.id}}" class="p-2">
+                                    <button class="btn btn-primary" onclick="startScanner({{item.id}})" qr="{{item.qrvalue}}">
+                                     Scan QR Code
+                                 </button>
+                                <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                            </div>
+                              {% else %}
+                                    <button class="btn btn-primary remove-button" progress="{{item.progress}}" data-tasks="{{item.noOfTasks}}" data-id="{{item.id}}" data-points="{{item.rewardValue}}">
+                                complete
+                                </button>
                                 {% endif %}
-                                <button class="remove-button btn btn-primary mt-1" qr="{{item.qrvalue}}" progress="{{item.progress}}" data-tasks="{{item.noOfTasks}}" data-id="{{item.id}}" data-points="{{item.rewardValue}}">complete</button>
                         </div>
                     {% endif %}
                     {% empty %}
@@ -75,12 +83,8 @@
                 const points = button.getAttribute('data-points');
                 const tasks = button.getAttribute('data-tasks');
                 const progress = button.getAttribute('progress');
-                const qr = button.getAttribute('qr');
-                const value =  document.getElementById("reader").getAttribute('qrcode')
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
-                    if (qr== '' || qr==value){
-                        document.getElementById("reader").setAttribute('qrcode',"0");
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
                             method: 'DELETE',
@@ -130,12 +134,6 @@
                         });
                     }
             
-                }else if(value == "0") {
-                        alert("you have not scanned a qr code")
-                    }
-                else{
-                    alert("this is not the correct qr code for this challenge")
-                }
             }
             });
         });
@@ -152,15 +150,36 @@
     // }
 
     // If found you qr code
-    function onScanSuccess(decodeText, decodeResult) {
-        alert("You Qr is : " + decodeText, decodeResult);
-        document.getElementById("reader").setAttribute('qrcode',decodeText);
+    function startScanner(challengeId) {
+        const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
+        const button = document.querySelector(`#reader-${challengeId} button`);
+        button.style.display = "none";  
+        const qr =button.getAttribute('qr')
+        alert("i work 2")
+        readerContainer.style.display = "block"; 
+        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
+        html5QrcodeScanner.render(function(decodedText, decodedResult) {
+            console.log(`Scan result: ${decodedText}`, decodedResult);
+            if (qr == decodedText){
+                alert("qrcode scanned")
+            fetch(`/challenge_increment_progress/${challengeId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ qrCode: decodedText })  
+            })
+            alert('task completed!');
+            window.location.reload();
+            }
+            else{
+                alert("try a different code")
+            }
+        });
     }
-    let htmlscanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbos: 250 }
-    );
-    htmlscanner.render(onScanSuccess);
 
 
 </script>

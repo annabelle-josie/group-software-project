@@ -15,6 +15,7 @@ class Challenge(models.Model):
     noOfTasks = models.IntegerField()  # Number of tasks in the challenge
     rewardValue = models.IntegerField()  # Reward value for completing the challenge
     qrvalue = models.CharField(max_length=50, default=None, null=True, blank=True)
+    isQR = models.BooleanField(default=False) 
     QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)  
 
     def __str__(self):
@@ -30,7 +31,7 @@ class Challenge(models.Model):
 class challengeForm(ModelForm):
     class Meta:
         model = Challenge
-        fields = ['title', 'desc', 'noOfTasks', 'rewardValue', 'qrvalue']  # Fields to include in the form
+        fields = ['title', 'desc', 'noOfTasks', 'rewardValue', 'isQR']  # Fields to include in the form
 
 # Model representing participants in a challenge
 class ChallengeParticipants(models.Model):
@@ -67,4 +68,11 @@ class ChallengeParticipants(models.Model):
                         progress=0,
                         status="incomplete"
                     )  # Assign the new user to each existing challenge
+
+    def increment_progress(self):
+        if self.progress < self.challengeId.noOfTasks:
+            self.progress += 1
+        if self.progress == self.challengeId.noOfTasks:
+            self.status = "complete"
+        self.save()
 
