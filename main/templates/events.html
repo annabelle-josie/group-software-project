@@ -10,7 +10,7 @@
                 <h1>{{ user.username }}' Events</h1>
             {% endif %}
         {% else %}
-            <h1>Guest's Events!</h1>
+            <h1>You are not logged on.</h1>
         {% endif %}
     </div>
 
@@ -92,16 +92,14 @@
                                         <p><strong>Total Tasks:</strong> {{ event.noOfTasks }} </p>
                                         {% if event.eventQRImage %}
                                             <p><strong>Event QR Code: </strong>{{ event.eventQR }}</p>
-                                            <a href="{{ event.eventQRImage }}">
+                                        <a href="{{ event.eventQRImage }}">
                                             <img src="{{ event.eventQRImage }}" style="max-width: 200px;"/>
-                                            {{ event.eventQRImage }}
                                         </a>
                                             <p></p>
                                         {% endif %}
                                         <button class="btn btn-primary" onclick="deleteEvent({{ event.eventId }})">
                                             Delete Event
                                         </button>
-
                                     </div>
                             </div>
                         </div>
@@ -161,12 +159,12 @@
             
             <div class="mb-3">
                 <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                <input type="number" name="noOfTasks" id="noOfTasks" class="form-control" required>
+                <input type="number" name="noOfTasks" id="noOfTasks" max="20" min="1" class="form-control" required>
             </div>
             
             <div class="mb-3">
                 <label for="rewardValue" class="form-label">Reward Value:</label>
-                <input type="number" name="rewardValue" class="form-control" max="1000" required>
+                <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
             </div>
             
             <div class="mb-3">
@@ -266,7 +264,7 @@
                 statusElement.innerText = "Completed";
                 statusElement.classList.remove("bg-warning");
                 statusElement.classList.add("bg-success");
-
+                window.location.reload();
                 const incrementButton = document.getElementById(`increment-${eventId}`);
                 if (incrementButton) {
                     incrementButton.style.display = "none";  
