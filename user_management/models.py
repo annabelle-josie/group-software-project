@@ -8,6 +8,7 @@ from django.dispatch import receiver
 class CustomUserManager(BaseUserManager):
     """Custom manager to prevent issues with swapped user models."""
     def create_user(self, username, email=None, password=None, **extra_fields):
+        """Create and return a regular user with the given username and password."""
         if not username:
             raise ValueError("The Username field must be set")
         email = self.normalize_email(email) if email else None
@@ -17,12 +18,14 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
+        """Create and return a superuser with the given username and password via create_user function."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         return self.create_user(username, email, password, **extra_fields)
     
 class CustomUser(AbstractUser):
-    email = models.EmailField(null=True, blank=True) # Allows no email, potentially remove in sprint 2
+    """Custom user model extending the default Django user model with friends, owned plants, and stats."""
+    email = models.EmailField(null=True, blank=True) # TODO: Allows no email, potentially remove in sprint 2
     friends = models.ManyToManyField("self", symmetrical=True, blank=True)
     owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
@@ -94,6 +97,7 @@ def ensure_game_keeper_group():
     Group.objects.get_or_create(name="Game Keepers")
 
 class UserStats(models.Model):
+    """Model to store user stats like leaves and points."""
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="stats")
     leaves = models.IntegerField(default=0)
     points = models.IntegerField(default=0)
@@ -119,6 +123,7 @@ def create_user_garden(sender, instance, created, **kwargs):
         UserGarden.objects.create(user=instance)
 
 class FriendRequest(models.Model):
+    """Model to store friend requests with a status."""
     senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)
     receiverId = models.ForeignKey(CustomUser, related_name="received_requests", on_delete=models.CASCADE)
     status = models.CharField(
@@ -138,5 +143,5 @@ class FriendRequest(models.Model):
         unique_together = ("senderId", "receiverId") 
 
     def __str__(self):
-        return f"{self.senderId.username} to {self.receiverId.username} ({self.status})"
+        return f"{self.senderId.username} to {self.receiverId.username} ({self.status})" # Return the sender and receiver
 

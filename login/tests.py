@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-User = get_user_model()
+User = get_user_model() # Get the user model
 
 class LoginTests(TestCase):
     def setUp(self):

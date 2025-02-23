@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from user_management.models import CustomUser
 
+# Test case for the home page and protected views
 class HomePageTest(TestCase):
 
     def setUp(self):
@@ -30,4 +31,4 @@ class HomePageTest(TestCase):
         for url in self.protected_urls:
             with self.subTest(url=url):  # Runs the test for each page
                 response = self.client.get(url)
-                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.status_code, 200)  # Check for successful access

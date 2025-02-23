@@ -271,8 +271,6 @@
                 if (incrementButton) {
                     incrementButton.style.display = "none";  
                 }
-
-                window.location.reload(); 
             }
         })
         .catch(err => {
@@ -280,6 +278,7 @@
             console.error(err);
         });
     }
+
 
     document.addEventListener("DOMContentLoaded", function () {
         let now = new Date();

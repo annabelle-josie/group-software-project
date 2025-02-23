@@ -24,10 +24,12 @@ from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
 
+# Create views here
+
 User = get_user_model()
 
+# home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
-
 def home(request):
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
@@ -52,6 +54,7 @@ def home(request):
     ]
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
+# leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
 def leaderboard(request):
     context = get_leaderboard(request).content
@@ -62,7 +65,7 @@ def leaderboard(request):
 def garden(request):
     return render(request, "garden.html")
 
-
+# events view, displays all events (incl. progress, dynamic content, etc) and returns the events page
 @login_required(login_url="/auth/login")
 def events(request):
     user_events = EventParticipants.objects.filter(username=request.user)
@@ -131,7 +134,7 @@ def events(request):
         'is_gamekeeper': is_gamekeeper
     })
 
-
+# function to delete an event, returns a JSON response that indicates success or failure
 def delete_event(request, event_id):
     if request.method == "DELETE":
         event = get_object_or_404(Events, eventId=event_id)
@@ -143,33 +146,50 @@ def delete_event(request, event_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
+# increment progress view, increments the progress of an event participant and returns a JSON response for if user is not valid or success
 @login_required
 def increment_progress(request, event_id):
+    """Handle the progress increment request."""
     try:
         event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
         event = event_participant.eventId
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
-    if event_participant.progress < event_participant.eventId.noOfTasks:
-        event_participant.increment_progress()
-        
-        if event_participant.progress >= event_participant.eventId.noOfTasks:
-            event_participant.status = "complete"
-            event_participant.save()
-      
-            user_stats = UserStats.objects.get(user=request.user)
-            user_stats.leaves += event_participant.eventId.rewardValue
-            user_stats.points += event_participant.eventId.rewardValue
-            user_stats.save()
+    try:
+        data = json.loads(request.body)
+        qr_code = data.get('qrCode')
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
-            return JsonResponse({
-                'progress': event_participant.progress,
-                'totalTasks': event_participant.eventId.noOfTasks,
-                'status': event_participant.status,
-                'rewardAdded': event_participant.eventId.rewardValue,
-                'newBalance': user_stats.leaves
-            })
+    if event.isQR and (not qr_code or qr_code != event.eventQR):
+        return JsonResponse({'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True}, status=400)
+
+    if event_participant.progress < event.noOfTasks:
+        event_participant.progress += 1  
+        if event_participant.progress >= event.noOfTasks:  
+            event_participant.status = "complete"
+        event_participant.save()
+
+    if event_participant.status == "complete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += event.rewardValue
+        user_stats.points += event.rewardValue
+        user_stats.save()
+
+        return JsonResponse({
+            'progress': event_participant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': event_participant.status,
+            'rewardAdded': event.rewardValue,
+            'newBalance': user_stats.leaves,
+            'completed': True 
+        })
 
     return JsonResponse({
         'progress': event_participant.progress,
@@ -178,8 +198,7 @@ def increment_progress(request, event_id):
         'completed': False
     })
 
-
-  
+# function to generate a QR code, returns a QR code image in base64 format from qr html page
 # def generate_qr(request):
 #     qr_image_base64 = None
 #     if request.method == 'POST':
@@ -239,6 +258,7 @@ def add_challenge(request):
             )
     return HttpResponseRedirect(redirect_to="/allchallenges")
     
+# function to delete a challenge, returns a JSON response that indicates success or failure
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
@@ -260,6 +280,7 @@ def remove_challenge(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+# function to get the leaderboard, returns a JSON response with the top 10 users with the most points
 @api_view(['GET'])
 def get_leaderboard(request):
     leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
@@ -271,6 +292,7 @@ def get_leaderboard(request):
         data['leaderboard'].append({'username': username, 'points': points})
     return JsonResponse(data)
     
+# function to remove a task from a challenge, returns a JSON response that indicates success or failure
 @api_view(['POST'])
 def remove_task(request):
     print("hi")
@@ -289,6 +311,7 @@ def remove_task(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
    
+# function to view user's challenges, returns a list of challenges that the user is currently participating in
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
@@ -313,25 +336,30 @@ def mychallenges(request):
         'form':challengeForm(),
         'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper, 'challenges':allchallenges})
         
+'''Market: only availble if logged in (otherwise nowhere to purchase plant to)
+Retrieves all plants available on the market, plants owned by a given user and their points
+These are then returned to the front-end within context to the market.html template
+'''
 @login_required(login_url="/auth/login")
 def market_view(request):
-    plants = Plant.objects.filter(onMarket=True)   # Fetch all plants from DB that are allowed to be on market
-    
+    # Fetching all plants, plants owned by the user, and how many leaves that user has
+    plants = Plant.objects.filter(onMarket=True)   # Fetch from DB only plants that are allowed to be on market
     user = CustomUser.objects.get(username=request.user)
     currentLeaves = UserStats.objects.get(user_id=user.id).leaves
-    currentPlants = user.owned_plants.all()
-    print(currentPlants)
-    ownedList = []
-    for i in range(len(currentPlants)):
-        ownedList.append(currentPlants[i])
+    ownedPlants = user.owned_plants.all()
     
     context = {
         "plants": plants,
         "leaves": currentLeaves,
-        "ownedPlants" : ownedList
+        "ownedPlants" : ownedPlants
     }
     return render(request, "market.html", context)
 
+
+'''Used by the front-end to purchase a plant.
+Plant passed in the request along with the user. This data is used to find the matching plant in the database and 
+add it to the user's owned plant list provided the user can afford to buy the plant.
+'''
 @api_view(['POST'])
 def add_purchased_plant(request):
     # try:
@@ -344,18 +372,24 @@ def add_purchased_plant(request):
         userStatObj = UserStats.objects.get(user_id=user.id)
         userLeaves = userStatObj.leaves
 
-        if(plant.price <= userLeaves):
+        if(plant.price <= userLeaves): # If the user can afford the plant
+            # Create a list of plants, and add the new one to it
             ownList = []
             for i in range(len(currentPlants)):
                 ownList.append(currentPlants[i])
             ownList.append(plant)
 
+            # Set that appended list as the new list belonging to the user
             user.owned_plants.set(ownList)
 
+            #Adjust the users leaf count
             newLeaves = userLeaves - plant.price
             userStatObj.leaves = newLeaves
+            
+            # Save the user's leaf count
             userStatObj.save()
+
+            # Send confirmation to front-end that the purchase was successful
             return Response(status=status.HTTP_200_OK)
-        else:
-            # User doesn't have enough leaves to purchase plant
+        else: # If the user cannot afford it, send back a bad response and abort purchase
             return Response(status=status.HTTP_400_BAD_REQUEST)
