@@ -46,7 +46,7 @@
                         <div>
                             {{ item.title }} - {{ item.desc }} - {{ item.progress }}/{{ item.noOfTasks }} , {{ item.rewardValue }} points
                                 {% if item.isQR %}
-                                    <div id="reader-{{item.id}}" class="p-2">
+                                <div id="reader-{{item.id}}" class="p-2">
                                     <button class="btn btn-primary" onclick="startScanner({{item.id}})" qr="{{item.qrvalue}}">
                                      Scan QR Code
                                  </button>
@@ -65,11 +65,6 @@
             </li>
         </ul>
         <button class="btn btn-primary mt-2" onclick="window.location.href='allchallenges'">See more tasks</button>
-    </div>
-
-    <div class="col-md-6" style="background-color: rgb(200, 203, 255);">
-        <h>Scan QR Code</h1>
-        <div style="width:120px" id="reader" qrcode="0"></div>
     </div>
 </div>
 <script src="https://unpkg.com/html5-qrcode"></script>
