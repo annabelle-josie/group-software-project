@@ -18,9 +18,10 @@ class UserStatsTests(TestCase):
 
     def test_userstats_creation(self):
         """Ensure a UserStats entry is created when a user is made."""
+        stats = UserStats.objects.get(user=self.user)
         self.assertTrue(UserStats.objects.filter(user=self.user).exists())
-        self.assertEqual(user_stats.points, 50)
-        self.assertEqual(user_stats.leaves, 50)
+        self.assertEqual(stats.points, 50)
+        self.assertEqual(stats.leaves, 50)
 
     def test_game_keeper_can_award_points_and_leaves(self):
         """Ensure a Game Keeper can award points and leaves."""
