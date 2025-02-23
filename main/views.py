@@ -12,12 +12,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-import qrcode
-from io import BytesIO
-import base64
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .forms import QRCodeForm
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model
 from garden.models import UserGarden
@@ -65,18 +61,6 @@ def leaderboard(request):
     context['points'] = UserStats.objects.get(user_id=request.user.id).points
     return render(request, "leaderboard.html", context)
 
-# challenges view, displays all challenges and returns the allchallenges page
-def challenges(request):
-    challenges = Challenge.objects.all()
-    try:
-        users = UserStats.objects.get(user=request.user)
-        stuff =users.points
-    except:
-        stuff=[]
-    context = {"challenge_list": challenges, "users":stuff}
-    return render(request, "allchallenges.html", context)
-
-# garden view, returns the garden page
 def garden(request):
     return render(request, "garden.html")
 
@@ -214,46 +198,39 @@ def increment_progress(request, event_id):
     })
 
 # function to generate a QR code, returns a QR code image in base64 format from qr html page
-def generate_qr(request):
-    qr_image_base64 = None
-    if request.method == 'POST':
-        form = QRCodeForm(request.POST)
-        if form.is_valid():
-            text = form.cleaned_data['text']
-            qr = qrcode.QRCode(
-                version=1,
-                error_correction=qrcode.constants.ERROR_CORRECT_L,
-                box_size=10,
-                border=4,
-            )
-            qr.add_data(text)
-            qr.make(fit=True)
+# def generate_qr(request):
+#     qr_image_base64 = None
+#     if request.method == 'POST':
+#         form = challengeFormForm(request.POST)
+#         if form.is_valid():
+#             text = form.cleaned_data['text']
+#             qr = qrcode.QRCode(
+#                 version=1,
+#                 error_correction=qrcode.constants.ERROR_CORRECT_L,
+#                 box_size=10,
+#                 border=4,
+#             )
+#             qr.add_data(text)
+#             qr.make(fit=True)
 
-            img = qr.make_image(fill='black', back_color='white')
-            buffer = BytesIO()
-            img.save(buffer, format='PNG')
-            qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
-            location = "main/qrcodes/"+text+".png"
-            img.save(location)
+#             img = qr.make_image(fill='black', back_color='white')
+#             buffer = BytesIO()
+#             img.save(buffer, format='PNG')
+#             qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
+#             location = "main/qrcodes/"+text+".png"
+#             img.save(location)
             # to download to computer
             # response = HttpResponse(location, content_type='application/force-download')
             # response['Content-Disposition'] = f'attachment; filename="qrcode.png"'
             # return response
-    else:
-        form = QRCodeForm()
+    # else:
+    #     form = QRCodeForm()
     
-    return render(request, 'qr.html', {'form': form, 'qr_image_base64': qr_image_base64})
+    # return render(request, 'new.html', {'form': form, 'qr_image_base64': qr_image_base64})
 
-# function to add a challenge, returns a redirect to the allchallenges page
-# def save_image(request):
-#     # image = request.data.get("qrcode")
-#     print("i work ")
-#     #
-#     return response
 
 def add_challenge(request):
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-
     if request.method == "POST" and is_gamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
@@ -268,6 +245,8 @@ def add_challenge(request):
             rewardValue=rewardValue,
             qrvalue= qrvalue,
         )
+        new_challenge.generate_qr_image()
+        new_challenge.save()
         all_users = CustomUser.objects.all()
         for user in all_users:
             ChallengeParticipants.objects.create(
@@ -335,7 +314,7 @@ def remove_task(request):
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-
+    allchallenges= Challenge.objects.latest('challengeId')
     challenge_in_progress = [
         {
             "title": challenge_participant.challengeId.title,
@@ -344,14 +323,17 @@ def mychallenges(request):
             "progress": challenge_participant.progress,
             "noOfTasks":challenge_participant.challengeId.noOfTasks,
             "status": challenge_participant.status,
+            "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
         }
         for challenge_participant in user_challenge
     ]
+    # mychallenge = Challenge.objects.get(challengeId= id)
     
+
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
-        'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper})
+        'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper, 'challenges':allchallenges})
         
 '''Market: only availble if logged in (otherwise nowhere to purchase plant to)
 Retrieves all plants available on the market, plants owned by a given user and their points
