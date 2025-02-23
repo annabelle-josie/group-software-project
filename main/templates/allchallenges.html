@@ -9,7 +9,7 @@
 {% else %}
     <h1>you are not logged on</h1>
 {% endif %}
-{% if is_gamekeeper %}
+{% if isGamekeeper %}
     <h2> scroll to create new challenges</h2>
 {% endif %}
 
@@ -50,7 +50,7 @@
 </div>
 
 <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
-{% if is_gamekeeper %}
+{% if isGamekeeper %}
 <div class="row">
     <!-- Create new challenge column -->
     <div class="col-12 col-md-6">

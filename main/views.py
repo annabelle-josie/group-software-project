@@ -67,30 +67,30 @@ def garden(request):
 # events view, displays all events (incl. progress, dynamic content, etc) and returns the events page
 @login_required(login_url="/auth/login")
 def events(request):
-    user_events = EventParticipants.objects.filter(username=request.user)
+    userEvents = EventParticipants.objects.filter(username=request.user)
 
-    events_with_progress = [
+    eventsWithProgress = [
         {
-            "eventId": event_participant.eventId.eventId,
-            "title": event_participant.eventId.title,
-            "desc": event_participant.eventId.desc,
-            "startDate": event_participant.eventId.startDate,
-            "endDate": event_participant.eventId.endDate,
-            "rewardValue": event_participant.eventId.rewardValue,
-            "progress": event_participant.progress,
-            "noOfTasks": event_participant.eventId.noOfTasks,
-            "status": event_participant.status,
-            "eventQR": event_participant.eventId.eventQR,
-            "eventQRImage": event_participant.eventId.eventQRImage.url if event_participant.eventId.eventQRImage else None,
-            "isQR": event_participant.eventId.isQR,  
-            "eventMaster": event_participant.eventId.eventMaster.username,
+            "eventId": eventParticipant.eventId.eventId,
+            "title": eventParticipant.eventId.title,
+            "desc": eventParticipant.eventId.desc,
+            "startDate": eventParticipant.eventId.startDate,
+            "endDate": eventParticipant.eventId.endDate,
+            "rewardValue": eventParticipant.eventId.rewardValue,
+            "progress": eventParticipant.progress,
+            "noOfTasks": eventParticipant.eventId.noOfTasks,
+            "status": eventParticipant.status,
+            "eventQR": eventParticipant.eventId.eventQR,
+            "eventQRImage": eventParticipant.eventId.eventQRImage.url if eventParticipant.eventId.eventQRImage else None,
+            "isQR": eventParticipant.eventId.isQR,  
+            "eventMaster": eventParticipant.eventId.eventMaster.username,
         }
-        for event_participant in user_events
+        for eventParticipant in userEvents
     ]
 
-    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
-    if request.method == "POST" and is_gamekeeper:
+    if request.method == "POST" and isGamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
@@ -101,7 +101,7 @@ def events(request):
 
         eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
-        new_event = Events.objects.create(
+        newEvent = Events.objects.create(
             title=title,
             desc=desc,
             noOfTasks=noOfTasks,
@@ -114,14 +114,14 @@ def events(request):
         )
 
         if isQR:
-            new_event.generateQrImage()
-            new_event.save()
+            newEvent.generateQrImage()
+            newEvent.save()
 
-        all_users = User.objects.all()  
-        for user in all_users:
+        allUsers = User.objects.all()  
+        for user in allUsers:
             EventParticipants.objects.create(
                 username=user,
-                eventId=new_event,
+                eventId=newEvent,
                 progress=0, 
                 status="incomplete"  
             )
@@ -129,8 +129,8 @@ def events(request):
         return HttpResponseRedirect(request.path)
 
     return render(request, 'events.html', {
-        'events': events_with_progress,
-        'is_gamekeeper': is_gamekeeper
+        'events': eventsWithProgress,
+        'isGamekeeper': isGamekeeper
     })
 
 # function to delete an event, returns a JSON response that indicates success or failure
@@ -150,8 +150,8 @@ def delete_event(request, event_id):
 def incrementProgress(request, event_id):
     """Handle the progress increment request."""
     try:
-        event_participant = EventParticipants.objects.get(username=request.user, eventId=event_id)
-        event = event_participant.eventId
+        eventParticipant = EventParticipants.objects.get(username=request.user, eventId=event_id)
+        event = eventParticipant.eventId
     except EventParticipants.DoesNotExist:
         return JsonResponse({'error': 'Event participant not found.'}, status=404)
 
@@ -162,38 +162,38 @@ def incrementProgress(request, event_id):
         return JsonResponse({'error': 'Invalid JSON.'}, status=400)
 
     if event.isQR and (not qr_code or qr_code != event.eventQR):
-        return JsonResponse({'progress': event_participant.progress,
+        return JsonResponse({'progress': eventParticipant.progress,
             'totalTasks': event.noOfTasks,
-            'status': event_participant.status,
+            'status': eventParticipant.status,
             'rewardAdded': event.rewardValue,
             'newBalance': user_stats.leaves,
             'completed': True}, status=400)
 
-    if event_participant.progress < event.noOfTasks:
-        event_participant.progress += 1  
-        if event_participant.progress >= event.noOfTasks:  
-            event_participant.status = "complete"
-        event_participant.save()
+    if eventParticipant.progress < event.noOfTasks:
+        eventParticipant.progress += 1  
+        if eventParticipant.progress >= event.noOfTasks:  
+            eventParticipant.status = "complete"
+        eventParticipant.save()
 
-    if event_participant.status == "complete":
+    if eventParticipant.status == "complete":
         user_stats = UserStats.objects.get(user=request.user)
         user_stats.leaves += event.rewardValue
         user_stats.points += event.rewardValue
         user_stats.save()
 
         return JsonResponse({
-            'progress': event_participant.progress,
+            'progress': eventParticipant.progress,
             'totalTasks': event.noOfTasks,
-            'status': event_participant.status,
+            'status': eventParticipant.status,
             'rewardAdded': event.rewardValue,
             'newBalance': user_stats.leaves,
             'completed': True 
         })
 
     return JsonResponse({
-        'progress': event_participant.progress,
+        'progress': eventParticipant.progress,
         'totalTasks': event.noOfTasks,
-        'status': event_participant.status,
+        'status': eventParticipant.status,
         'completed': False
     })
 
@@ -230,8 +230,8 @@ def incrementProgress(request, event_id):
 
 
 def add_challenge(request):
-    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-    if request.method == "POST" and is_gamekeeper:
+    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+    if request.method == "POST" and isGamekeeper:
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
@@ -247,8 +247,8 @@ def add_challenge(request):
         )
         new_challenge.generateQrImage()
         new_challenge.save()
-        all_users = CustomUser.objects.all()
-        for user in all_users:
+        allUsers = CustomUser.objects.all()
+        for user in allUsers:
             ChallengeParticipants.objects.create(
                 username=user,
                 challengeId=new_challenge,
@@ -313,7 +313,7 @@ def remove_task(request):
 # function to view user's challenges, returns a list of challenges that the user is currently participating in
 def mychallenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
-    is_gamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     allchallenges= Challenge.objects.latest('challengeId')
     challenge_in_progress = [
         {
@@ -333,7 +333,7 @@ def mychallenges(request):
 
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
-        'challenge_list': challenge_in_progress, 'is_gamekeeper': is_gamekeeper, 'challenges':allchallenges})
+        'challenge_list': challenge_in_progress, 'isGamekeeper': isGamekeeper, 'challenges':allchallenges})
         
 '''Market: only availble if logged in (otherwise nowhere to purchase plant to)
 Retrieves all plants available on the market, plants owned by a given user and their points
