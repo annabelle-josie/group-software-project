@@ -277,7 +277,6 @@ def add_challenge(request):
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
-    print("the point" + point)
     print(request.user)
     try:
         user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
