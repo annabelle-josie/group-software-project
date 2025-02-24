@@ -44,7 +44,7 @@ def home(request):
     except ChallengeParticipants.DoesNotExist:
         allchallenges = None
     current = timezone.now().date()
-    if allchallenges and allchallenges.date == current:
+    if allchallenges and allchallenges.date != current:
         for i in my_user_challenge:
             i.progress = 0
             i.status = "incomplete"
