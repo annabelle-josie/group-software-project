@@ -39,13 +39,16 @@ def home(request):
     except UserGarden.DoesNotExist:
         plant_slots = []
     my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
-    allchallenges= ChallengeParticipants.objects.latest('date')
+    try:
+        allchallenges = ChallengeParticipants.objects.latest('date')
+    except ChallengeParticipants.DoesNotExist:
+        allchallenges = None
     current = timezone.now().date()
-    if allchallenges.date == current:
+    if allchallenges and allchallenges.date == current:
         for i in my_user_challenge:
             i.progress = 0
-            i.status= "incomplete"
-            i.date= timezone.now()
+            i.status = "incomplete"
+            i.date = timezone.now()
             i.save()
     user_challenge = ChallengeParticipants.objects.filter(username=request.user, status="incomplete")
     challenge_in_progress = [
