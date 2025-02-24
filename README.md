@@ -50,6 +50,10 @@ pip install -r requirements.txt
 Navigate to the group-software-project folder and set up the database schema:
 
 ```console
+python manage.py makemigrations
+```
+
+```console
 python manage.py migrate
 ```
 
