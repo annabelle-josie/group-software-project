@@ -1,8 +1,9 @@
+import json
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 from main.models import Challenge, ChallengeParticipants
-from user_management.models import CustomUser
+from user_management.models import CustomUser, UserStats
 # Test case for the home page and protected views
 class HomePageTest(TestCase):
 
@@ -49,6 +50,7 @@ class ChallengeTests(TestCase):
         )
 
         self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.client.login(username="testuser", password="SecurePass123!")
 
 
     def test_user_is_assigned_to_challenges(self):
@@ -68,14 +70,26 @@ class ChallengeTests(TestCase):
 
     def test_challenge_completion_when_all_tasks_done(self):
         """Ensure challenge is marked as complete when progress reaches task requirement."""
+
+        for _ in range(self.challenge.noOfTasks):
+            response = self.client.post(
+                "/api/v1/removeTask",  # Use the correct API endpoint
+                {"challengeId": self.challenge.challengeId},  # Send as form data, not JSON
+            )
+        
+        response = self.client.delete(
+            "/api/v1/removeChallenge",
+            data=json.dumps({"challengeId": self.challenge.challengeId, "points": self.challenge.rewardValue}),
+            content_type="application/json"
+        )
+
         participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
+        user_stats = UserStats.objects.get(user=self.user)  # Fetch user stats
+        expected_points = 50 + self.challenge.rewardValue  # Initial 50 points + challenge reward
 
-        participant.progress = self.challenge.noOfTasks
-        participant.status = "complete"
-        participant.save()
-
-        updated_participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
-        self.assertEqual(updated_participant.status, "complete")
+  
+        self.assertEqual(participant.status, "complete")
+        self.assertEqual(user_stats.points, expected_points)
 
     def test_daily_reset_logic(self):
         """Ensure progress resets at midnight when `home` is accessed on a new day."""
@@ -94,7 +108,7 @@ class ChallengeTests(TestCase):
 
         self.assertEqual(updated_participant.progress, 0)
         self.assertEqual(updated_participant.status, "incomplete")
-        self.assertEqual(updated_participant.date.date(), current_date)
+        self.assertEqual(updated_participant.date, current_date)
 
     def test_rewards_are_given_on_completion(self):
         """Ensure users receive reward points when completing a challenge."""
