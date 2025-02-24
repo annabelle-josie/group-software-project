@@ -2,37 +2,49 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-User = get_user_model() # Get the user model
+custom_user = get_user_model() # Get the user model
 
 class LoginTests(TestCase):
+    """Tests for user authentication including signup, login, and access control."""
+
     def setUp(self):
         """Set up test client and test user."""
         self.client = Client()
         self.signup_url = reverse('signup')
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
-        self.user = User.objects.create_user(username='testuser', password='SecurePass123!')
+        self.user = custom_user.objects.create_user(username='testuser', password='SecurePass123!')
 
     ## Signup Tests ##
-    def test_signup_valid_user(self):
-        """Test user can sign up successfully with valid credentials."""
+    def test_signup_with_valid_data(self):
+        """Set up test client and test user."""
         response = self.client.post(self.signup_url, {
-            'username': 'newuser',
-            'password1': 'StrongPass123!',
-            'password2': 'StrongPass123!'
+            "username": "newuser",
+            "password1": "ValidPass123!",
+            "password2": "ValidPass123!"
         })
-        self.assertEqual(response.status_code, 302)  # Expect redirect on success
-        self.assertTrue(User.objects.filter(username='newuser').exists())  # User should be created
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(custom_user.objects.filter(username="newuser").exists())
 
-    def test_signup_password_mismatch(self):
-        """Test signup fails if passwords don’t match."""
+    def test_signup_with_weak_password(self):
+        """Ensure signup fails if password is too weak."""
         response = self.client.post(self.signup_url, {
-            'username': 'newuser',
-            'password1': 'Password123',
-            'password2': 'WrongPassword'
+            "username": "weakuser",
+            "password1": "weakuser1",
+            "password2": "weakuser1"
         })
-        self.assertEqual(response.status_code, 200)  # Should stay on signup page
-        self.assertFalse(User.objects.filter(username='newuser').exists())  # User should not be created
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The password is too similar to the username.") 
+
+    def test_signup_with_mismatched_passwords(self):
+        """Ensure signup fails if passwords do not match."""
+        response = self.client.post(self.signup_url, {
+            "username": "mismatchuser",
+            "password1": "ValidPass123!",
+            "password2": "WrongPass123!"
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(custom_user.objects.filter(username="mismatchuser").exists())
 
     def test_signup_existing_username(self):
         """Test signup fails if username is already taken."""
@@ -53,6 +65,8 @@ class LoginTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This password is too short")
+
+
 
     ## Login Tests ##
     def test_login_valid_user(self):
@@ -84,6 +98,8 @@ class LoginTests(TestCase):
         self.assertFalse(response.wsgi_request.user.is_authenticated)
         self.assertContains(response, "Please enter a correct username and password.")
 
+
+
     ## Logout Tests ##
     def test_logout(self):
         """Ensure a logged-in user can log out successfully."""
@@ -92,16 +108,3 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 302)  # Expect redirect after logout
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
-    ## Protected Views (Test only after admin pages exist) ##
-    # def test_protected_view_requires_login(self):
-    #     """Ensure a protected page redirects anonymous users."""
-    #     protected_url = reverse('home') # Change later to an admin page
-    #     response = self.client.get(protected_url)
-    #     self.assertNotEqual(response.status_code, 200)  # Should redirect
-
-    # def test_protected_view_accessible_to_logged_in_users(self):
-    #     """Ensure a logged-in user can access a protected page."""
-    #     protected_url = reverse('home')  # Change later to an admin page
-    #     self.client.login(username='testuser', password='SecurePass123!')
-    #     response = self.client.get(protected_url)
-    #     self.assertEqual(response.status_code, 200)
