@@ -30,6 +30,7 @@ User = get_user_model()
 # home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
 def home(request):
+
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
     try:
@@ -37,8 +38,16 @@ def home(request):
         plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except UserGarden.DoesNotExist:
         plant_slots = []
-    user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
-
+    my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
+    allchallenges= ChallengeParticipants.objects.latest('date')
+    current = timezone.now().date()
+    if allchallenges.date == current:
+        for i in my_user_challenge:
+            i.progress = 0
+            i.status= "incomplete"
+            i.date= timezone.now()
+            i.save()
+    user_challenge = ChallengeParticipants.objects.filter(username=request.user, status="incomplete")
     challenge_in_progress = [
         {
             "title": challenge_participant.challengeId.title,
@@ -48,9 +57,13 @@ def home(request):
             "noOfTasks":challenge_participant.challengeId.noOfTasks,
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
+            "date": challenge_participant.date,
         }
         for challenge_participant in user_challenge
+    
     ]
+    
+    
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
 # leaderboard view, displays the top 10 users with the most points
