@@ -53,28 +53,36 @@ class ChallengeTests(TestCase):
         self.client.login(username="testuser", password="SecurePass123!")
 
 
-    def test_user_is_assigned_to_challenges(self):
-        """Ensure the user is automatically assigned to existing challenges upon creation."""
-        self.assertTrue(ChallengeParticipants.objects.filter(username=self.user, challengeId=self.challenge).exists())
+    def test_new_user_is_assigned_to_existing_challenges(self):
+        """Ensure that a newly created user is automatically assigned to existing challenges."""
+
+        new_user = CustomUser.objects.create_user(username="newtestuser", password="SecurePass123!")
+
+        self.assertTrue(ChallengeParticipants.objects.filter(username=new_user, challengeId=self.challenge).exists())
+
 
     def test_progress_increases_when_task_completed(self):
         """Ensure progress increases when a QR code is scanned."""
+
         participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
         initial_progress = participant.progress
 
-        participant.progress += 1
-        participant.save()
+        response = self.client.post(
+            "/api/v1/removeTask", 
+            {"challengeId": self.challenge.challengeId}, 
+        )
 
-        updated_participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
-        self.assertEqual(updated_participant.progress, initial_progress + 1)
+        participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
+
+        self.assertEqual(participant.progress, initial_progress + 1)
 
     def test_challenge_completion_when_all_tasks_done(self):
         """Ensure challenge is marked as complete when progress reaches task requirement."""
 
         for _ in range(self.challenge.noOfTasks):
             response = self.client.post(
-                "/api/v1/removeTask",  # Use the correct API endpoint
-                {"challengeId": self.challenge.challengeId},  # Send as form data, not JSON
+                "/api/v1/removeTask", 
+                {"challengeId": self.challenge.challengeId}, 
             )
         
         response = self.client.delete(
@@ -84,12 +92,8 @@ class ChallengeTests(TestCase):
         )
 
         participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
-        user_stats = UserStats.objects.get(user=self.user)  # Fetch user stats
-        expected_points = 50 + self.challenge.rewardValue  # Initial 50 points + challenge reward
-
   
         self.assertEqual(participant.status, "complete")
-        self.assertEqual(user_stats.points, expected_points)
 
     def test_daily_reset_logic(self):
         """Ensure progress resets at midnight when `home` is accessed on a new day."""
@@ -112,18 +116,22 @@ class ChallengeTests(TestCase):
 
     def test_rewards_are_given_on_completion(self):
         """Ensure users receive reward points when completing a challenge."""
-        participant = ChallengeParticipants.objects.get(username=self.user, challengeId=self.challenge)
+        for _ in range(self.challenge.noOfTasks):
+            response = self.client.post(
+                "/api/v1/removeTask", 
+                {"challengeId": self.challenge.challengeId}, 
+            )
+        
+        response = self.client.delete(
+            "/api/v1/removeChallenge",
+            data=json.dumps({"challengeId": self.challenge.challengeId, "points": self.challenge.rewardValue}),
+            content_type="application/json"
+        )
 
-        # Simulate user completing the challenge
-        participant.progress = self.challenge.noOfTasks
-        participant.status = "complete"
-        participant.save()
+        user_stats = UserStats.objects.get(user=self.user)  
+        expected_points = 50 + self.challenge.rewardValue  # Initial 50 points + challenge reward
 
-        self.user.stats.points += self.challenge.rewardValue
-        self.user.stats.save()
-
-        updated_user = CustomUser.objects.get(username=self.user.username)
-        self.assertEqual(updated_user.stats.points, 50 + self.challenge.rewardValue)  # Initial points (50) + Reward (10)
+        self.assertEqual(user_stats.points, expected_points)
 
 
     
