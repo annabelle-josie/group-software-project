@@ -1,21 +1,16 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %}challenges{% endblock %}
+{% block title %}all challenges{% endblock %}
 
 {% block content %}
-<h1>All Challenges</h1>
 {% if user.is_authenticated %}
-    {% if user.username|last != "s" %}
-        <h1>{{ user.username }}'s Challenges!</h1>
-    {% else %}
-        <h1>{{ user.username }}' Challenges!</h1>
-    {% endif %}
+    <h1> all {{ user.username }}'s challenges!</h1>
 {% else %}
-    <h1>You are not logged on.</h1>
+    <h1>you are not logged on</h1>
 {% endif %}
-{% if is_gamekeeper %}
-    <h2>Scroll to create new challenges.</h2>
+{% if isGamekeeper %}
+    <h2> scroll to create new challenges</h2>
 {% endif %}
 
 <!-- First row for current tasks (pink) and QR scan (purple) -->
@@ -55,7 +50,7 @@
 </div>
 
 <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
-{% if is_gamekeeper %}
+{% if isGamekeeper %}
 <div class="row">
     <!-- Create new challenge column -->
     <div class="col-12 col-md-6">
@@ -79,7 +74,9 @@
 </div>
 {% endif %}
 
+<script src="https://unpkg.com/html5-qrcode"></script>
 <script>
+    // Handling the "See more tasks" button functionality and QR code scanning
     document.addEventListener('DOMContentLoaded', function () {
         const removeButtons = document.querySelectorAll('.remove-button');
         removeButtons.forEach(button => {

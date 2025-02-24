@@ -19,7 +19,7 @@
     {% if events %}
         <div class="accordion" id="eventAccordion">
             {% for event in events %}
-                {% if not is_gamekeeper %}
+                {% if not isGamekeeper %}
                     <div class="card">
                         <div class="card-header" id="heading{{ forloop.counter }}">
                             <h2 class="mb-0">
@@ -134,7 +134,7 @@
         <p class="alert alert-info">There are no available events.</p>
     {% endif %}
 
-    {% if is_gamekeeper %}
+    {% if isGamekeeper %}
         <h2 class="mt-5">Create An Event</h2>
         <form method="post" class="mt-3">
             {% csrf_token %}

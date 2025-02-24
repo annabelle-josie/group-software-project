@@ -59,7 +59,7 @@ class ChallengeParticipants(models.Model):
 
     # Signal receiver to assign new users to existing challenges
     @receiver(post_save, sender=get_user_model())
-    def assign_user_to_existing_challenges(sender, instance, created, **kwargs):
+    def assignUserToExistingChallenges(sender, instance, created, **kwargs):
         if created:
             existing_challenges = Challenge.objects.all()  # Get all existing challenges
             for challenge in existing_challenges:
