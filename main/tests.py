@@ -178,3 +178,39 @@ class MarketTests(TestCase):
 
         self.assertEqual(self.user_stats.leaves, 50)
         self.assertNotIn(self.plant2, owned_plants)
+
+class LeaderboardTests(TestCase):
+    """Tests for leaderboard functionality."""
+
+    def setUp(self):
+        """Set up a test user and create additional users with varying points."""
+        self.client = Client()
+
+        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.client.login(username="testuser", password="SecurePass123!")
+        self_user_stats = UserStats.objects.get(user=self.user)
+        self_user_stats.points = 80
+        self_user_stats.save()
+
+        # Create 11 additional users so total 12 users exist.
+        self.created_users = [self.user]
+        for i in range(1, 12):
+            new_user = CustomUser.objects.create_user(username=f"user{i}", password="Pass123!")
+            self.created_users.append(new_user)
+            stats = UserStats.objects.get(user=new_user)
+            stats.points = 50 + (i * 10)
+            stats.save()
+
+def test_leaderboard_view_returns_top_ten(self):
+        """Test that the leaderboard view returns the top 10 users in descending order and includes the logged-in user's points."""
+        response = self.client.get(reverse("leaderboard"))
+        context = response.context
+        leaderboard_data = context.get("leaderboard")
+        logged_in_points = context.get("points")
+
+        self.assertEqual(logged_in_points, 80)
+        self.assertIsInstance(leaderboard_data, list)
+        self.assertEqual(len(leaderboard_data), 10)
+
+        points_list = [entry['points'] for entry in leaderboard_data]
+        self.assertEqual(points_list, sorted(points_list, reverse=True))
