@@ -153,7 +153,7 @@ def events(request):
 def delete_event(request, event_id):
     if request.method == "DELETE":
         event = get_object_or_404(Events, eventId=event_id)
-        if request.user.username == event.eventMaster or request.user.is_superuser:
+        if request.user.username == event.eventMaster.username or request.user.is_superuser:
             event.delete()
             return JsonResponse({"success": True})
         else:
@@ -277,7 +277,6 @@ def add_challenge(request):
 @api_view(['DELETE'])
 def remove_challenge(request):
     point = request.data.get('points')
-    print("the point" + point)
     print(request.user)
     try:
         user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
