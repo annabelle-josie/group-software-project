@@ -82,6 +82,13 @@ Three users of differing levels of access have been created to allow for easy te
 1. Normal user -> Username: basicuser Password: easypeasy
 2. Gamekeeper -> Username: gamekeeper1 Password: easypeasy
 
+
+To run the Django tests, input the command:
+
+```console
+python manage.py test
+```
+
 ### Note to developers
 
 When creating plants. No double quotes (") may be used. This will render the plant unclickable. Do not use them in facts, names or anything else. Instead use single quotes!
