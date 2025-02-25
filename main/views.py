@@ -153,7 +153,7 @@ def events(request):
 def delete_event(request, event_id):
     if request.method == "DELETE":
         event = get_object_or_404(Events, eventId=event_id)
-        if request.user.username == event.eventMaster or request.user.is_superuser:
+        if request.user.username == event.eventMaster.username or request.user.is_superuser:
             event.delete()
             return JsonResponse({"success": True})
         else:

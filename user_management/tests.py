@@ -1,6 +1,5 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from user_management.models import UserStats, FriendRequest
 from garden.models import Plant, UserGarden
 
@@ -14,9 +13,6 @@ class UserCreationTests(TestCase):
         self.user = custom_user.objects.create(username="testuser", password="password123")
         self.game_keeper = custom_user.objects.create(username="gamekeeper", password="securepass")
 
-        # Assign Game Keeper to the special group
-        game_keeper_group, _ = Group.objects.get_or_create(name="Game Keepers")
-        self.game_keeper.groups.add(game_keeper_group)
 
     
     def test_userstats_creation(self):
