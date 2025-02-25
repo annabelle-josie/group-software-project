@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+
+{% block title %} Home {% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 p-3 text-center bg-light">
+            {% if owner|last != "s" %}
+                <h1>{{ owner }}'s Garden</h1>
+            {% else %}
+                <h1>{{ owner }}' Garden</h1>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Garden Section -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center">
+                {% for plant in plant_slots %}
+                <div class="col-4 col-md-2 p-2">
+                    <a class="d-block text-decoration-none">
+                        <div class="p-3 rounded" style="background-color: #f7b2b2;">
+                            {% if plant and plant.image %}
+                                <img class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                            {% else %}
+                                <img class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="empty_slot">
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% empty %}
+                    <p>You have not created a garden yet. <a href="/garden">Go to the garden page.</a></p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

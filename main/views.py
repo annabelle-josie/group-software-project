@@ -407,3 +407,14 @@ def add_purchased_plant(request):
             return Response(status=status.HTTP_200_OK)
         else: # If the user cannot afford it, send back a bad response and abort purchase
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+def profile(request, username):
+    try:
+        owner = CustomUser.objects.get(username=username)
+        userGarden = UserGarden.objects.get(user_id=owner.id)
+        plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
+    except:
+        plant_slots = None
+
+    return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
