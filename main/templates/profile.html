@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %} Home {% endblock %}
+{% block title %} Profile {% endblock %}
 {% load static %}
 
 {% block content %}
@@ -33,7 +33,7 @@
                     </a>
                 </div>
                 {% empty %}
-                    <p>You have not created a garden yet. <a href="/garden">Go to the garden page.</a></p>
+                    <p>This user does not have a garden.</p>
                 {% endfor %}
             </div>
         </div>
