@@ -6,24 +6,26 @@
 
 {% block content %}
 
-<div class="container-fluid">
-    <div class="row align-items-center text-center p-3" style="background-color: rgb(176, 239, 255);">
+<!-- <div class="container"> -->
+    <div class="row h-50 p-3" style="background-color: rgb(176, 239, 255);">
 
         <!-- Image & Details Section - shows selected plant's information -->
         <!-- If no plant is selected (on first load of page) show the 0th plant -->
+         <!-- TODO: Image is wrong size, but mostly fixed. It's all bootstrap, 
+          and all  completely reactive -->
         {% with plants.0 as firstPlant %}
-        <div class="col-md-5 text-center">
-            <img id="chosen-plant-image" class="img-fluid rounded"
+        <div class="col-6">
+            <img class="img-fluid h-100" 
+                id="chosen-plant-image"
                 src="{{ firstPlant.image.url }}" 
-                alt="{{ firstPlant.name }}" 
-                style="max-height: 300px; width: auto;">
+                alt="{{ firstPlant.name }}" >
         </div>
-        <div class="col-md-7">
-            <p class="fw-bold text-center">Your Leaves: {{ user.stats.leaves }}</p>
-            <h1 class="fw-bold text-center">Plants</h1>
+        <div class="col">
+            <p class="text-center">Your Leaves: {{ user.stats.leaves }}</p>
+            <h1 class="text-center">Plants</h1>
             <h3 id="chosen-plant-name"><strong>Name:</strong> {{ firstPlant.name }}</h3>
             <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ firstPlant.price }}</h4>
-            <p id="chosen-plant-fact" class="fs-5"><strong>Fact:</strong> {{ firstPlant.fact }}</p>
+            <p id="chosen-plant-fact" class=""><strong>Fact:</strong> {{ firstPlant.fact }}</p>
         {% if firstPlant in ownedPlants %}
             <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
                 <button id="chosen-plant-buy" class="btn btn-danger w-100" onClick="">Owned</button>
@@ -32,32 +34,33 @@
             <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ firstPlant.name }}')">Buy plant</button>
         {%endif%}
     </div>
+</div>
 
        
         {% endwith %}
-    </div>
+    <!-- </div> -->
 
     <!-- Plant Selection Grid -->
      <!-- Display all avaialble plants -->
-    <div class="plant-grid" style="background-color: rgb(255, 176, 221); padding: 10px;">
+    <div class="h-50 overflow-scroll row" style="background-color: rgb(255, 176, 221);">
         {% for plant in plants %}
         {% if plant in ownedPlants %}
         <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
-            <div class="plant-item"
+            <div class="col-3 col-sm-2"
             onclick='updatePlantOwned( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-                <img class="img-fluid rounded shadow"
+                <img class="img-fluid w-100"
                     src="{{ plant.image.url }}" 
                     alt="{{ plant.name }}">
-                <p class="fw-bold text-dark">OWNED: {{ plant.name }}</p>
+                <p class="text-center">OWNED: {{ plant.name }}</p>
             </div>
         {% else %}
         <!-- Otherwise let them buy the plant as usual -->
-            <div class="plant-item"
+            <div class="col-3 col-sm-2"
             onclick='updatePlant( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-                <img class="img-fluid rounded shadow"
+                <img class="img-fluid w-100"
                     src="{{ plant.image.url }}" 
                     alt="{{ plant.name }}">
-                <p class="fw-bold text-dark">{{ plant.name }}</p>
+                <p class="text-center">{{ plant.name }}</p>
             </div>
         {%endif%}
         {% endfor %}
@@ -121,46 +124,6 @@
 </script>
 
 <!-- Styling for Proper Mobile Layout -->
-<style>
-    /* Dynamic Grid Layout */
-    .plant-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 15px;
-        text-align: center;
-    }
-
-    .plant-item {
-        cursor: pointer;
-        padding: 10px;
-        text-align: center;
-    }
-
-    .plant-item img {
-        max-width: 100px;
-        height: auto;
-    }
-
-    /* Improve Mobile View */
-    @media (max-width: 768px) {
-        .row {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .col-md-5, .col-md-7 {
-            width: 100%;
-        }
-
-        .plant-grid {
-            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-        }
-
-        .btn {
-            font-size: 1rem;
-        }
-    }
-</style>
 
 {% endblock %}
 
