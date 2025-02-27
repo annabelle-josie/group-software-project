@@ -21,4 +21,5 @@ urlpatterns = [
     path('incrementProgress/<int:event_id>/', views.incrementProgress, name='incrementProgress'),  # Increment progress endpoint
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),  # Add purchased plant endpoint
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
+    path("profile/<str:username>/", views.profile),
 ]
