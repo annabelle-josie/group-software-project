@@ -26,7 +26,6 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     """Custom user model extending the default Django user model with friends, owned plants, and stats."""
     email = models.EmailField(null=True, blank=True) # TODO: Allows no email, potentially remove in sprint 2
-    friends = models.ManyToManyField("self", symmetrical=True, blank=True)
     owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
 
@@ -44,53 +43,69 @@ class CustomUser(AbstractUser):
         target_user.stats.save()
 
     def send_friend_request(self, to_user):
-        """Allows sending a friend request only if no rejected request exists."""
+        """Send a friend request unless the sender was already rejected. If recipient sends a request, remove restriction."""
         if self == to_user:
             raise ValueError("You cannot send a friend request to yourself.")
 
-        # Check for past requests
-        existing_request = FriendRequest.objects.filter(senderId=self, receiverId=to_user).first()
-        reverse_request = FriendRequest.objects.filter(senderId=to_user, receiverId=self).first()
+        # Check if a request already exists in either direction
+        existing_request = Friendship.objects.filter(user1=self, user2=to_user).first()
+        reverse_request = Friendship.objects.filter(user1=to_user, user2=self).first()
 
-        # If a request already exists
-        if existing_request:
-            if existing_request.status == "pending":
-                raise ValueError("Friend request already sent.")
-            elif existing_request.status == "rejected":
-                raise ValueError("This user has rejected your request.")
-        
-        # If the reverse request was rejected, allow sending one
+        # CASE 1: Sender has been previously rejected → Cannot send again
+        if existing_request and existing_request.status == "rejected":
+            return
+
+        # CASE 2: Recipient had rejected but now sends a request → Remove restriction
         if reverse_request and reverse_request.status == "rejected":
-            reverse_request.delete() 
+            reverse_request.status = "pending"
+            reverse_request.save()
+            return
 
-        FriendRequest.objects.create(senderId=self, receiverId=to_user)
+        # CASE 3: New Request
+        if not existing_request:
+            Friendship.objects.create(user1=self, user2=to_user, status="pending")
+        else:
+            raise ValueError("Friend request already sent or accepted.")
+
 
     def accept_friend_request(self, from_user):
-        """Accepts a pending friend request and deletes it while adding the friend."""
+        """Accepts a pending friend request and updates the status."""
         try:
-            request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
-            self.friends.add(from_user)
-            from_user.friends.add(self)
-            request.delete()  # Remove request after accepting
-        except FriendRequest.DoesNotExist:
-            raise ValueError("No pending friend requests.")
+            friendship = Friendship.objects.get(user1=from_user, user2=self, status="pending")
+            friendship.status = "accepted"
+            friendship.save()
+        except Friendship.DoesNotExist:
+            raise ValueError("No pending friend request from this user.")
 
     def reject_friend_request(self, from_user):
-        """Rejects a pending friend request, preventing future requests from that user."""
+        """Rejects a pending friend request."""
         try:
-            request = FriendRequest.objects.get(senderId=from_user, receiverId=self, status="pending")
-            request.status = "rejected"
-            request.save()
-        except FriendRequest.DoesNotExist:
-            raise ValueError("No pending friend requests.")
+            friendship = Friendship.objects.get(user1=from_user, user2=self, status="pending")
+            friendship.status = "rejected"
+            friendship.save()
+        except Friendship.DoesNotExist:
+            raise ValueError("No pending friend request from this user.")
 
     def unfriend(self, friend):
-        """Removes a user from friends but allows sending a new request."""
-        if friend in self.friends.all():
-            self.friends.remove(friend)
-            friend.friends.remove(self)
-        else:
+        """Removes an accepted friend by deleting the relationship."""
+        try:
+            friendship = Friendship.objects.get(
+                models.Q(user1=self, user2=friend) | models.Q(user1=friend, user2=self),
+                status="accepted"
+            )
+            friendship.delete()
+        except Friendship.DoesNotExist:
             raise ValueError("This user is not your friend.")
+
+    def get_friends(self):
+        """Returns a queryset of all accepted friends."""
+        friends = Friendship.objects.filter(
+            models.Q(user1=self, status="accepted") | models.Q(user2=self, status="accepted")
+        ).values_list("user1", "user2")
+
+        friend_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
+        return CustomUser.objects.filter(id__in=friend_ids)
+
 
 def ensure_game_keeper_group():
     """Creates the 'Game Keepers' group if it doesn't exist."""
@@ -140,26 +155,26 @@ def create_userGarden(sender, instance, created, **kwargs):
         if default_plant:
             instance.owned_plants.add(default_plant)
 
-class FriendRequest(models.Model):
-    """Model to store friend requests with a status."""
-    senderId = models.ForeignKey(CustomUser, related_name="sent_requests", on_delete=models.CASCADE)
-    receiverId = models.ForeignKey(CustomUser, related_name="received_requests", on_delete=models.CASCADE)
-    status = models.CharField(
-        max_length=10,
-        choices=[
-            ("pending", "Pending"),
-            ("rejected", "Rejected"),
-        ],
-        default="pending",
-    )
+class Friendship(models.Model):
+    """Model to track friendships explicitly, replacing the ManyToManyField."""
+    user1 = models.ForeignKey(CustomUser, related_name="friendship_initiated", on_delete=models.CASCADE)
+    user2 = models.ForeignKey(CustomUser, related_name="friendship_received", on_delete=models.CASCADE)
+    
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("accepted", "Accepted"),
+        ("rejected", "Rejected"),
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+
     created_at = models.DateTimeField(default=now)  
     updated_at = models.DateTimeField(auto_now=True)  
 
     class Meta:
-        verbose_name = "Friend Request"
-        verbose_name_plural = "Friend Requests"
-        unique_together = ("senderId", "receiverId") 
+        verbose_name = "Friendship"
+        verbose_name_plural = "Friendships"
+        unique_together = ("user1", "user2")  # Ensure unique pairs
 
     def __str__(self):
-        return f"{self.senderId.username} to {self.receiverId.username} ({self.status})" # Return the sender and receiver
+        return f"{self.user1.username} -> {self.user2.username} ({self.status})"
 

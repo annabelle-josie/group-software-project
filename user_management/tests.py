@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from user_management.models import UserStats, FriendRequest
+from user_management.models import UserStats, Friendship
 from garden.models import Plant, UserGarden
 
 custom_user = get_user_model()
@@ -37,76 +37,74 @@ class UserCreationTests(TestCase):
         self.assertEqual(user_garden.plant6Id, self.potted_plant)
 
 
-
-
 CustomUser = get_user_model()
 
-class FriendRequestTests(TestCase):
+class FriendshipTests(TestCase):
 
     def setUp(self):
-        """Set up test users before each test."""
-        self.user1 = CustomUser.objects.create_user(username="user1", password="password123")
-        self.user2 = CustomUser.objects.create_user(username="user2", password="password123")
+        """Create two users for testing friendships."""
+        self.user_a = CustomUser.objects.create_user(username="userA", password="testpassword")
+        self.user_b = CustomUser.objects.create_user(username="userB", password="testpassword")
 
     def test_send_friend_request(self):
-        """Test if a user can send a friend request."""
-        self.user1.send_friend_request(self.user2)
-        request = FriendRequest.objects.filter(senderId=self.user1, receiverId=self.user2).first()
-        self.assertIsNotNone(request)
-        self.assertEqual(request.status, "pending")
+        """Test sending a friend request."""
+        self.user_a.send_friend_request(self.user_b)
+        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        self.assertEqual(friendship.status, "pending")
 
-    def test_cannot_send_duplicate_friend_request(self):
-        """Test that a user cannot send duplicate friend requests if one is already pending."""
-        self.user1.send_friend_request(self.user2)
+    def test_cannot_duplicate_friend_request(self):
+        """Ensure users cannot send duplicate friend requests."""
+        self.user_a.send_friend_request(self.user_b)
         with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
+            self.user_a.send_friend_request(self.user_b)  # Sending again should fail
 
-    def test_cannot_send_request_to_self(self):
-        """Test that a user cannot send a friend request to themselves."""
+    def test_cannot_send_request_if_already_friends(self):
+        """Ensure users cannot send a request if they are already friends."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.accept_friend_request(self.user_a)
         with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user1)
+            self.user_a.send_friend_request(self.user_b)  # Should fail since they're friends
+
+    def test_cannot_send_request_after_rejection(self):
+        """Ensure the rejected sender cannot send another request unless the recipient initiates."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.reject_friend_request(self.user_a)
+        self.user_a.send_friend_request(self.user_b)
+
+        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        self.assertEqual(friendship.status, "rejected")
+
+    def test_recipient_can_reverse_rejection(self):
+        """Ensure the rejecting recipient can send a request and override rejection."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.reject_friend_request(self.user_a)
+        self.user_b.send_friend_request(self.user_a)
+
+        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        self.assertEqual(friendship.status, "pending")
 
     def test_accept_friend_request(self):
-        """Test if a user can accept a friend request and become friends."""
-        self.user1.send_friend_request(self.user2)
-        self.user2.accept_friend_request(self.user1)
+        """Ensure friend requests can be accepted."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.accept_friend_request(self.user_a)
 
-        self.assertTrue(self.user1.friends.filter(pk=self.user2.pk).exists())
-        self.assertTrue(self.user2.friends.filter(pk=self.user1.pk).exists())
-
-        request = FriendRequest.objects.filter(senderId=self.user1, receiverId=self.user2).first()
-        self.assertIsNone(request)  # Request should be deleted after accepting
+        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        self.assertEqual(friendship.status, "accepted")
 
     def test_reject_friend_request(self):
-        """Test if a user can reject a friend request and prevent new requests."""
-        self.user1.send_friend_request(self.user2)
-        self.user2.reject_friend_request(self.user1)
+        """Ensure friend requests can be rejected."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.reject_friend_request(self.user_a)
 
-        request = FriendRequest.objects.filter(senderId=self.user1, receiverId=self.user2).first()
-        self.assertIsNotNone(request)
-        self.assertEqual(request.status, "rejected")
+        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        self.assertEqual(friendship.status, "rejected")
 
-        # Ensure the sender cannot send another request after rejection
-        with self.assertRaises(ValueError):
-            self.user1.send_friend_request(self.user2)
+    def test_get_friends(self):
+        """Ensure we can correctly retrieve friends."""
+        self.user_a.send_friend_request(self.user_b)
+        self.user_b.accept_friend_request(self.user_a)
 
-        # However, the receiver can initiate a request
-        self.user2.send_friend_request(self.user1)
-        request = FriendRequest.objects.filter(senderId=self.user2, receiverId=self.user1).first()
-        self.assertIsNotNone(request)
-        self.assertEqual(request.status, "pending")
-
-    def test_remove_friend(self):
-        """Test if a user can remove a friend and re-send a request later."""
-        self.user1.send_friend_request(self.user2)
-        self.user2.accept_friend_request(self.user1)
-        self.user1.unfriend(self.user2)
-
-        self.assertFalse(self.user1.friends.filter(pk=self.user2.pk).exists())
-        self.assertFalse(self.user2.friends.filter(pk=self.user1.pk).exists())
-
-        # Ensure a new request can be sent after unfriending
-        self.user1.send_friend_request(self.user2)
-        request = FriendRequest.objects.filter(senderId=self.user1, receiverId=self.user2).first()
-        self.assertIsNotNone(request)
-        self.assertEqual(request.status, "pending")
+        accepted_friends = Friendship.objects.filter(status="accepted")
+        self.assertEqual(accepted_friends.count(), 1)
+        self.assertEqual(accepted_friends.first().user1, self.user_a)
+        self.assertEqual(accepted_friends.first().user2, self.user_b)

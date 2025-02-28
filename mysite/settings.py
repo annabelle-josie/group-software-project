@@ -31,7 +31,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 #CHANGE THIS TO WHATEVER HOSTNAME WE CHOOSE!
-ALLOWED_HOSTS = ['annabellejosie.eu.pythonanywhere.com']
+ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = "user_management.CustomUser"
 
