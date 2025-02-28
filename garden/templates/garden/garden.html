@@ -35,9 +35,14 @@
     <p>Plant {{ forloop.counter }}</p>
     {% csrf_token %}
     <select name="plantname" id="plantname">
-        {% for plant in avalible %}
-    <option value="{{plant.name}}"> {{plant.name}}</option>
-    {% endfor %}
+        {% for plant in allplants %}
+        {% if plant in avalible %}
+                <option value="{{plant.name}}"> {{plant.name}}</option>
+        {% else %}
+            <option disabled> {{plant.name}}</option>
+        {% endif %}
+        {% endfor %}
+    
     </select>
     <input name="slot" id="slot" hidden value="0"> 
     <button type="submit" onclick="style='visibility: hidden'">change</button>

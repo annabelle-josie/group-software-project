@@ -61,6 +61,7 @@ def home(request):
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
             "date": challenge_participant.date,
+            "isQR": challenge_participant.challengeId.isQR,  
         }
         for challenge_participant in user_challenge
     
@@ -213,65 +214,55 @@ def incrementProgress(request, event_id):
         'completed': False
     })
 
-# function to generate a QR code, returns a QR code image in base64 format from qr html page
-# def generate_qr(request):
-#     qr_image_base64 = None
-#     if request.method == 'POST':
-#         form = challengeFormForm(request.POST)
-#         if form.is_valid():
-#             text = form.cleaned_data['text']
-#             qr = qrcode.QRCode(
-#                 version=1,
-#                 error_correction=qrcode.constants.ERROR_CORRECT_L,
-#                 box_size=10,
-#                 border=4,
+@login_required
+def challenge_increment_progress(request, challenge_id):
+    """Handle the progress increment request."""
+    try:
+        challenge_participant = ChallengeParticipants.objects.get(username=request.user, challengeId=challenge_id)
+        challenge = challenge_participant.challengeId
+        print(challenge.challengeId)
+    except ChallengeParticipants.DoesNotExist:
+        return JsonResponse({'error': 'challenge participant not found.'}, status=404)
+
+    if challenge_participant.progress < challenge.noOfTasks:
+        challenge_participant.progress += 1  
+        if challenge_participant.progress >= challenge.noOfTasks:  
+            challenge_participant.status = "complete"
+        challenge_participant.save()
+
+    if challenge_participant.status == "complete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += challenge.rewardValue
+        user_stats.points += challenge.rewardValue
+        user_stats.save()
+
+# def add_challenge(request):
+#     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+#     if request.method == "POST" and isGamekeeper:
+#         title = request.POST["title"]
+#         desc = request.POST["desc"]
+#         noOfTasks = request.POST["noOfTasks"]
+#         rewardValue = request.POST["rewardValue"]
+#         qrvalue = request.POST["qrvalue"]
+
+#         new_challenge = Challenge.objects.create(
+#             title=title,
+#             desc=desc,
+#             noOfTasks=noOfTasks,
+#             rewardValue=rewardValue,
+#             qrvalue= qrvalue,
+#         )
+#         new_challenge.generateQrImage()
+#         new_challenge.save()
+#         allUsers = CustomUser.objects.all()
+#         for user in allUsers:
+#             ChallengeParticipants.objects.create(
+#                 username=user,
+#                 challengeId=new_challenge,
+#                 progress=0, 
+#                 status="incomplete"  
 #             )
-#             qr.add_data(text)
-#             qr.make(fit=True)
-
-#             img = qr.make_image(fill='black', back_color='white')
-#             buffer = BytesIO()
-#             img.save(buffer, format='PNG')
-#             qr_image_base64 = base64.b64encode(buffer.getvalue()).decode()
-#             location = "main/qrcodes/"+text+".png"
-#             img.save(location)
-            # to download to computer
-            # response = HttpResponse(location, content_type='application/force-download')
-            # response['Content-Disposition'] = f'attachment; filename="qrcode.png"'
-            # return response
-    # else:
-    #     form = QRCodeForm()
-    
-    # return render(request, 'new.html', {'form': form, 'qr_image_base64': qr_image_base64})
-
-
-def add_challenge(request):
-    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-    if request.method == "POST" and isGamekeeper:
-        title = request.POST["title"]
-        desc = request.POST["desc"]
-        noOfTasks = request.POST["noOfTasks"]
-        rewardValue = request.POST["rewardValue"]
-        qrvalue = request.POST["qrvalue"]
-
-        new_challenge = Challenge.objects.create(
-            title=title,
-            desc=desc,
-            noOfTasks=noOfTasks,
-            rewardValue=rewardValue,
-            qrvalue= qrvalue,
-        )
-        new_challenge.generateQrImage()
-        new_challenge.save()
-        allUsers = CustomUser.objects.all()
-        for user in allUsers:
-            ChallengeParticipants.objects.create(
-                username=user,
-                challengeId=new_challenge,
-                progress=0, 
-                status="incomplete"  
-            )
-    return HttpResponseRedirect(redirect_to="/allchallenges")
+#     return HttpResponseRedirect(redirect_to="/allchallenges")
     
 # function to delete a challenge, returns a JSON response that indicates success or failure
 @api_view(['DELETE'])
@@ -328,6 +319,7 @@ def remove_task(request):
    
 # function to view user's challenges, returns a list of challenges that the user is currently participating in
 def mychallenges(request):
+    
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     allchallenges= Challenge.objects.latest('challengeId')
@@ -341,10 +333,39 @@ def mychallenges(request):
             "status": challenge_participant.status,
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
+            "isQR": challenge_participant.challengeId.isQR,  
         }
         for challenge_participant in user_challenge
     ]
-    # mychallenge = Challenge.objects.get(challengeId= id)
+    if request.method == "POST" and isGamekeeper:
+        title = request.POST["title"]
+        desc = request.POST["desc"]
+        noOfTasks = request.POST["noOfTasks"]
+        rewardValue = request.POST["rewardValue"]
+        isQR = request.POST["qrCode"] == "qr"  
+
+        qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
+
+        new_challenge = Challenge.objects.create(
+            title=title,
+            desc=desc,
+            noOfTasks=noOfTasks,
+            rewardValue=rewardValue,
+            qrvalue= qrvalue,
+            isQR =isQR,
+        )
+        if isQR:
+            new_challenge.generateQrImage()
+            new_challenge.save()
+        all_users = CustomUser.objects.all()
+        for user in all_users:
+            ChallengeParticipants.objects.create(
+                username=user,
+                challengeId=new_challenge,
+                progress=0, 
+                status="incomplete"  
+            )
+        return HttpResponseRedirect(request.path)
     
 
     return render(request, 'allchallenges.html', {

@@ -12,7 +12,7 @@ urlpatterns = [
     path("garden/", include("garden.urls")),  # Include garden app URLs
     path("events", views.events, name="events"),  # Events page
     path("market/", views.market_view, name="market"),  # Market page
-    path("addChallenge", views.add_challenge),  # Add challenge endpoint
+    # path("addChallenge", views.add_challenge),  # Add challenge endpoint
     # path("api/v1/addChallenge", views.add_challenge),  # API endpoint to add challenge
     path("api/v1/removeChallenge", views.remove_challenge),  # API endpoint to remove challenge
     path("api/v1/removeTask", views.remove_task),  # API endpoint to remove task
