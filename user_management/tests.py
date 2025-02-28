@@ -45,6 +45,8 @@ class FriendshipTests(TestCase):
         """Create two users for testing friendships."""
         self.user_a = CustomUser.objects.create_user(username="userA", password="testpassword")
         self.user_b = CustomUser.objects.create_user(username="userB", password="testpassword")
+        self.user_c = CustomUser.objects.create_user(username="userC", password="testpassword")
+        self.user_d = CustomUser.objects.create_user(username="userD", password="testpassword")
 
     def test_send_friend_request(self):
         """Test sending a friend request."""
@@ -100,11 +102,36 @@ class FriendshipTests(TestCase):
         self.assertEqual(friendship.status, "rejected")
 
     def test_get_friends(self):
-        """Ensure we can correctly retrieve friends."""
-        self.user_a.send_friend_request(self.user_b)
-        self.user_b.accept_friend_request(self.user_a)
+        """Ensure get_friends() returns only accepted friends."""
+        Friendship.objects.create(user1=self.user_a, user2=self.user_b, status="accepted")
+        Friendship.objects.create(user1=self.user_a, user2=self.user_c, status="accepted")
+        Friendship.objects.create(user1=self.user_d, user2=self.user_a, status="pending")
 
-        accepted_friends = Friendship.objects.filter(status="accepted")
-        self.assertEqual(accepted_friends.count(), 1)
-        self.assertEqual(accepted_friends.first().user1, self.user_a)
-        self.assertEqual(accepted_friends.first().user2, self.user_b)
+        friends = self.user_a.get_friends()
+
+        self.assertEqual(friends.count(), 2)
+        self.assertIn(self.user_b, friends)
+        self.assertIn(self.user_c, friends)
+        self.assertNotIn(self.user_d, friends)
+
+
+    def test_get_incoming_friend_requests(self):
+        """Ensure get_incoming_friend_requests() returns only pending requests."""
+        Friendship.objects.create(user1=self.user_a, user2=self.user_b, status="accepted")
+        Friendship.objects.create(user1=self.user_a, user2=self.user_c, status="accepted")
+        Friendship.objects.create(user1=self.user_d, user2=self.user_a, status="pending")
+
+        incoming_requests = self.user_a.get_incoming_friend_requests()
+
+        self.assertEqual(incoming_requests.count(), 1)
+        self.assertIn(self.user_d, incoming_requests)
+        self.assertNotIn(self.user_b, incoming_requests)
+        self.assertNotIn(self.user_c, incoming_requests)
+
+    def test_unfriend(self):
+        """Ensure users can unfriend each other."""
+        Friendship.objects.create(user1=self.user_a, user2=self.user_b, status="accepted")
+        result = self.user_a.unfriend(self.user_b)
+
+        self.assertTrue(result)
+        self.assertFalse(Friendship.objects.filter(user1=self.user_a, user2=self.user_b).exists())

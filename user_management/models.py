@@ -87,15 +87,16 @@ class CustomUser(AbstractUser):
             raise ValueError("No pending friend request from this user.")
 
     def unfriend(self, friend):
-        """Removes an accepted friend by deleting the relationship."""
-        try:
-            friendship = Friendship.objects.get(
-                models.Q(user1=self, user2=friend) | models.Q(user1=friend, user2=self),
-                status="accepted"
-            )
+        """Removes a friend from the user's friends list."""
+        friendship = Friendship.objects.filter(
+            (models.Q(user1=self, user2=friend) | models.Q(user1=friend, user2=self)),
+            status="accepted"
+        )
+        
+        if friendship.exists():
             friendship.delete()
-        except Friendship.DoesNotExist:
-            raise ValueError("This user is not your friend.")
+            return True
+        return False
 
     def get_friends(self):
         """Returns a queryset of all accepted friends."""
@@ -105,6 +106,15 @@ class CustomUser(AbstractUser):
 
         friend_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
         return CustomUser.objects.filter(id__in=friend_ids)
+    
+    def get_incoming_friend_requests(self):
+        """Returns a queryset of all friend requests."""
+        friends = Friendship.objects.filter(
+            models.Q(user1=self, status="pending") | models.Q(user2=self, status="pending")
+        ).values_list("user1", "user2")
+
+        request_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
+        return CustomUser.objects.filter(id__in=request_ids)
 
 
 def ensure_game_keeper_group():
