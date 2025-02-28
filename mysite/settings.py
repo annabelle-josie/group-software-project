@@ -30,7 +30,8 @@ DEBUG = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-ALLOWED_HOSTS = []
+#CHANGE THIS TO WHATEVER HOSTNAME WE CHOOSE!
+ALLOWED_HOSTS = ['annabellejosie.eu.pythonanywhere.com']
 
 AUTH_USER_MODEL = "user_management.CustomUser"
 

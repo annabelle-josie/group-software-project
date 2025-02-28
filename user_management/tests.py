@@ -1,21 +1,20 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from user_management.models import UserStats, FriendRequest
+from garden.models import Plant, UserGarden
 
-CustomUser = get_user_model()
+custom_user = get_user_model()
 
-class UserStatsTests(TestCase):
+class UserCreationTests(TestCase):
 
     def setUp(self):
         """Set up test users and Game Keeper group before each test."""
-        self.user = CustomUser.objects.create(username="testuser", password="password123")
-        self.game_keeper = CustomUser.objects.create(username="gamekeeper", password="securepass")
+        self.potted_plant = Plant.objects.create(name="Potted Plant", price=10, fact="A simple potted plant.")
+        self.user = custom_user.objects.create(username="testuser", password="password123")
+        self.game_keeper = custom_user.objects.create(username="gamekeeper", password="securepass")
 
-        # Assign Game Keeper to the special group
-        game_keeper_group, _ = Group.objects.get_or_create(name="Game Keepers")
-        self.game_keeper.groups.add(game_keeper_group)
 
+    
     def test_userstats_creation(self):
         """Ensure a UserStats entry is created when a user is made."""
         stats = UserStats.objects.get(user=self.user)
@@ -23,15 +22,20 @@ class UserStatsTests(TestCase):
         self.assertEqual(stats.points, 50)
         self.assertEqual(stats.leaves, 50)
 
-    def test_game_keeper_can_award_points_and_leaves(self):
-        """Ensure a Game Keeper can award points and leaves."""
-        self.game_keeper.award_points_and_leaves(self.user, 10)
-        self.assertEqual(self.user.stats.points, 60)
+    def test_user_owned_plants_contains_potted_plant(self):
+        """Ensure the potted plant is owned by new users."""
+        self.assertIn(self.potted_plant, self.user.owned_plants.all())
 
-    def test_non_game_keeper_cannot_award_points_and_leaves(self):
-        """Ensure a normal user cannot award points and leaves."""
-        with self.assertRaises(PermissionError):
-            self.user.award_points_and_leaves(self.game_keeper, 10)
+    def test_user_garden_has_potted_plants_in_all_slots(self):
+        """Ensure the user garden exists for the user, and has the potted plant in every slot."""
+        user_garden = UserGarden.objects.get(user=self.user)
+        self.assertEqual(user_garden.plant1Id, self.potted_plant)
+        self.assertEqual(user_garden.plant2Id, self.potted_plant)
+        self.assertEqual(user_garden.plant3Id, self.potted_plant)
+        self.assertEqual(user_garden.plant4Id, self.potted_plant)
+        self.assertEqual(user_garden.plant5Id, self.potted_plant)
+        self.assertEqual(user_garden.plant6Id, self.potted_plant)
+
 
 
 

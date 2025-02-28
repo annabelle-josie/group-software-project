@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load auth_extras %}
+
+{% block title %} Profile {% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 p-3 text-center bg-light">
+            {% if owner|last != "s" %}
+                <h1>{{ owner }}'s Garden</h1>
+            {% else %}
+                <h1>{{ owner }}' Garden</h1>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Garden Section -->
+    <div class="container mx-auto" style="position: relative;">
+        <img width=100% src="{% static 'garden.png' %}" alt="garden background">
+        <img width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+        <img width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+        <img width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+        <img width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+        <img width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+        <img width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+    </div>
+</div>
+
+
+
+{% endblock %}
+
