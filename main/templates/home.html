@@ -60,23 +60,25 @@
                         {% if forloop.counter <= 4 %}
                             <li class="list-group-item">
                                 <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points</p>
-                                
+                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points
                                 {% if item.isQR %}
+                                    
+                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                                    </button> </p>
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                    <button class="btn btn-primary mt-1 w-100" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
-                                        Scan QR Code
-                                    </button>
                                     <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
                                 {% else %}
 
-                                <button class="remove-button btn btn-primary mt-1 w-100"
+                                <button class="remove-button form-check-input border border-dark"
                                     progress="{{ item.progress }}" 
                                     data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" 
                                     data-points="{{ item.rewardValue }}">
-                                    Complete
-                                </button>
+    
+                                </button> </p>
                                 {% endif %}
+                                {% if item.repeatble is False %} 
+                                    <span class="badge bg-success text-dark">Achievment</span>
+                                {% endif %} 
                             </li>
                             {% endif %}
                     {% empty %}

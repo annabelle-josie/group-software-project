@@ -23,25 +23,25 @@
           <li class="list-group-item">
               <div>
                 <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points</p>
+                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  
                 {% if item.isQR %}
-                    <span class="badge bg-warning text-dark">QR Required</span>
-                    <div>
-                        <button class="btn btn-primary" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
-                            Scan QR Code
-                        </button>
+                        <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                        </button> </p>
+                        <span class="badge bg-warning text-dark">QR Required</span>
                         <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-                    </div>
-                  {% else %}
-                  <button class="remove-button btn btn-primary mt-1"
+                {% else %}
+                  <button class="remove-button form-check-input border border-dark"
                           qr="{{ item.qrvalue }}"
                           progress="{{ item.progress }}"
                           data-tasks="{{ item.noOfTasks }}"
                           data-id="{{ item.id }}"
                           data-points="{{ item.rewardValue }}">
-                      complete
-                  </button>
+                  </button> </p>
                   {% endif %}
+                  {% if item.repeatble is False %} 
+                        <span class="badge bg-success text-dark">Achievment</span>
+                {% endif %} 
+                
               </div>
           </li>
           {% empty %}
@@ -74,6 +74,13 @@
                 <select name="qrCode" id="qrCode" class="form-control" required>
                     <option value="non-qr">Non-QR Event</option>
                     <option value="qr">QR Event</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="repeatble" class="form-label"> repeatble:</label>
+                <select name="repeatble" id="repeatble" class="form-control" required>
+                    <option value="repeatble">Daily</option>
+                    <option value="not-repeatble">Achievment</option>
                 </select>
             </div>
             

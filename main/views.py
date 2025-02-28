@@ -1,3 +1,4 @@
+from random import randint
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
@@ -30,7 +31,6 @@ User = get_user_model()
 # home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
 def home(request):
-
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
     try:
@@ -38,18 +38,35 @@ def home(request):
         plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except UserGarden.DoesNotExist:
         plant_slots = []
-    my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
     try:
-        allchallenges = ChallengeParticipants.objects.latest('date')
+        current_challenges = ChallengeParticipants.objects.latest('date')
     except ChallengeParticipants.DoesNotExist:
-        allchallenges = None
+               current_challenges = None
+    my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
     current = timezone.now().date()
-    if allchallenges and allchallenges.date != current:
+    repeatble_challenges = Challenge.objects.filter(repeatble=True)
+    random_item = repeatble_challenges.count()
+    if current_challenges and current_challenges.date != current:
         for i in my_user_challenge:
-            i.progress = 0
-            i.status = "incomplete"
-            i.date = timezone.now()
-            i.save()
+            if i.challengeId.repeatble is True:
+                print(i.challengeId)
+                # i.delete()
+                my_user_challenge.get(challengeId=i.challengeId).delete()
+        count=0
+        mylist =[]
+        while count < 3:
+            random_challenge = repeatble_challenges[randint(0, random_item - 1)]
+            if(random_challenge.challengeId not in mylist):
+                print(random_challenge.repeatble, random_challenge.title)
+                mylist.append(random_challenge.challengeId)
+                ChallengeParticipants.objects.create(
+                    username=request.user,
+                    challengeId=random_challenge,
+                    progress=0, 
+                    status="incomplete"  
+                )
+                count += 1
+        print(mylist)
     user_challenge = ChallengeParticipants.objects.filter(username=request.user, status="incomplete")
     challenge_in_progress = [
         {
@@ -62,6 +79,7 @@ def home(request):
             "id": challenge_participant.challengeId.challengeId,
             "date": challenge_participant.date,
             "isQR": challenge_participant.challengeId.isQR,  
+            "repeatble": challenge_participant.challengeId.repeatble,
         }
         for challenge_participant in user_challenge
     
@@ -236,33 +254,6 @@ def challenge_increment_progress(request, challenge_id):
         user_stats.points += challenge.rewardValue
         user_stats.save()
 
-# def add_challenge(request):
-#     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-#     if request.method == "POST" and isGamekeeper:
-#         title = request.POST["title"]
-#         desc = request.POST["desc"]
-#         noOfTasks = request.POST["noOfTasks"]
-#         rewardValue = request.POST["rewardValue"]
-#         qrvalue = request.POST["qrvalue"]
-
-#         new_challenge = Challenge.objects.create(
-#             title=title,
-#             desc=desc,
-#             noOfTasks=noOfTasks,
-#             rewardValue=rewardValue,
-#             qrvalue= qrvalue,
-#         )
-#         new_challenge.generateQrImage()
-#         new_challenge.save()
-#         allUsers = CustomUser.objects.all()
-#         for user in allUsers:
-#             ChallengeParticipants.objects.create(
-#                 username=user,
-#                 challengeId=new_challenge,
-#                 progress=0, 
-#                 status="incomplete"  
-#             )
-#     return HttpResponseRedirect(redirect_to="/allchallenges")
     
 # function to delete a challenge, returns a JSON response that indicates success or failure
 @api_view(['DELETE'])
@@ -317,12 +308,14 @@ def remove_task(request):
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
    
-# function to view user's challenges, returns a list of challenges that the user is currently participating in
-def mychallenges(request):
-    
+# function to view user's challenges, returns a list of challenges that the user is currently participating in and add new challenges
+def my_challenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
-    allchallenges= Challenge.objects.latest('challengeId')
+    try:
+        allchallenges= Challenge.objects.latest('challengeId')
+    except:
+        allchallenges = None
     challenge_in_progress = [
         {
             "title": challenge_participant.challengeId.title,
@@ -334,6 +327,7 @@ def mychallenges(request):
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
             "isQR": challenge_participant.challengeId.isQR,  
+            "repeatble": challenge_participant.challengeId.repeatble,
         }
         for challenge_participant in user_challenge
     ]
@@ -343,6 +337,7 @@ def mychallenges(request):
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
         isQR = request.POST["qrCode"] == "qr"  
+        repeatble = request.POST["repeatble"] == "repeatble"
 
         qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
@@ -353,17 +348,19 @@ def mychallenges(request):
             rewardValue=rewardValue,
             qrvalue= qrvalue,
             isQR =isQR,
+            repeatble = repeatble,
         )
         if isQR:
             new_challenge.generateQrImage()
             new_challenge.save()
-        all_users = CustomUser.objects.all()
-        for user in all_users:
-            ChallengeParticipants.objects.create(
-                username=user,
-                challengeId=new_challenge,
-                progress=0, 
-                status="incomplete"  
+        if repeatble is False:
+            all_users = CustomUser.objects.all()
+            for user in all_users:
+                ChallengeParticipants.objects.create(
+                    username=user,
+                    challengeId=new_challenge,
+                    progress=0, 
+                    status="incomplete"  
             )
         return HttpResponseRedirect(request.path)
     

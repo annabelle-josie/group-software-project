@@ -6,7 +6,7 @@ urlpatterns = [
     path("", views.home, name="home"),  # Home page
     # path("qr", views.generate_qr, name="qr"),  # QR code generation page
     path("leaderboard", views.leaderboard, name="leaderboard"),  # Leaderboard page
-    path("allchallenges", views.mychallenges, name="allchallenges"),  # All challenges page
+    path("allchallenges", views.my_challenges, name="allchallenges"),  # All challenges page
     # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),
     path("garden/", include("garden.urls")),  # Include garden app URLs
@@ -21,4 +21,5 @@ urlpatterns = [
     path('incrementProgress/<int:event_id>/', views.incrementProgress, name='incrementProgress'),  # Increment progress endpoint
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),  # Add purchased plant endpoint
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
+    path('challenge_increment_progress/<int:challenge_Id>', views.challenge_increment_progress, name='challenge_increment_progress'),
 ]
