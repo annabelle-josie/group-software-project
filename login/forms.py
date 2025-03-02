@@ -8,4 +8,4 @@ class CustomUserCreationForm(UserCreationForm):
     """Class to create a form for user registration"""
     class Meta:
         model = CustomUser
-        fields = ("username", "password1", "password2")
+        fields = ("username", "email", "password1", "password2")
