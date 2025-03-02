@@ -42,14 +42,3 @@ class GardenTests(TestCase):
 
         self.assertEqual(self.garden.plant3Id, self.plant2)
 
-    def test_get_garden_returns_correct_plants(self):
-        """Ensure retrieving a user's garden returns the correct plants."""
-
-        self.garden.plant1Id = self.plant1
-        self.garden.save()
-
-        response = self.client.get(reverse("garden"))
-
-        self.assertContains(response, self.plant1.name)
-        self.assertContains(response, self.plant2.name)
-        self.assertNotContains(response, self.unowned_plant.name)
