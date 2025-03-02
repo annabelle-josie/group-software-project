@@ -38,7 +38,7 @@
                           data-points="{{ item.rewardValue }}">
                   </button> </p>
                   {% endif %}
-                  {% if item.repeatble is False %} 
+                  {% if item.repeatable is False %} 
                         <span class="badge bg-success text-dark">Achievment</span>
                 {% endif %} 
                 
@@ -77,10 +77,10 @@
                 </select>
             </div>
             <div class="mb-3">
-                <label for="repeatble" class="form-label"> repeatble:</label>
-                <select name="repeatble" id="repeatble" class="form-control" required>
-                    <option value="repeatble">Daily</option>
-                    <option value="not-repeatble">Achievment</option>
+                <label for="repeatable" class="form-label"> repeatable:</label>
+                <select name="repeatable" id="repeatable" class="form-control" required>
+                    <option value="repeatable">Daily</option>
+                    <option value="not-repeatable">Achievment</option>
                 </select>
             </div>
             
