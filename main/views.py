@@ -44,29 +44,31 @@ def home(request):
                current_challenges = None
     my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
     current = timezone.now().date()
-    repeatble_challenges = Challenge.objects.filter(repeatble=True)
-    random_item = repeatble_challenges.count()
+    repeatable_challenges = Challenge.objects.filter(repeatable=True)
+    random_item = repeatable_challenges.count()
     if current_challenges and current_challenges.date != current:
         for i in my_user_challenge:
-            if i.challengeId.repeatble is True:
+            if i.challengeId.repeatable is True:
                 print(i.challengeId)
                 # i.delete()
                 my_user_challenge.get(challengeId=i.challengeId).delete()
-        count=0
-        mylist =[]
-        while count < 3:
-            random_challenge = repeatble_challenges[randint(0, random_item - 1)]
-            if(random_challenge.challengeId not in mylist):
-                print(random_challenge.repeatble, random_challenge.title)
-                mylist.append(random_challenge.challengeId)
-                ChallengeParticipants.objects.create(
-                    username=request.user,
-                    challengeId=random_challenge,
-                    progress=0, 
-                    status="incomplete"  
-                )
-                count += 1
-        print(mylist)
+        
+        if random_item > 0:
+            count=0
+            mylist =[]
+            while count < 3:
+                random_challenge = repeatable_challenges[randint(0, random_item - 1)]
+                if(random_challenge.challengeId not in mylist):
+                    print(random_challenge.repeatable, random_challenge.title)
+                    mylist.append(random_challenge.challengeId)
+                    ChallengeParticipants.objects.create(
+                        username=request.user,
+                        challengeId=random_challenge,
+                        progress=0, 
+                        status="incomplete"  
+                    )
+                    count += 1
+            print(mylist)
     user_challenge = ChallengeParticipants.objects.filter(username=request.user, status="incomplete")
     challenge_in_progress = [
         {
@@ -79,7 +81,7 @@ def home(request):
             "id": challenge_participant.challengeId.challengeId,
             "date": challenge_participant.date,
             "isQR": challenge_participant.challengeId.isQR,  
-            "repeatble": challenge_participant.challengeId.repeatble,
+            "repeatable": challenge_participant.challengeId.repeatable,
         }
         for challenge_participant in user_challenge
     
@@ -326,7 +328,7 @@ def my_challenges(request):
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
             "isQR": challenge_participant.challengeId.isQR,  
-            "repeatble": challenge_participant.challengeId.repeatble,
+            "repeatable": challenge_participant.challengeId.repeatable,
         }
         for challenge_participant in user_challenge
     ]
@@ -336,7 +338,7 @@ def my_challenges(request):
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
         isQR = request.POST["qrCode"] == "qr"  
-        repeatble = request.POST["repeatble"] == "repeatble"
+        repeatable = request.POST["repeatable"] == "repeatable"
 
         qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
@@ -347,12 +349,12 @@ def my_challenges(request):
             rewardValue=rewardValue,
             qrvalue= qrvalue,
             isQR =isQR,
-            repeatble = repeatble,
+            repeatable = repeatable,
         )
         if isQR:
             new_challenge.generateQrImage()
             new_challenge.save()
-        if repeatble is False:
+        if repeatable is False:
             all_users = CustomUser.objects.all()
             for user in all_users:
                 ChallengeParticipants.objects.create(
