@@ -5,6 +5,7 @@ from django.views.generic import CreateView
 from .forms import CustomUserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
+from django.contrib.auth import views as auth_views
 
 CustomUser = get_user_model()
 # Explicitly set correct template path, as we arent using registration, so without this it assumes the path as /registration/login.html 
@@ -21,3 +22,15 @@ class SignUpView(CreateView):
 # Privacy View
 class PrivacyView(TemplateView):
     template_name = 'login/privacy.html'
+
+class PasswordResetView(auth_views.PasswordResetView):
+    template_name = 'login/password_reset.html'
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = 'login/password_reset_done.html'
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'login/password_reset_confirm.html'
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = 'login/password_reset_complete.html'
