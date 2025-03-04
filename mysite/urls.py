@@ -6,4 +6,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls), # admin page
     path("", include("main.urls")),
+    path('auth/', include('django.contrib.auth.urls')), # Include login app URLs
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

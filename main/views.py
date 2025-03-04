@@ -22,6 +22,8 @@ from django.shortcuts import get_object_or_404
 from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
+from login.forms import ProfileUpdateForm, CustomPasswordChangeForm
+
 
 # Create views here
 
@@ -63,10 +65,8 @@ def home(request):
             "date": challenge_participant.date,
         }
         for challenge_participant in user_challenge
-    
     ]
-    
-    
+
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
 
 # leaderboard view, displays the top 10 users with the most points
@@ -408,7 +408,7 @@ def add_purchased_plant(request):
         else: # If the user cannot afford it, send back a bad response and abort purchase
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-
+@login_required
 def profile(request, username):
     try:
         owner = CustomUser.objects.get(username=username)
@@ -418,3 +418,31 @@ def profile(request, username):
         plant_slots = None
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
+
+@login_required
+def settings(request):
+    user_form = ProfileUpdateForm(instance=request.user)
+    password_form = CustomPasswordChangeForm(user=request.user)
+
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            user_form = ProfileUpdateForm(request.POST, instance=request.user)
+            if user_form.is_valid():
+                user_form.save()
+                messages.success(request, 'Your profile has been updated successfully!')
+                return redirect('settings')
+        elif 'change_password' in request.POST:
+            password_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                messages.success(request, 'Your password has been changed successfully!')
+                return redirect('/auth/login/')
+    else:
+        user_form = ProfileUpdateForm(instance=request.user)
+        password_form = CustomPasswordChangeForm(user=request.user)
+
+    context = {
+        'user_form': user_form,
+        'password_form': password_form
+    }
+    return render(request, "settings.html", context)
