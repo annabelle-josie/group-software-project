@@ -5,4 +5,4 @@ from .models import *
 class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge  # Specify the model to be serialised
-        fields = ['challengeId', 'title', 'desc', 'noOfTasks', 'rewardValue']  # Fields to include in the serialisation
+        fields = ['challengeId', 'title', 'desc', 'noOfTasks', 'rewardValue', 'isQR']  # Fields to include in the serialisation

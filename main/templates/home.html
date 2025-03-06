@@ -60,35 +60,32 @@
                         {% if forloop.counter <= 4 %}
                             <li class="list-group-item">
                                 <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points</p>
-                                
-                                {% if item.qrvalue != '' %}
+                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points
+                                {% if item.isQR %}
+                                    
+                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                                    </button> </p>
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                {% endif %}
+                                    <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                                {% else %}
 
-                                <button class="remove-button btn btn-primary mt-1 w-100"
-                                    qr="{{ item.qrvalue }}" progress="{{ item.progress }}" 
+                                <button class="remove-button form-check-input border border-dark"
+                                    progress="{{ item.progress }}" 
                                     data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" 
                                     data-points="{{ item.rewardValue }}">
-                                    Complete
-                                </button>
+    
+                                </button> </p>
+                                {% endif %}
+                                {% if item.repeatable is False %} 
+                                    <span class="badge bg-success text-dark">Achievment</span>
+                                {% endif %} 
                             </li>
-                        {% endif %}
+                            {% endif %}
                     {% empty %}
                         <p class="text-center">No challenges left</p>
                     {% endfor %}
                 </ul>
                 <button class="btn btn-light mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
-            </div>
-        </div>
-
-        <!-- QR Code Scanner Section -->
-        <div class="col-md-6 col-12">
-            <div class="p-3 text-black rounded shadow text-center" style="background-color: #C2C2F0;">
-                <h2>Scan QR Code</h2>
-                <div class="d-flex justify-content-center">
-                    <div id="reader" qrcode="0" style="width: 200px;"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -104,14 +101,9 @@
                 const points = button.getAttribute('data-points');
                 const tasks = button.getAttribute('data-tasks');
                 const progress = button.getAttribute('progress');
-                const qr = button.getAttribute('qr');
-                const value = document.getElementById("reader").getAttribute('qrcode');
                 const confirmRemove = confirm('Are you sure you have completed this task?');
 
                 if (confirmRemove) {
-                    if (qr === '' || qr === value) {
-                        document.getElementById("reader").setAttribute('qrcode', "0");
-
                         if (tasks == (parseInt(progress) + 1)) {
                             fetch('api/v1/removeChallenge', {
                                 method: 'DELETE',
@@ -160,23 +152,43 @@
                                 alert('Error completing task.');
                             });
                         }
-                    } else if (value === "0") {
-                        alert("You have not scanned a QR code");
-                    } else {
-                        alert("This is not the correct QR code for this challenge");
-                    }
                 }
             });
         });
     });
 
-    function onScanSuccess(decodeText, decodeResult) {
-        alert("Your QR is: " + decodeText, decodeResult);
-        document.getElementById("reader").setAttribute('qrcode', decodeText);
+    function startScanner(challengeId) {
+        const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
+        const button = document.getElementById(`button-${challengeId}`);
+        alert(challengeId)
+        readerContainer.style.display = "block"; 
+        button.style.display = "none";
+        alert(challengeId)
+        const qr = button.getAttribute('qr');
+        alert("hi")
+        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
+        html5QrcodeScanner.render(function(decodedText, decodedResult) {
+            console.log(`Scan result: ${decodedText}`, decodedResult);
+            if (qr == decodedText){
+                alert("qrcode scanned")
+                fetch(`/challenge_increment_progress/${challengeId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ qrCode: decodedText })
+                })
+                alert('task completed!');
+                window.location.reload();
+            }
+            else{
+                alert("try a different code")
+            }
+        });
     }
-
-    let htmlscanner = new Html5QrcodeScanner("reader", { fps: 10, qrbos: 250 });
-    htmlscanner.render(onScanSuccess);
 </script>
 
 {% endblock %}
