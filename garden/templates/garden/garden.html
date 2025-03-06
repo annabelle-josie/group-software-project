@@ -4,7 +4,7 @@
 {% block title %} Garden {% endblock %}
 
 {% block content %}
-<h1>{% if user.is_authenticated %}
+<!-- <h1>{% if user.is_authenticated %}
     {% if user.username|last != "s" %}
         <h1>{{ user.username }}'s Garden</h1>
     {% else %}
@@ -12,9 +12,9 @@
     {% endif %}
 {% else %}
     <h1>Guest's Garden!</h1>
-{% endif %}</h1>
+{% endif %}</h1> -->
 <div class="row h-100">
-    <div class="mt-3 h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
+    <div class="h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
             <div class="m-10 p-10"></div>
             {% for plant in plantSlots %} 
                 <div class="col-4 p-2">
