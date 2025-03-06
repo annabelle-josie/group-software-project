@@ -13,33 +13,36 @@
 {% else %}
     <h1>Guest's Garden!</h1>
 {% endif %}</h1>
+<div class="row h-100">
+    <div class="mt-3 h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
+            <div class="m-10 p-10"></div>
+            {% for plant in plantSlots %} 
+                <div class="col-4 p-2">
+                    {% if plant and plant.image %}
+                        <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                    {% else %}
+                        <img id="{{ forloop.counter }}" class="image img-fluid" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No plants found in your garden.</p>
+            {% endfor %}
+    </div>
 
-<div class="mt-3 h-100 row" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
-        <div class="m-10 p-10"></div>
-        {% for plant in plantSlots %} 
-            <div class="col-4 p-2">
-                {% if plant and plant.image %}
-                    <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
-                {% else %}
-                    <img id="{{ forloop.counter }}" class="image img-fluid" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
-                {% endif %}
-            </div>
-        {% empty %}
-            <p>No plants found in your garden.</p>
-        {% endfor %}
+    <div class="col-12 col-md-7">
+        <form action="updateGarden" method="post" style="visibility: hidden" name="submitform" id="submitform">
+            <p>Plant {{ forloop.counter }}</p>
+            {% csrf_token %}
+            <select name="plantname" id="plantname">
+                {% for plant in avalible %}
+            <option value="{{plant.name}}"> {{plant.name}}</option>
+            {% endfor %}
+            </select>
+            <input name="slot" id="slot" hidden value="0"> 
+            <button type="submit" onclick="style='visibility: hidden'">change</button>
+        </form>
+    </div>
 </div>
-
-<form action="updateGarden" method="post" style="visibility: hidden" name="submitform" id="submitform">
-    <p>Plant {{ forloop.counter }}</p>
-    {% csrf_token %}
-    <select name="plantname" id="plantname">
-        {% for plant in avalible %}
-    <option value="{{plant.name}}"> {{plant.name}}</option>
-    {% endfor %}
-    </select>
-    <input name="slot" id="slot" hidden value="0"> 
-    <button type="submit" onclick="style='visibility: hidden'">change</button>
-  </form>
     <!-- create a drop down checkbox 
     of user.avlible plants  -->
 <script>
