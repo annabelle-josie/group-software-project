@@ -29,25 +29,58 @@
             {% endfor %}
     </div>
 
-    <div class="col-12 col-md-7">
-        <form action="updateGarden" method="post" style="visibility: hidden" name="submitform" id="submitform">
-            <p>Plant {{ forloop.counter }}</p>
-            {% csrf_token %}
-            <select name="plantname" id="plantname">
-                {% for plant in allplants %}
-        {% if plant in avalible %}
-                        <option value="{{plant.name}}"> {{plant.name}}</option>
+   <!-- Button trigger modal -->
+<div class="col">
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    Launch demo modal
+  </button>
+  {% for plant in available %}
+    <p>{{ plant.name }} - {{ plant.image.url }}</p>
+{% endfor %}
+</div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close btn btn-outline-dark" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                <p>Choose a Plant:</p>
+                {% csrf_token %}
+                <select name="plantname" id="plantname">
+                    {% for plant in allplants %}
+        {% if plant in available %}
+                            <option value="{{plant.name}}"> {{plant.name}}</option>
         {% else %}
             <option disabled> {{plant.name}}</option>
         {% endif %}
-                {% endfor %}
+                    {% endfor %}
     
-            </select>
-            <input name="slot" id="slot" hidden value="0"> 
-            <button type="submit" onclick="style='visibility: hidden'">change</button>
-        </form>
+                </select>
+                <div class="row">
+                    {% for plant in available %}
+                    <button type="button" class="col-4" onclick='updatePlantOwned( "{{plant.name}}")'>
+                      <img src="{{ plant.image.url }}" class="img-fluid" alt="ahhhhh">
+                      
+                      <p class="text-center">{{ plant.name }}</p>
+                    </button>
+                    {% endfor %}
+                </div>    
+                <input name="slot" id="slot" hidden value="0"> 
+                <button class="btn btn-primary m-3" type="submit" data-dismiss="modal">Change</button>
+            </form>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+
+        
     <!-- create a drop down checkbox 
     of user.avlible plants  -->
 <script>
@@ -58,10 +91,18 @@
                 const id = img.getAttribute('id');
                 document.submitform.slot.value = id;
             //    alert(id)
-               document.getElementById("submitform").style.visibility = "visible";
+                $('#exampleModal').modal('show');
             });
         });
     });
+
+    function updatePlantOwned(plantName){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+    }
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 {% endblock %}
