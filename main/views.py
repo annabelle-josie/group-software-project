@@ -96,6 +96,7 @@ def leaderboard(request):
     context = get_leaderboard(request).content
     context = json.loads(context)
     context['points'] = UserStats.objects.get(user_id=request.user.id).points
+    context['leaves'] = UserStats.objects.get(user_id=request.user.id).leaves
     return render(request, "leaderboard.html", context)
 
 def garden(request):
