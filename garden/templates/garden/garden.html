@@ -31,12 +31,7 @@
 
    <!-- Button trigger modal -->
 <div class="col">
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-    Launch demo modal
-  </button>
-  {% for plant in available %}
-    <p>{{ plant.name }} - {{ plant.image.url }}</p>
-{% endfor %}
+<h1>Find something to fill this space???</h1>
 </div>
   
   <!-- Modal -->
@@ -53,21 +48,21 @@
             <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
                 <p>Choose a Plant:</p>
                 {% csrf_token %}
-                <select name="plantname" id="plantname">
+                <!-- <select name="plantname" id="plantname">
                     {% for plant in available %}
                 <option value="{{plant.name}}"> {{plant.name}}</option>
                 {% endfor %}
-                </select>
+                </select> -->
                 <div class="row">
                     {% for plant in available %}
-                    <button type="button" class="col-4" onclick='updatePlantOwned( "{{plant.name}}")'>
+                    <button id="owned{{plant.id}}" type="button" class="col-4 btn btn-outline-success" onclick='updatePlantOwned( "{{plant.name}}", "owned{{plant.id}}")'>
                       <img src="{{ plant.image.url }}" class="img-fluid" alt="ahhhhh">
-                      
                       <p class="text-center">{{ plant.name }}</p>
                     </button>
                     {% endfor %}
                 </div>    
                 <input name="slot" id="slot" hidden value="0"> 
+                <input name="plantname" id="plantname" hidden value={{available.0.name}}> 
                 <button class="btn btn-primary m-3" type="submit" data-dismiss="modal">Change</button>
             </form>
         </div>
@@ -91,10 +86,16 @@
         });
     });
 
-    function updatePlantOwned(plantName){
+    function updatePlantOwned(plantName, test){
         const $plantname = document.querySelector('#plantname');
         $plantname.value = plantName;
         console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
     }
 </script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
