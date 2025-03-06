@@ -2,19 +2,20 @@
 {% load auth_extras %}
 
 {% block content %}
-    <div class="w-100 p-3 h-8" style="background-color: #eee;">
+    <div class="w-100 p-3 h-8 text-center">
         {% if user.is_authenticated %}
-            {% if user.username|last != "s" %}
+            <!-- {% if user.username|last != "s" %}
                 <h1>{{ user.username }}'s Events</h1>
             {% else %}
                 <h1>{{ user.username }}' Events</h1>
-            {% endif %}
+            {% endif %} -->
+            <h1>Upcoming events for {{ user.username }}</h1>
         {% else %}
             <h1>You are not logged on.</h1>
         {% endif %}
     </div>
 
-
+<!-- 
     <div class="container mt-4">
     {% if events %}
         <div class="accordion" id="eventAccordion">
@@ -135,7 +136,132 @@
     {% endif %}
 
     {% if isGamekeeper %}
-        <h2 class="mt-5">Create An Event</h2>
+         -->
+
+        
+    <!-- {% endif %} -->
+</div>
+
+<div class="album">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+            {% if isGamekeeper %}
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <!-- Replace this image with one for each event!! -->
+                        <img src="../media/other/add.png" class="bd-placeholder-img card-img-top" width="100%" height="225">
+                        <div class="card-body">
+                        <p class="card-text fw-bold">{{ event.title }}</p>
+                        <p class="card-text">{{event.desc}}</p>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#createEventModal">Create a New Event</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if events %}
+                {% for event in events %}
+                        <div class="col">
+                        <div class="card shadow-sm">
+                            <!-- Replace this image with one for each event!! -->
+                            <img src="../media/backgrounds/greenhouse1.jpg" class="bd-placeholder-img card-img-top" width="100%" height="225">
+                            <div class="card-body">
+                            <p class="card-text fw-bold">{{ event.title }}</p>
+                            <p class="card-text">{{event.desc}}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-toggle="modal" data-target="#viewEventModal">View</button>
+                                {% if event.eventMaster == user.username %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                                {% endif %}
+                                </div>
+                                <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    
+                {% endfor %}
+            {% else %}
+                <p class="alert alert-info">There are no available events.</p>
+            {% endif %}
+        </div>
+    </div>
+  </div>
+
+  <!-- View Event Modal -->
+  <div class="modal fade" id="viewEventModal" tabindex="-1" role="dialog" aria-labelledby="viewEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewEventModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            {% with events.0 as event %}
+                <p id="eventDesc"><strong>Description:</strong> {{ event.desc }}</p>
+                <p id="eventStartDate"><strong>Start Date:</strong> {{ event.startDate }}</p>
+                <p id="eventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
+                <p id="eventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                <p id="eventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                
+                <p id="eventProgress">
+                    <strong>Progress:</strong> 
+                    <span id="progress-{{ event.eventId }}">
+                        {{ event.progress }}/{{ event.noOfTasks }}
+                    </span>
+                </p>
+
+                <p id="eventStatus"><strong>Status:</strong> 
+                    <span id="status-{{ event.eventId }}" 
+                        class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
+                        {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
+                    </span>
+                </p>
+
+                <div id="eventReader" class="eventReader">
+                {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                        <div id="reader-{{ event.eventId }}" class="p-2">
+                            <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
+                                Scan QR Code
+                            </button>
+                            <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                        </div>
+                    {% else %}
+                        {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                            <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
+                                Increment Progress
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endwith %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Event Modal -->
+  <div class="modal fade" id="createEventModal" tabindex="-1" role="dialog" aria-labelledby="createEventModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createEventModal">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <h2 class="mt-5">Create An Event</h2>
         <form method="post" class="mt-3">
             {% csrf_token %}
             
@@ -179,14 +305,62 @@
             
             <button type="submit" class="btn btn-primary">Create Event</button>
         </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        
-    {% endif %}
-</div>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-
 <script>
+    function updateModal(eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventProgress, eventTasks, eventStatus, eventQR){
+        document.getElementById("eventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
+        document.getElementById("eventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
+        document.getElementById("eventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
+        document.getElementById("eventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
+        document.getElementById("eventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+        
+        const progressString = 
+        "<strong>Progress:</strong> \
+        <span id='progress-" + eventId + "'> " + eventProgress + "/" + eventTasks + "</span>";
+        document.getElementById("eventProgress").innerHTML = progressString;
+
+        var statusMessage;
+        var statusWords;
+        if (eventStatus == 'complete' || eventProgress == eventTasks){
+            statusMessage = "bg-success";
+            statusWords = "Complete";
+        } else {
+            statusMessage = "bg-warning";
+            statusWords = "In Progress";
+        }
+       
+        const statusString = "<strong>Status:</strong> \
+        <span id='status-" + eventId + "' class='badge " + statusMessage + "'> " + statusWords +" </span>";
+        document.getElementById("eventStatus").innerHTML =  statusString;
+
+        var readerString = "";
+        if(eventQR == "True" && eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
+            readerString = "<div id='reader-" + eventId + "' class='p-2'> \
+                <button class='btn btn-primary' onclick='startScanner(" + eventId + ")'> Scan QR Code </button> \
+                 <div id='reader-" + eventId + "-reader' style='width: 100%; max-width: 400px; margin: auto;'></div> \
+                                 </div>";
+        } else{
+            if(eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
+                readerString = "<button class='btn btn-primary' id='increment-" + eventId + "' onclick='incrementProgress("  + eventId + ")'> \
+                    Increment Progress </button>";
+            }
+        }
+
+        console.log("id = " + eventId); //eventID doesn't seem to exist?
+        console.log(readerString);
+        document.getElementById("eventReader").innerHTML = readerString;
+    }
+
     function toggleTaskInput(selectElement) {
         const noOfTasksInput = document.getElementById('noOfTasks');
         if (selectElement.value === 'qr') {
@@ -323,4 +497,7 @@
     }
 
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
 {% endblock %}
