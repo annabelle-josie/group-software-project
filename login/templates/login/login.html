@@ -3,28 +3,23 @@
 {% block title %} Log-In {% endblock %}
 
 {% block content %}
-
 {% if user.is_authenticated %}
-
 <p>You are already logged in.</p>
 <form action="{% url 'logout' %}" method="post">
   {% csrf_token %}
   <button type="submit">Log Out</button>
 </form>
-
 {% else %}
-
 <h2>Log In</h2>
 <form method="post">
   {% csrf_token %}
-  {{ form }}
+  {{ form.as_p }}
   <button type="submit">Log In</button>
 </form>
-
 <br/>
 <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
 <br>
 <p><a href="{% url 'privacy' %}">Read our privacy policy</a></p>
+<p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
 {% endif %}
-
 {% endblock %}
