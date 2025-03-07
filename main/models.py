@@ -17,7 +17,10 @@ class Challenge(models.Model):
     noOfTasks = models.IntegerField()  # Number of tasks in the challenge
     rewardValue = models.IntegerField()  # Reward value for completing the challenge
     qrvalue = models.CharField(max_length=50, default=None, null=True, blank=True)
-    QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)  
+    QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)
+    isQR = models.BooleanField(default=False)
+    repeatable = models.BooleanField(default=False)
+    # could have repeatable achivements not reapeatble only reset daily when complete achivement get acheivement added to a list 
 
     def __str__(self):
         return self.title  # String representation of the challenge
