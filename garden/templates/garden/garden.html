@@ -15,15 +15,11 @@
 {% endif %}</h1> -->
 
 <div class="row h-100">
-    <div class="h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
+    <div class="h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse5.jpg'); background-repeat: no-repeat; background-size: contain;">
             <div class="m-10 p-10"></div>
             {% for plant in plantSlots %} 
                 <div class="col-4 p-2">
-                    {% if plant and plant.image %}
-                        <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
-                    {% else %}
-                        <img id="{{ forloop.counter }}" class="image img-fluid" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
-                    {% endif %}
+                    <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
                 </div>
             {% empty %}
                 <p>No plants found in your garden.</p>

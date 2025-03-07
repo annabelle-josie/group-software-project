@@ -7,7 +7,7 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 p-3 text-center bg-light">
+        <div class="col-12 text-center">
             {% if owner|last != "s" %}
                 <h1>{{ owner }}'s Garden</h1>
             {% else %}
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Garden Section -->
-    <div class="container mx-auto" style="position: relative;">
+    <div class="container mx-auto w-md-50 w-100" style="position: relative;">
         <img width=100% src="{% static 'garden.png' %}" alt="garden background">
         <img width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
         <img width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">

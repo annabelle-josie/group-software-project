@@ -32,7 +32,7 @@
                                 <div class="btn-group">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-toggle="modal" data-target="#activeEventModal">View</button>
                                 {% if event.eventMaster == user.username %}
-                                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="launchEditModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`,  `{{ event.eventQRImage }}`)">Edit</button>
                                 {% endif %}
                                 </div>
                                 <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
@@ -81,8 +81,8 @@
                         <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-toggle="modal" data-target="#availableEventModal">View</button>
                         {% if event.eventMaster == user.username %}
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
-                        {% endif %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="launchEditModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`,  `{{ event.eventQRImage }}`)" data-toggle="modal" data-target="#availableEventModal" data-toggle="modal" data-target="#availableEventModal">Edit</button>
+                                {% endif %}
                         </div>
                         <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
                     </div>
@@ -169,7 +169,7 @@
                 <p id="availableEventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
                 <p id="availableEventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
                 <p id="availableEventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
-                
+                <div id="qrCodeViewer"></div>
                 <button id="availableSignUpButton" class="btn btn-primary" onclick="signUpEvent({{ event.eventId }})">
                     Register for Event
                 </button>
@@ -301,7 +301,21 @@
         document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
         document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
         document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
-        document.getElementById("availableSignUpButton").onclick = ("signUpEvent(" + eventId + ")");
+        document.getElementById("availableButton").innerHTML = ("signUpEvent(" + eventId + ")");
+        document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
+        document.getElementById("qrCodeViewer").innerHTML = "";
+    }
+
+    function launchEditModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventQRImage){
+        document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
+        document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
+        document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
+        document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
+        document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
+        document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+        document.getElementById("availableSignUpButton").onclick = ("deleteEvent(" + eventId + ")");
+        document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
+        document.getElementById("qrCodeViewer").innerHTML = "(<img src='" + eventQRImage + "' alt='QR Code'> ");
     }
 
 function signUpEvent(eventId) {
