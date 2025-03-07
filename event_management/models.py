@@ -19,6 +19,7 @@ class Events(models.Model):
     eventQR = models.CharField(max_length=100, default=None, null=True, blank=True)  
     eventQRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)  
     isQR = models.BooleanField(default=False) 
+    eventImage = models.ImageField(upload_to="event_images/", default=None, null=True, blank=True)  
     eventMaster = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
 
     class Meta:
@@ -35,6 +36,11 @@ class Events(models.Model):
             buffer = BytesIO()
             qr.save(buffer, format="PNG")
             self.eventQRImage.save(f"qr_{self.eventId}.png", ContentFile(buffer.getvalue()), save=False)
+
+    def save(self, *args, **kwargs):
+        if not self.eventImage:
+            self.eventImage = "default_event_images/cheese.jpg"
+        super().save(*args, **kwargs)
 
 # Model representing the participants of an event
 class EventParticipants(models.Model):
@@ -55,20 +61,6 @@ class EventParticipants(models.Model):
 
     def __str__(self):
         return f"{self.username.username} - {self.eventId.title}" # String representation of the event participant
-
-    @receiver(post_save, sender=get_user_model())
-    def assignUserToExistingEvents(sender, instance, created, **kwargs):
-        """Assign user to existing events"""
-        if created:  
-            existing_events = Events.objects.all() # Get all existing events
-            for event in existing_events:
-                if not EventParticipants.objects.filter(username=instance, eventId=event).exists():
-                    EventParticipants.objects.create(
-                        username=instance,
-                        eventId=event,
-                        progress=0,
-                        status="incomplete"
-                    ) # Assign the new user to the existing event(s)
 
     def incrementProgress(self):
         if self.progress < self.eventId.noOfTasks:

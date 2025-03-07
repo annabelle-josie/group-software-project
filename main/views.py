@@ -102,11 +102,54 @@ def leaderboard(request):
 def garden(request):
     return render(request, "garden.html")
 
-# events view, displays all events (incl. progress, dynamic content, etc) and returns the events page
-@login_required(login_url="/auth/login")
-def events(request):
-    userEvents = EventParticipants.objects.filter(username=request.user)
 
+
+
+
+def sign_up_for_event(request, event_id):
+    if request.method == 'POST':
+        event = Events.objects.get(eventId=event_id)
+        user = request.user
+
+        if EventParticipants.objects.filter(eventId=event, username=user).exists():
+            return JsonResponse({'success': False, 'message': 'You are already signed up for this event.'})
+
+        EventParticipants.objects.create(
+            eventId=event,
+            username=user,
+            status='In Progress',
+            progress=0
+        )
+        
+        return JsonResponse({'success': True, 'message': 'Successfully registered for the event.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+
+def events_view(request):
+    if request.user.is_authenticated:
+        user_events = EventParticipants.objects.filter(username=request.user).values_list('eventId', flat=True)
+        registered_events = Events.objects.filter(eventId__in=user_events)
+        available_events = Events.objects.exclude(eventId__in=user_events)
+
+        return render(request, 'events.html', {
+            'events': registered_events,
+            'available_events': available_events
+        })
+    else:
+        return render(request, 'events.html', {
+            'events': [],
+            'available_events': []
+        })
+
+
+
+
+def events(request):
+    # Fetch events where the user is a participant
+    userEvents = EventParticipants.objects.filter(username=request.user)
+    
+    # List of events the user is signed up for, with their progress
     eventsWithProgress = [
         {
             "eventId": eventParticipant.eventId.eventId,
@@ -120,25 +163,55 @@ def events(request):
             "status": eventParticipant.status,
             "eventQR": eventParticipant.eventId.eventQR,
             "eventQRImage": eventParticipant.eventId.eventQRImage.url if eventParticipant.eventId.eventQRImage else None,
-            "isQR": eventParticipant.eventId.isQR,  
+            "isQR": eventParticipant.eventId.isQR,
+            "eventImage": eventParticipant.eventId.eventImage.url if eventParticipant.eventId.eventImage else None,
             "eventMaster": eventParticipant.eventId.eventMaster.username,
         }
         for eventParticipant in userEvents
     ]
+    
+    # Get the IDs of the events the user is already participating in
+    userEventIds = userEvents.values_list('eventId', flat=True)
+    
+    # Fetch all events the user is not participating in
+    availableEvents = Events.objects.exclude(eventId__in=userEventIds)
+    
+    # List of events the user is not signed up for
+    available_events = [
+        {
+            "eventId": event.eventId,
+            "title": event.title,
+            "desc": event.desc,
+            "startDate": event.startDate,
+            "endDate": event.endDate,
+            "rewardValue": event.rewardValue,
+            "eventQR": event.eventQR,
+            "eventQRImage": event.eventQRImage.url if event.eventQRImage else None,
+            "isQR": event.isQR,
+            "eventImage": event.eventImage.url if event.eventImage else None,
+            "eventMaster": event.eventMaster.username,
+        }
+        for event in availableEvents
+    ]
 
+    # Check if the user is a Game Keeper (admin role)
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
     if request.method == "POST" and isGamekeeper:
+        # Handle the creation of a new event by a Game Keeper
         title = request.POST["title"]
         desc = request.POST["desc"]
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
-        isQR = request.POST["qrCode"] == "qr"  
+        isQR = request.POST["qrCode"] == "qr"
+        eventImage = request.FILES.get('eventImage')
 
+        # Generate a random QR code if selected
         eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
+        # Create the new event without assigning it to users yet
         newEvent = Events.objects.create(
             title=title,
             desc=desc,
@@ -148,28 +221,24 @@ def events(request):
             endDate=endDate,
             eventMaster=request.user,
             eventQR=eventQR,
-            isQR=isQR
+            isQR=isQR,
+            eventImage=eventImage
         )
 
+        # If the event requires a QR code, generate it
         if isQR:
             newEvent.generateQrImage()
             newEvent.save()
-
-        allUsers = User.objects.all()  
-        for user in allUsers:
-            EventParticipants.objects.create(
-                username=user,
-                eventId=newEvent,
-                progress=0, 
-                status="incomplete"  
-            )
 
         return HttpResponseRedirect(request.path)
 
     return render(request, 'events.html', {
         'events': eventsWithProgress,
+        'available_events': available_events,
         'isGamekeeper': isGamekeeper
     })
+
+
 
 # function to delete an event, returns a JSON response that indicates success or failure
 def delete_event(request, event_id):

@@ -128,6 +128,8 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
+MEDIA_ROOT = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # This is the folder where static files get collected
 STATICFILES_DIRS = [BASE_DIR / 'static',]
 
