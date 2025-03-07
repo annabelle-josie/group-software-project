@@ -144,7 +144,7 @@ def events_view(request):
 
 
 
-
+@login_required(login_url="/auth/login")
 def events(request):
     # Fetch events where the user is a participant
     userEvents = EventParticipants.objects.filter(username=request.user)
