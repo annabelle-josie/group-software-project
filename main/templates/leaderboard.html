@@ -38,26 +38,37 @@
       <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="global" role="tabpanel" aria-labelledby="global-tab">
             <h1 class="text-center">Global Leaderboard</h1>
-            <table class="table table-hover">
+            <table class="table table-hover text-center">
                 <thead>
                     <tr>
                         <th scope="col">Rank</th>
                         <th scope="col">Username</th>
                         <th scope="col">Points</th>
+                        
                     </tr>
                 </thead>
                 <tbody>
                 {% for item in leaderboard %}
                 <tr>
                     <td scope="row">{{forloop.counter}}</td>
-                    <td>{{item.username}}</td>
-                    <td>{{item.points}}</td>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                        
+                        {{item.username}} 
+                        <button>ClickMe</button> 
+                        </div>
+                    </td>
+                    <td> {{item.points}}</td>
                 </tr>
                 {% endfor %}
                 {% if user.is_authenticated %}
                 <tr>
                     <td>You</td>
-                    <td>{{user.username}}</td>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                        {{user.username}}
+                    </div>
+                    </td>
                     <td>{{points}}</td>
                 </tr>
                 {% endif %}

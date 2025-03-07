@@ -19,8 +19,7 @@
         </a>
         <a class="navbar-brand me-auto d-flex align-items-center" href="#"> 
             {% if user.is_authenticated %}
-             <img class="p-3" src="../media/other/crown.png" height="75px">
-                <p>Rank</p>
+            <p>{{user.username}}</p>
                 <img class="p-3" src="../media/other/leaf.png" height="75px">
                 <p>{{ user.stats.leaves }}</p>
             {% else %}

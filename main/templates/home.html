@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-12 p-3 text-center bg-light">
             {% if user.is_authenticated %}
                 {% if user.username|last != "s" %}
@@ -17,18 +17,12 @@
             {% else %}
                 <h1>Guest's Garden!</h1>
             {% endif %}
-
-            {% if request.user|has_group:"Game Keepers" %}
-                <p>You are a <strong>Game Keeper.</strong></p>
-            {% else %}
-                <p>You are a <strong>User.</strong></p>
-            {% endif %}
         </div>
-    </div>
+    </div> -->
 
     <!-- Garden Section -->
-    <div class="mt-3 h-60 row">
-            <!-- <div class="d-flex flex-wrap justify-content-center"> -->
+    <!-- <div class="mt-3 h-60 row">
+            <div class="d-flex flex-wrap justify-content-center"> 
                 {% for plant in plant_slots %}
                     <a href="/garden" class="col-4 col-md-2 p-2">
                         <div class="p-3 rounded" style="background-color: #f7b2b2;">
@@ -42,8 +36,19 @@
                 {% empty %}
                     <p>You have not created a garden yet. <a href="/garden">Go to the garden page.</a></p>
                 {% endfor %}
-            <!-- </div> -->
-    </div>
+            </div> -->
+    <!-- </div>  -->
+
+        <!-- Garden Section -->
+        <div class="container mx-auto w-md-50 w-100" style="position: relative;">
+            <img width=100% src="{% static 'garden.png' %}" alt="garden background">
+            <img width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+            <img width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+            <img width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+            <img width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+            <img width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+            <img width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+        </div>
 
     <!-- Tasks & QR Scanner Section -->
     <div class="row mt-4">
