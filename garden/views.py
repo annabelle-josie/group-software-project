@@ -23,6 +23,7 @@ def gardenView(request):
         for slot in range(1, 7):  # Loop through all 6 slots
             plant = getattr(userGarden, f"plant{slot}Id", None)  # Get Plant object directly
             # print(f"Plant Slot {slot}: {plant}")  # Debugging line
+            # print(f"Plant Slot {slot}: {plant}")  # Debugging line
             plantSlots.append(plant)
     # print("Final Plant Slots:", plantSlots)  # Debugging line
     return render(request, "garden/garden.html", {"plantSlots": plantSlots,"available":available, "allplants": allplants})

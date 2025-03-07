@@ -27,7 +27,26 @@
             {% empty %}
                 <p>No plants found in your garden.</p>
             {% endfor %}
+{% endif %}</h1> -->
+<div class="row h-100">
+    <div class="h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse4.png'); background-repeat: no-repeat; background-size: contain;">
+            <div class="m-10 p-10"></div>
+            {% for plant in plantSlots %} 
+                <div class="col-4 p-2">
+                    {% if plant and plant.image %}
+                        <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                    {% else %}
+                        <img id="{{ forloop.counter }}" class="image img-fluid" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>No plants found in your garden.</p>
+            {% endfor %}
     </div>
+
+   <!-- Button trigger modal -->
+<div class="col">
+<h1>Find something to fill this space???</h1>
 
    <!-- Button trigger modal -->
 <div class="col">
@@ -85,6 +104,7 @@
                 document.submitform.slot.value = id;
             //    alert(id)
                 $('#exampleModal').modal('show');
+                $('#exampleModal').modal('show');
             });
         });
     });
@@ -100,7 +120,21 @@
         });
         document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
     }
+
+    function updatePlantOwned(plantName, test){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
+    }
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
