@@ -23,4 +23,5 @@ urlpatterns = [
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
     path('challenge_increment_progress/<int:challenge_Id>', views.challenge_increment_progress, name='challenge_increment_progress'),
     path("profile/<str:username>/", views.profile),
+    path('settings/', views.settings, name='settings'),
 ]
