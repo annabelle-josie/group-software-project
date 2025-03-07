@@ -27,27 +27,5 @@
     </div>
 </div>
 
-{% if is_own_profile %}
-    <!-- Profile Update Section -->
-    <div class="container mt-5">
-        <h2>Update Profile</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ user_form.as_p }}
-            <button type="submit" class="btn btn-primary">Update Profile</button>
-        </form>
-    </div>
-
-    <!-- Password Change Section -->
-    <div class="container mt-5">
-        <h2>Change Password</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ password_form.as_p }}
-            <button type="submit" class="btn btn-primary">Change Password</button>
-        </form>
-    </div>
-{% endif %}
-
 {% endblock %}
 
