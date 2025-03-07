@@ -35,8 +35,16 @@ class EventTests(TestCase):
 
         self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
         self.user_stats = UserStats.objects.get(user=self.user)
-        self.event_participant = EventParticipants.objects.get(username=self.user, eventId=self.event)
         self.client.login(username="testuser", password="SecurePass123!")
+
+        self.event_participant = EventParticipants.objects.create(
+            username=self.user,
+            eventId=self.event,
+            progress=0,
+            status="incomplete"
+        )
+
+        self.event_participant = EventParticipants.objects.get(username=self.user, eventId=self.event)
 
     def tearDown(self):
         """Remove the temporary media directory and all its contents."""

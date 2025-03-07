@@ -10,16 +10,26 @@
   <button type="submit">Log Out</button>
 </form>
 {% else %}
-<h2>Log In</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log In</button>
-</form>
-<br/>
-<p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
-<br>
-<p><a href="{% url 'privacy' %}">Read our privacy policy</a></p>
-<p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+
+<div class="d-flex justify-content-center">
+  <div class="container text-center mt-5">
+    <div class="bg-success-subtle rounded p-5 m-5">
+      <h2>Log In</h2>
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }} 
+        <!-- So ugly but I can't change it?? -->
+        <button class="btn btn-success" type="submit">Log In</button>
+      </form>
+      <br/>
+      <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+      <br>
+      <p><a href="{% url 'privacy' %}">Read our privacy policy</a></p>
+      <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
+    </div>
+  </div>
+</div>
+
 {% endif %}
+
 {% endblock %}

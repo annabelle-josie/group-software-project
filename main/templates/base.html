@@ -14,9 +14,14 @@
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <!-- Navbar Brand (Username + Leaves) -->
-        <a class="navbar-brand me-auto" href="#"> 
+        <a class="navbar-brand me-auto" href="/"> 
+            <img src="../media/other/logo.png" height="100px">
+        </a>
+        <a class="navbar-brand me-auto d-flex align-items-center" href="#"> 
             {% if user.is_authenticated %}
-                Welcome, {{ user.username }} | Leaves: {{ user.stats.leaves }}
+            <p>{{user.username}}</p>
+                <img class="p-3" src="../media/other/leaf.png" height="75px">
+                <p>{{ user.stats.leaves }}</p>
             {% else %}
                 Guest
             {% endif %}

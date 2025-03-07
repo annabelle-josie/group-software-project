@@ -4,29 +4,106 @@
 {% block title %} Leaderboards {% endblock %}
 
 {% block content %}
+<!-- CHANGE IMAGES HERE, THEY'RE CHEESY. ALSO FIND WAY OF CALCULATING RANK AND FRIEND TABLE -->
+<div class="container">
+    <div class="d-flex  justify-content-center m-4">
+        <img class="img-fluid" style="max-width:100px" src="../media/other/trophy.png" alt="trophy icon">
+    </div>
+    <h1 class="text-center">Leaderboard</h1>
+    <div class="row d-flex justify-content-center">
+        <div class="col-3 text-center">
+            <img class="img-fluid " style="max-width:50px" src="../media/other/crown.png" alt="crown icon">
+            <h1>10</h1>
+            <p>Rank HARDCODE</p>
+        </div>
+        <div class="col-3 text-center">
+            <img class="img-fluid " style="max-width:50px" src="../media/other/leaf.png" alt="leaf icon">
+            <h1>{{leaves}}</h1>
+            <p>Leaves</p>
+        </div>
+        <div class="col-3 text-center">
+            <img class="img-fluid " style="max-width:50px" src="../media/other/point.png" alt="point icon">
+            <h1>{{points}}</h1>
+            <p>Points</p>
+        </div>
+    </div>
 
-<h1>Leaderboard Page</h1>
-
-<table style="background-color:#eee" border="1px solid black">
-    <tr>
-        <th>Rank</th>
-        <th>Username</th>
-        <th>Points</th>
-    </tr>
-    {% for item in leaderboard %}
-    <tr>
-        <td>{{forloop.counter}}</td>
-        <td>{{item.username}}</td>
-        <td>{{item.points}}</td>
-    </tr>
-    {% endfor %}
-    {% if user.is_authenticated %}
-    <tr>
-        <td>You</td>
-        <td>{{user.username}}</td>
-        <td>{{points}}</td>
-    </tr>
-    {% endif %}
-  </table>
-
+    <ul class="nav nav-tabs nav-fill mt-5" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="global-tab" data-bs-toggle="tab" data-bs-target="#global" type="button" role="tab" aria-controls="global" aria-selected="true">Global</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="friend-tab" data-bs-toggle="tab" data-bs-target="#friend" type="button" role="tab" aria-controls="friend" aria-selected="false">Friend</button>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="global" role="tabpanel" aria-labelledby="global-tab">
+            <h1 class="text-center">Global Leaderboard</h1>
+            <table class="table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Points</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in leaderboard %}
+                <tr>
+                    <td scope="row">{{forloop.counter}}</td>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                        
+                        {{item.username}} 
+                        <button>ClickMe</button> 
+                        </div>
+                    </td>
+                    <td> {{item.points}}</td>
+                </tr>
+                {% endfor %}
+                {% if user.is_authenticated %}
+                <tr>
+                    <td>You</td>
+                    <td>
+                        <div class="d-flex justify-content-between">
+                        {{user.username}}
+                    </div>
+                    </td>
+                    <td>{{points}}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="friend" role="tabpanel" aria-labelledby="friend-tab">
+            <h1 class="text-center">Friend Leaderboard</h1>
+            <p class="text-center">Needs actual implementation here, currently just repeat of global</p>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Username</th>
+                        <th scope="col">Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in leaderboard %}
+                <tr>
+                    <td scope="row">{{forloop.counter}}</td>
+                    <td>{{item.username}}</td>
+                    <td>{{item.points}}</td>
+                </tr>
+                {% endfor %}
+                {% if user.is_authenticated %}
+                <tr>
+                    <td>You</td>
+                    <td>{{user.username}}</td>
+                    <td>{{points}}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+            </table>
+        </div>
+      </div>
+</div>
 {% endblock %}

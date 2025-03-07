@@ -4,7 +4,7 @@
 {% block title %} Garden {% endblock %}
 
 {% block content %}
-<h1>{% if user.is_authenticated %}
+<!-- <h1>{% if user.is_authenticated %}
     {% if user.username|last != "s" %}
         <h1>{{ user.username }}'s Garden</h1>
     {% else %}
@@ -12,41 +12,63 @@
     {% endif %}
 {% else %}
     <h1>Guest's Garden!</h1>
-{% endif %}</h1>
+{% endif %}</h1> -->
 
-<div class="row h-50">
-    <div class="row h-50">
-        {% for plant in plantSlots %}
-            <div class="col-2" style="background-color: rgb(255, 176, 176); padding: 10px;">
-                <p>Plant {{ forloop.counter }}</p>
-                {% if plant and plant.image %}
-                    <img id="{{forloop.counter}}"class="image img-fluid" width="100%" src="{{ plant.image.url }}" alt="{{ plant.name }}">
-                {% else %}
-                    <img id="{{ forloop.counter }}" class="image img-fluid" width="100%" src="{% static 'placeholder.jpg' %}" alt="Empty Spot">
-                {% endif %}
-            </div>
-        {% empty %}
-            <p>No plants found in your garden.</p>
-        {% endfor %}
+<div class="row h-100">
+    <div class="h-100 row col-md-5 col-12" style="background-image:url('../media/backgrounds/greenhouse5.jpg'); background-repeat: no-repeat; background-size: contain;">
+            <div class="m-10 p-10"></div>
+            {% for plant in plantSlots %} 
+                <div class="col-4 p-2">
+                    <img id="{{forloop.counter}}"class="image img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
+                </div>
+            {% empty %}
+                <p>No plants found in your garden.</p>
+            {% endfor %}
     </div>
-</div>
 
-<form action="updateGarden" method="post" style="visibility: hidden" name="submitform" id="submitform">
-    <p>Plant {{ forloop.counter }}</p>
-    {% csrf_token %}
-    <select name="plantname" id="plantname">
-        {% for plant in allplants %}
-        {% if plant in avalible %}
-                <option value="{{plant.name}}"> {{plant.name}}</option>
-        {% else %}
-            <option disabled> {{plant.name}}</option>
-        {% endif %}
-        {% endfor %}
-    
-    </select>
-    <input name="slot" id="slot" hidden value="0"> 
-    <button type="submit" onclick="style='visibility: hidden'">change</button>
-  </form>
+<div class="col">
+<h1>Find something to fill this space???</h1>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close btn btn-outline-dark" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                <p>Choose a Plant:</p>
+                {% csrf_token %}
+                <!-- {% for plant in allplants %}
+                {% if plant in available %}
+                                    <option value="{{plant.name}}"> {{plant.name}}</option>
+                {% else %}
+                    <option disabled> {{plant.name}}</option>
+                {% endif %}
+                            {% endfor %} -->
+            
+                <div class="row">
+                    {% for plant in available %}
+                    <button id="owned{{plant.id}}" type="button" class="col-4 btn btn-outline-success" onclick='updatePlantOwned( "{{plant.name}}", "owned{{plant.id}}")'>
+                      <img src="{{ plant.image.url }}" class="img-fluid" alt="ahhhhh">
+                      <p class="text-center">{{ plant.name }}</p>
+                    </button>
+                    {% endfor %}
+                </div>    
+                <input name="slot" id="slot" hidden value="0"> 
+                <input name="plantname" id="plantname" hidden value={{available.0.name}}> 
+                <button class="btn btn-primary m-3" type="submit" data-dismiss="modal">Change</button>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+        
     <!-- create a drop down checkbox 
     of user.avlible plants  -->
 <script>
@@ -57,10 +79,39 @@
                 const id = img.getAttribute('id');
                 document.submitform.slot.value = id;
             //    alert(id)
-               document.getElementById("submitform").style.visibility = "visible";
+                $('#exampleModal').modal('show');
+                $('#exampleModal').modal('show');
             });
         });
     });
+
+    function updatePlantOwned(plantName, test){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
+    }
+
+    function updatePlantOwned(plantName, test){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
+    }
 </script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 {% endblock %}
