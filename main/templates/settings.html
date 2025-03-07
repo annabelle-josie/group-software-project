@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Update Profile</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        <button type="submit" name="update_profile" class="btn btn-primary">Update Profile</button>
+    </form>
+</div>
+
+<div class="container mt-5">
+    <h2>Change Password</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ password_form.as_p }}
+        <button type="submit" name="change_password" class="btn btn-primary">Change Password</button>
+    </form>
+</div>
+{% endblock %}
