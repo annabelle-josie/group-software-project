@@ -300,9 +300,9 @@
         document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
         document.getElementById("availableSignUpButton").innerHTML = ("Register For Event");
         // document.getElementById("availableSignUpButton").setAttribute = ("onclick", ("signUpEvent(" + parseInt(eventId) + ")"));
-        const onClickString = "signUpEvent(" + eventId + ")";
-        console.log(onClickString);
-        document.getElementById("availableSignUpButton").onclick = onClickString;
+        // const onClickString = ("signUpEvent(" + eventId + ")");
+        // console.log(onClickString);
+        document.getElementById("availableSignUpButton").onclick = (() => signUpEvent(eventId));
         document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
         document.getElementById("qrCodeViewer").innerHTML = "";
         console.log("complete");
@@ -317,8 +317,8 @@
         document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
         document.getElementById("availableSignUpButton").innerHTML = ("Delete Event");
         // document.getElementById("availableSignUpButton").setAttribute = ("onclick", ("deleteEvent(" + parseInt(eventId) + ")"));
-        const onClickString = ("deleteEvent(" + eventId + ")");
-        console.log(eventId);
+        // const onClickString = ("deleteEvent(" + eventId + ")");
+        // console.log(eventId);
         document.getElementById("availableSignUpButton").onclick = (() => deleteEvent(eventId));
         document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
         console.log(eventQRImage);
