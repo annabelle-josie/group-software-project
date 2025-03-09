@@ -20,8 +20,10 @@ class LoginTests(TestCase):
         """Set up test client and test user."""
         response = self.client.post(self.signup_url, {
             "username": "newuser",
+            "email": "testemail@email.com",
             "password1": "ValidPass123!",
-            "password2": "ValidPass123!"
+            "password2": "ValidPass123!",
+            "privacy_policy": True
         })
         self.assertEqual(response.status_code, 302)
         self.assertTrue(custom_user.objects.filter(username="newuser").exists())
@@ -30,8 +32,10 @@ class LoginTests(TestCase):
         """Ensure signup fails if password is too weak."""
         response = self.client.post(self.signup_url, {
             "username": "weakuser",
+            "email": "testemail@email.com",
             "password1": "weakuser1",
-            "password2": "weakuser1"
+            "password2": "weakuser1",
+            "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "The password is too similar to the username.") 
@@ -40,8 +44,10 @@ class LoginTests(TestCase):
         """Ensure signup fails if passwords do not match."""
         response = self.client.post(self.signup_url, {
             "username": "mismatchuser",
+            "email": "testemail@email.com",
             "password1": "ValidPass123!",
-            "password2": "WrongPass123!"
+            "password2": "WrongPass123!",
+            "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
         self.assertFalse(custom_user.objects.filter(username="mismatchuser").exists())
@@ -50,8 +56,10 @@ class LoginTests(TestCase):
         """Test signup fails if username is already taken."""
         response = self.client.post(self.signup_url, {
             'username': 'testuser',
+            "email": "testemail@email.com",
             'password1': 'NewPass123!',
-            'password2': 'NewPass123!'
+            'password2': 'NewPass123!',
+            "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "A user with that username already exists.") 
@@ -60,8 +68,10 @@ class LoginTests(TestCase):
         """Ensure password is rejected if it's too short."""
         response = self.client.post(self.signup_url, {
             'username': 'shortpassuser',
+            "email": "testemail@email.com",
             'password1': '12345',
-            'password2': '12345'
+            'password2': '12345',
+            "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This password is too short")

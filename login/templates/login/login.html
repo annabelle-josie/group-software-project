@@ -17,12 +17,12 @@
       <h2>Log In</h2>
       <form method="post">
         {% csrf_token %}
-        {{ form.as_p }} 
+        {{ form.as_p }}
         <!-- So ugly but I can't change it?? -->
         <button class="btn btn-success" type="submit">Log In</button>
       </form>
       <br/>
-      <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+      <p>Don't have an account? <a class="btn btn-success" href="{% url 'signup' %}">Sign Up</a></p>
       <br>
       <p><a href="{% url 'privacy' %}">Read our privacy policy</a></p>
       <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
