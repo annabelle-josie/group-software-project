@@ -9,68 +9,85 @@
 </head>
 
 <body>
+{% load static %}
+<!-- Custom Styles for a Thinner Navbar and Larger, Better-Spaced Text -->
+<style>
+    .navbar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1030;
+        background-color: #f8f9fa;
+        padding: 0.2rem 1rem; /* Adjust to control navbar thickness */
+    }
+    .navbar-overlay .container-fluid {
+        padding: 0;
+    }
+    .navbar-overlay .nav-link {
+        font-size: 1.0rem;      /* Adjust to control link text size of the navbar */
+        padding: 0rem 0;      /* Adjust to control spacing */
+        margin: 0.5rem 0;
+    }
 
-<!-- Bootstrap Navbar -->
-<nav class="navbar navbar-light bg-light">
+    .navbar-overlay .navbar-brand img {
+        max-height: 50px; /* Adjust this value for thinner images on the navbar */
+    }
+
+    .navbar-overlay .navbar-brand img.leaf {
+        padding: 0.2rem 1rem;
+    }
+
+    body {
+        padding-top: 60px; 
+    }
+</style>
+
+<nav class="navbar navbar-light fixed-top navbar-overlay">
     <div class="container-fluid">
-        <!-- Navbar Brand (Username + Leaves) -->
-        <a class="navbar-brand me-auto" href="/"> 
-            <img src="../media/other/logo.png" height="100px">
-        </a>
-        <a class="navbar-brand me-auto d-flex align-items-center" href="#"> 
-            {% if user.is_authenticated %}
-            <p>{{user.username}}</p>
-                <img class="p-3" src="../media/other/leaf.png" height="75px">
-                <p>{{ user.stats.leaves }}</p>
-            {% else %}
-                Guest
-            {% endif %}
-        </a>
-
-        <!-- Toggler button -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Dropdown Menu -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto text-end">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/garden">Garden</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/events">Events</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/leaderboard">Leaderboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/market">Market</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/profile">Profile</a>
-                </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/settings">Settings</a>
-            </li>
-
-                {% if user.is_authenticated %}
-                    <!-- Log Out Button (Using JavaScript for POST request) -->
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" id="logoutButton">Log Out</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+      <!-- Brand -->
+    <a class="navbar-brand" href="/">
+        <img src="{% static 'icons/logo.png' %}" alt="site icon">
+    </a>
+      <!-- User Info -->
+    <div class="d-flex align-items-center">
+        {% if user.is_authenticated %}
+          <p class="mb-0 me-3">{{ user.username }}</p>
+          <div class="d-flex align-items-center border rounded p-2">
+            <p class="mb-0">{{ user.stats.leaves }}</p>
+            <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-2" alt="leaf icon">
+          </div>
+        {% else %}
+          <span>Guest</span>
+        {% endif %}
     </div>
+
+    <!-- Collapsible Menu with Grid Layout -->
+    <div class="nav-item dropdown me-1">
+        <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdown" role="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="navbar-toggler-icon"></span>
+        </a>
+        <!-- Dropdown Items -->
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+          <li><a class="dropdown-item" href="/">Home</a></li>
+          <li><a class="dropdown-item" href="/garden">Garden</a></li>
+          <li><a class="dropdown-item" href="/events">Events</a></li>
+          <li><a class="dropdown-item" href="/leaderboard">Leaderboard</a></li>
+          <li><a class="dropdown-item" href="/market">Market</a></li>
+          <li><a class="dropdown-item" href="/settings">Settings</a></li>
+          {% if user.is_authenticated %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
+          {% endif %}
+        </ul>
+      </div>
+  </div>
 </nav>
 
 {% block content %}
 {% endblock %}
+  
     
 <!-- JavaScript to handle logout without a form -->
 <script>
