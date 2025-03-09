@@ -43,6 +43,8 @@
     body {
         padding-top: 60px; 
     }
+
+    
 </style>
 
 <nav class="navbar navbar-light fixed-top navbar-overlay">
@@ -70,18 +72,14 @@
         </a>
         <!-- Dropdown Items -->
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-            {% if user.is_authenticated %}
-                <li><a class="dropdown-item" href="/">Home</a></li>
-                <li><a class="dropdown-item" href="/garden">Garden</a></li>
-                <li><a class="dropdown-item" href="/events">Events</a></li>
-                <li><a class="dropdown-item" href="/leaderboard">Leaderboard</a></li>
-                <li><a class="dropdown-item" href="/market">Market</a></li>
-                <li><a class="dropdown-item" href="/settings">Settings</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
-            {%else%} 
-                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
-                <a class="dropdown-item" href="{% url 'signup' %}">Sign Up</a>
+          <li><a class="dropdown-item" href="/">Home</a></li>
+          <li><a class="dropdown-item" href="/events">Events</a></li>
+          <li><a class="dropdown-item" href="/leaderboard">Leaderboard</a></li>
+          <li><a class="dropdown-item" href="/market">Market</a></li>
+          <li><a class="dropdown-item" href="/settings">Settings</a></li>
+          {% if user.is_authenticated %}
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
           {% endif %}
         </ul>
       </div>
@@ -111,5 +109,11 @@
     });
 </script>
 
+
+<footer class="footer bg-primary text-white text-center py-3">
+    <div class="container">
+        <p>&copy; <script>document.write(new Date().getFullYear());</script> Down2Earth. All rights reserved.</p>
+    </div>
+</footer>
 </body>
 </html>
