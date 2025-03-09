@@ -18,7 +18,7 @@ class EventTests(TestCase):
         """Set up test users, events, and event participants before each test."""
         self.client = Client()
         
-        self.gamekeeper = CustomUser.objects.create_user(username="gamekeeper", password="AdminPass123!")
+        self.gamekeeper = CustomUser.objects.create_user(username="gamekeeper", email='admintestemail@email.com', password="AdminPass123!")
         gamekeeper_group, _ = Group.objects.get_or_create(name="Game Keepers")
         self.gamekeeper.groups.add(gamekeeper_group)
 
@@ -33,7 +33,7 @@ class EventTests(TestCase):
             isQR=False,
         )
 
-        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.user_stats = UserStats.objects.get(user=self.user)
         self.client.login(username="testuser", password="SecurePass123!")
 

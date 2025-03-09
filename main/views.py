@@ -16,7 +16,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from event_management.models import Events, EventParticipants
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from garden.models import UserGarden
 from user_management.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
@@ -583,3 +583,13 @@ def settings(request):
         'password_form': password_form
     }
     return render(request, "settings.html", context)
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your account has been deleted successfully.')
+        return redirect('home')
+    return render(request, 'settings.html')

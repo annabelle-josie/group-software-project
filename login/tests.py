@@ -13,7 +13,7 @@ class LoginTests(TestCase):
         self.signup_url = reverse('signup')
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
-        self.user = custom_user.objects.create_user(username='testuser', password='SecurePass123!')
+        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
 
     ## Signup Tests ##
     def test_signup_with_valid_data(self):
