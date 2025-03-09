@@ -24,6 +24,9 @@ from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
 from login.forms import ProfileUpdateForm, CustomPasswordChangeForm
+from django.urls import reverse
+from django.conf import settings
+
 
 
 # Create views here
@@ -178,6 +181,48 @@ def leaderboard(request):
 def garden(request):
     return render(request, "garden.html")
 
+
+@login_required(login_url="/auth/login")
+def scan_qr(request, event_id, qr_code):
+    """Handles QR scanning, auto-registers user if not registered, and increments progress if valid."""
+    try:
+        event = Events.objects.get(eventId=event_id)
+    except Events.DoesNotExist:
+        return JsonResponse({'error': 'Invalid event.'}, status=404)
+
+    try:
+        eventParticipant = EventParticipants.objects.get(username=request.user, eventId=event)
+    except EventParticipants.DoesNotExist:
+        eventParticipant = EventParticipants(username=request.user, eventId=event, progress=0, status="in_progress")
+        eventParticipant.save()
+
+    if event.isQR and event.eventQR == qr_code:
+        if eventParticipant.progress < event.noOfTasks:
+            eventParticipant.progress += 1
+            if eventParticipant.progress >= event.noOfTasks:
+                eventParticipant.status = "complete"
+            
+            eventParticipant.save()
+
+            if eventParticipant.status == "complete":
+                user_stats = UserStats.objects.get(user=request.user)
+                user_stats.leaves += event.rewardValue
+                user_stats.points += event.rewardValue
+                user_stats.save()
+                return redirect('events')  
+
+        return JsonResponse({
+            'progress': eventParticipant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': eventParticipant.status,
+            'completed': False
+        })
+
+    return JsonResponse({'error': 'Invalid QR code.'}, status=400)
+
+
+
+
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
         event = Events.objects.get(eventId=event_id)
@@ -281,7 +326,7 @@ def events(request):
         eventImage = request.FILES.get('eventImage')
 
         # Generate a random QR code if selected
-        eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
+        qr_secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
         # Create the new event without assigning it to users yet
         newEvent = Events.objects.create(
@@ -292,14 +337,18 @@ def events(request):
             startDate=startDate,
             endDate=endDate,
             eventMaster=request.user,
-            eventQR=eventQR,
+            eventQR=qr_secret,
             isQR=isQR,
             eventImage=eventImage
         )
 
-        # If the event requires a QR code, generate it
         if isQR:
-            newEvent.generateQrImage()
+            base_url = 'down2earth.eu.pythonanywhere.com'
+            qr_url = f"{base_url}{reverse('scan_qr', args=[newEvent.eventId, qr_secret])}"
+            qr = qrcode.make(qr_url)
+            buffer = BytesIO()
+            qr.save(buffer, format="PNG")
+            newEvent.eventQRImage.save(f"qr_{newEvent.eventId}.png", ContentFile(buffer.getvalue()), save=False)
             newEvent.save()
 
         return HttpResponseRedirect(request.path)

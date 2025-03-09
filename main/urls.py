@@ -28,5 +28,6 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),
     path("api/get_garden/<int:user_id>/", views.get_garden, name="get_garden"),
     path("updateGarden", views.updateGarden, name="updateGarden"),
+    path('scan-qr/<int:event_id>/<str:qr_code>/', views.scan_qr, name='scan_qr'),
     path('delete_account/', views.delete_account, name='delete_account'),
 ]
