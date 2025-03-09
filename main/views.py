@@ -150,8 +150,33 @@ def leaderboard(request):
     for person in userrank:
         rank = person.userrank
     context['rank'] = rank
+    for entry in context['leaderboard']:
+        try:
+            user = CustomUser.objects.get(username=entry['username'])
+            user_garden = UserGarden.objects.get(user_id=user.id)
+            plant1 = Plant.objects.get(id=user_garden.plant1Id_id)
+            plant2 = Plant.objects.get(id=user_garden.plant2Id_id)
+            plant3 = Plant.objects.get(id=user_garden.plant3Id_id)
+            plant4 = Plant.objects.get(id=user_garden.plant4Id_id)
+            plant5 = Plant.objects.get(id=user_garden.plant5Id_id)
+            plant6 = Plant.objects.get(id=user_garden.plant6Id_id)
+            entry['plant1'] = plant1.image.url
+            entry['plant2'] = plant2.image.url
+            entry['plant3'] = plant3.image.url
+            entry['plant4'] = plant4.image.url
+            entry['plant5'] = plant5.image.url
+            entry['plant6'] = plant6.image.url
+        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist, Plant.DoesNotExist):
+            entry['plant1'] = '/static/potted_plant.png'
+            entry['plant2'] = '/static/potted_plant.png'
+            entry['plant3'] = '/static/potted_plant.png'
+            entry['plant4'] = '/static/potted_plant.png'
+            entry['plant5'] = '/static/potted_plant.png'
+            entry['plant6'] = '/static/potted_plant.png'
     return render(request, "leaderboard.html", context)
 
+def garden(request):
+    return render(request, "garden.html")
 
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
