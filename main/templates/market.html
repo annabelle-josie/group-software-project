@@ -7,7 +7,7 @@
 {% block content %}
 
 <!-- <div class="container"> -->
-    <div class="row h-50 p-3" style="background-color: rgb(176, 239, 255);">
+    <div class="row h-50 col-12 col-md-6 p-3" style="background-color: rgb(176, 239, 255);">
 
         <!-- Image & Details Section - shows selected plant's information -->
         <!-- If no plant is selected (on first load of page) show the 0th plant -->
@@ -21,10 +21,15 @@
                 alt="{{ firstPlant.name }}" >
         </div>
         <div class="col">
-            <p class="text-center">Your Leaves: {{ user.stats.leaves }}</p>
-            <h1 class="text-center">Plants</h1>
-            <h3 id="chosen-plant-name"><strong>Name:</strong> {{ firstPlant.name }}</h3>
-            <h4 id="chosen-plant-price"><strong>Cost:</strong> {{ firstPlant.price }}</h4>
+            <br>
+            <h1 class="text-center" id="chosen-plant-name"> {{ firstPlant.name }}</h1>
+            <div class="align-items-center">
+                <div class="d-flex align-items-center">
+                    <p class="mb-0" id="chosen-plant-price"><strong>Cost: </strong>{{ firstPlant.price }}</p>
+                <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-1" alt="leaf icon">
+                </div>
+            </div>
+<!--            <h4 class="text-center" id="chosen-plant-price"> {{ firstPlant.price }} <strong>leaves</strong></h4> -->
             <p id="chosen-plant-fact" class=""><strong>Fact:</strong> {{ firstPlant.fact }}</p>
         {% if firstPlant in ownedPlants %}
             <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
@@ -42,25 +47,39 @@
 
     <!-- Plant Selection Grid -->
      <!-- Display all avaialble plants -->
-    <div class="h-50 overflow-scroll row" style="background-color: rgb(255, 176, 221);">
+    <div class="h-50 col-12 col-md-6 d-flex flex-row overflow-x-auto" style="background-image: url('../static/backgrounds/shop.png'); background-repeat: no-repeat; height: 100vh; background-size: cover;">
         {% for plant in plants %}
         {% if plant in ownedPlants %}
         <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
-            <div class="col-3 col-sm-2"
+            <div class="col-3 col-sm-2 d-flex flex-column align-items-center position-relative"
             onclick='updatePlantOwned( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-                <img class="img-fluid w-100"
+            <img class="img-fluid position-absolute z-index-0" 
+                    src="{% static 'icons/PlantBG.png' %}" 
+                    style="top: 20px; height: 60%; width: 88%;"
+                    alt="Plant Background"
+                    tabindex="0">    
+            <img class="img-fluid position-relative w-100 z-index-1"
                     src="{{ plant.image.url }}" 
-                    alt="{{ plant.name }}">
-                <p class="text-center">OWNED: {{ plant.name }}</p>
+                    alt="{{ plant.name }}"
+                    tabindex="0">
+                <img class="img-fluid w-50 position-absolute top-50 end-0 m-1 z-index-2" 
+                    src="{% static 'icons/Sold.png' %}" 
+                    alt="Sold!"
+                    tabindex="0">
             </div>
         {% else %}
         <!-- Otherwise let them buy the plant as usual -->
-            <div class="col-3 col-sm-2"
+            <div class="col-3 col-sm-2 d-flex flex-column align-items-center position-relative"
             onclick='updatePlant( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-                <img class="img-fluid w-100"
+                <img class="img-fluid position-absolute z-index-0" 
+                    src="{% static 'icons/PlantBG.png' %}" 
+                    style="top: 20px; height: 60%; width: 88%;"
+                    alt="Plant Background"
+                    tabindex="0">    
+                <img class="img-fluid position-relative w-100 z-index-1"
                     src="{{ plant.image.url }}" 
-                    alt="{{ plant.name }}">
-                <p class="text-center">{{ plant.name }}</p>
+                    alt="{{ plant.name }}"
+                    tabindex="0">
             </div>
         {%endif%}
         {% endfor %}
@@ -72,8 +91,8 @@
     // If plant is not owned by the user, allow them to view all information about the plant, and to purchase it
     function updatePlant(image, name, price, fact, user, plantObject) {
         document.getElementById("chosen-plant-image").src = image;
-        document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
-        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost:</strong> " + price;
+        document.getElementById("chosen-plant-name").innerHTML = name;
+        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
 
         const onClickString = "buyPlant('" + user + "','" + name + "');"
@@ -85,8 +104,8 @@
     // If a plant is already owned, still allow a user to see the information associated with it, but do not allow re-purchase
     function updatePlantOwned(image, name, price, fact, user, plantObject) {
         document.getElementById("chosen-plant-image").src = image;
-        document.getElementById("chosen-plant-name").innerHTML = "<strong>Name:</strong> " + name;
-        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost:</strong> " + price;
+        document.getElementById("chosen-plant-name").innerHTML = name;
+        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
         document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
 
         const onClickString = "#"
