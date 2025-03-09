@@ -25,7 +25,7 @@ class CustomUserManager(BaseUserManager):
     
 class CustomUser(AbstractUser):
     """Custom user model extending the default Django user model with friends, owned plants, and stats."""
-    email = models.EmailField(null=True, blank=True) # TODO: Allows no email, potentially remove in sprint 2
+    email = models.EmailField(null=False, blank=False)
     owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
 

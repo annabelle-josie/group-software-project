@@ -164,6 +164,55 @@
             }
         });
     }
+
+    function updatePlantOwned(plantName, test){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
+    }
+
+    function swapClickable(){
+        var plantImages = document.querySelectorAll(".clickable")
+        console.log(plantImages)
+        if(plantImages.length != 0){
+            plantImages.forEach( plant => {
+                plant.setAttribute("class", "nonClickable");
+                plant.removeEventListener('click', handleClick);
+            });
+            console.log("No longer clickable")
+        } else{
+            plantImages = document.querySelectorAll(".nonClickable")
+            plantImages.forEach( plant => {
+                plant.setAttribute("class", "clickable");
+                plant.addEventListener('click', handleClick);
+            });
+            console.log("Clickable")
+        }
+    }
+
+    function handleClick(event) {
+        makeClickable(event.currentTarget);
+    }
+    function makeClickable(plant) {
+            const id = plant.getAttribute('id');
+            document.submitform.slot.value = id;
+            //    alert(id)
+            $('#editPlantModal').modal('show');
+    }
 </script>
+
+<style>
+    .clickable{
+        /* width: 150px; */
+  -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
+  filter: drop-shadow(5px 5px 5px #eaff00);
+    }
+</style>
 
 {% endblock %}
