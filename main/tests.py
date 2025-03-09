@@ -10,7 +10,7 @@ class HomePageTest(TestCase):
 
     def setUp(self):
         """Set up a test user for authentication."""
-        self.user = CustomUser.objects.create_user(username='testuser', password='password123')
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="password123")
 
         # List of all protected views that require authentication
         self.protected_urls = [
@@ -49,14 +49,14 @@ class ChallengeTests(TestCase):
             qrvalue="recycle_bottle"
         )
 
-        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
 
     def test_new_user_is_assigned_to_existing_challenges(self):
         """Ensure that a newly created user is automatically assigned to existing challenges."""
 
-        new_user = CustomUser.objects.create_user(username="newtestuser", password="SecurePass123!")
+        new_user = CustomUser.objects.create_user(username="newtestuser", email="testemail@email.com", password="SecurePass123!")
 
         self.assertTrue(ChallengeParticipants.objects.filter(username=new_user, challengeId=self.challenge).exists())
 
@@ -140,7 +140,7 @@ class MarketTests(TestCase):
     def setUp(self):
         """Set up test users, plants, and user stats before each test."""
         self.client = Client()
-        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
         self.user_stats = UserStats.objects.get(user=self.user)
@@ -185,7 +185,7 @@ class LeaderboardTests(TestCase):
         """Set up a test user and create additional users with varying points."""
         self.client = Client()
 
-        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
         self_user_stats = UserStats.objects.get(user=self.user)
         self_user_stats.points = 80
@@ -194,7 +194,7 @@ class LeaderboardTests(TestCase):
         # Create 11 additional users so total 12 users exist.
         self.created_users = [self.user]
         for i in range(1, 12):
-            new_user = CustomUser.objects.create_user(username=f"user{i}", password="Pass123!")
+            new_user = CustomUser.objects.create_user(username=f"user{i}", email=f"testemail{i}@email.com", password="Pass123!")
             self.created_users.append(new_user)
             stats = UserStats.objects.get(user=new_user)
             stats.points = 50 + (i * 10)

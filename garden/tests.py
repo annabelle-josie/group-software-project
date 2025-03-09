@@ -9,7 +9,7 @@ class GardenTests(TestCase):
     def setUp(self):
         """Set up test users, plants, and gardens before each test."""
         self.client = Client()
-        self.user = CustomUser.objects.create_user(username="testuser", password="SecurePass123!")
+        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
         self.plant1 = Plant.objects.create(name="Sunflower", price=10, fact="A bright yellow flower.")
