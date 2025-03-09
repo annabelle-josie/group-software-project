@@ -10,6 +10,7 @@ class HomePageTest(TestCase):
 
     def setUp(self):
         """Set up a test user for authentication."""
+        
         self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="password123")
 
         # List of all protected views that require authentication
