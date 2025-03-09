@@ -25,5 +25,7 @@ urlpatterns = [
     path("profile/<str:username>/", views.profile),
     path('sign_up_for_event/<int:event_id>/', views.sign_up_for_event, name='sign_up_for_event'),
     path('settings/', views.settings, name='settings'),
+    path("api/get_garden/<int:user_id>/", views.get_garden, name="get_garden"),
+    path("updateGarden", views.updateGarden, name="updateGarden")
 
 ]

@@ -92,6 +92,54 @@ def home(request):
     available = users.owned_plants.all()
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
 
+@login_required(login_url="/auth/login")
+def gardenView(request):
+    """View to display the garden on the main page"""
+    userGarden = UserGarden.objects.get(user=request.user)
+    users = CustomUser.objects.get(username= request.user)
+    # available = users.owned_plants.all().values()
+    available = users.owned_plants.all()
+    allplants= Plant.objects.filter(onMarket=True)
+
+    plantSlots = []
+    if userGarden:
+        for slot in range(1, 7):  # Loop through all 6 slots
+            plant = getattr(userGarden, f"plant{slot}Id", None)  # Get Plant object directly
+            # print(f"Plant Slot {slot}: {plant}")  # Debugging line
+            # print(f"Plant Slot {slot}: {plant}")  # Debugging line
+            plantSlots.append(plant)
+    # print("Final Plant Slots:", plantSlots)  # Debugging line
+    return render(request, "garden/garden.html", {"plantSlots": plantSlots,"available":available, "allplants": allplants})
+
+@api_view(["GET"])
+def get_garden(request, user_id):
+    """API used to display garden on the main page"""
+    try:
+        garden = userGarden.objects.get(user__id=user_id)
+        serializer = GardenSerializer(garden)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except userGarden.DoesNotExist:
+        return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+def updateGarden(request):
+    """View to updte the user's garden with a new plant"""
+    # print("hello")
+    plantname = request.POST.get('plantname')
+    slot = request.POST.get('slot')
+    print(slot)
+    if not plantname:
+        return redirect("/")
+    try:
+        plant= Plant.objects.get(name=plantname)
+        # print(plant)
+        plantslots = UserGarden.objects.get(user=request.user)
+        plantslot = setattr(plantslots, f"plant{slot}Id",plant)
+        plantslots.save()
+        # get right plant list and plant ID 
+    except Plant.DoesNotExist:
+        return Response({"error": "no "}, status=status.HTTP_404_NOT_FOUND)
+    return HttpResponseRedirect(redirect_to="/")
+
 # leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
 def leaderboard(request):
@@ -104,8 +152,6 @@ def leaderboard(request):
     context['rank'] = rank
     return render(request, "leaderboard.html", context)
 
-def garden(request):
-    return render(request, "garden.html")
 
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
