@@ -182,15 +182,19 @@ def garden(request):
     return render(request, "garden.html")
 
 
-
-@login_required
+@login_required(login_url="/auth/login")
 def scan_qr(request, event_id, qr_code):
-    """Handles QR scanning and increments progress if valid."""
+    """Handles QR scanning, auto-registers user if not registered, and increments progress if valid."""
     try:
         event = Events.objects.get(eventId=event_id)
+    except Events.DoesNotExist:
+        return JsonResponse({'error': 'Invalid event.'}, status=404)
+
+    try:
         eventParticipant = EventParticipants.objects.get(username=request.user, eventId=event)
-    except (Events.DoesNotExist, EventParticipants.DoesNotExist):
-        return JsonResponse({'error': 'Invalid event or not registered.'}, status=404)
+    except EventParticipants.DoesNotExist:
+        eventParticipant = EventParticipants(username=request.user, eventId=event, progress=0, status="in_progress")
+        eventParticipant.save()
 
     if event.isQR and event.eventQR == qr_code:
         if eventParticipant.progress < event.noOfTasks:
@@ -205,15 +209,7 @@ def scan_qr(request, event_id, qr_code):
                 user_stats.leaves += event.rewardValue
                 user_stats.points += event.rewardValue
                 user_stats.save()
-
-                return JsonResponse({
-                    'progress': eventParticipant.progress,
-                    'totalTasks': event.noOfTasks,
-                    'status': eventParticipant.status,
-                    'rewardAdded': event.rewardValue,
-                    'newBalance': user_stats.leaves,
-                    'completed': True 
-                })
+                return redirect('events')  
 
         return JsonResponse({
             'progress': eventParticipant.progress,
@@ -223,6 +219,7 @@ def scan_qr(request, event_id, qr_code):
         })
 
     return JsonResponse({'error': 'Invalid QR code.'}, status=400)
+
 
 
 
