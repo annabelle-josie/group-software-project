@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.urls import reverse
+from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
 
@@ -28,15 +28,7 @@ class Events(models.Model):
 
     def __str__(self):
         return self.title # String representation of the event
-
-    def generateQrImage(self):
-        """Generate QR code image for the event"""
-        if self.eventQR:
-            qr = qrcode.make(self.eventQR)
-            buffer = BytesIO()
-            qr.save(buffer, format="PNG")
-            self.eventQRImage.save(f"qr_{self.eventId}.png", ContentFile(buffer.getvalue()), save=False)
-
+    
     def save(self, *args, **kwargs):
         if not self.eventImage:
             self.eventImage = "default_event_images/cheese.jpg"
