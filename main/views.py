@@ -100,13 +100,17 @@ def leaderboard(request):
     for person in userrank:
         rank = person.userrank
     context['rank'] = rank
+    for entry in context['leaderboard']:
+        entry['plant1'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant1Id_id).image.url
+        entry['plant2'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant2Id_id).image.url
+        entry['plant3'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant3Id_id).image.url
+        entry['plant4'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant4Id_id).image.url
+        entry['plant5'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant5Id_id).image.url
+        entry['plant6'] = Plant.objects.get(id=UserGarden.objects.get(user_id=CustomUser.objects.get(username=entry['username']).id).plant6Id_id).image.url
     return render(request, "leaderboard.html", context)
 
 def garden(request):
     return render(request, "garden.html")
-
-
-
 
 
 def sign_up_for_event(request, event_id):

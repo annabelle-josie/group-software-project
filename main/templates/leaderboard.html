@@ -35,8 +35,9 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="friend-tab" data-bs-toggle="tab" data-bs-target="#friend" type="button" role="tab" aria-controls="friend" aria-selected="false">Friend</button>
-      </ul>
-      <div class="tab-content" id="myTabContent">
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
         <div class="tab-pane fade show active" id="global" role="tabpanel" aria-labelledby="global-tab">
             <h1 class="text-center">Global Leaderboard</h1>
             <table class="table table-hover text-center">
@@ -45,7 +46,6 @@
                         <th scope="col">Rank</th>
                         <th scope="col">Username</th>
                         <th scope="col">Points</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
@@ -54,9 +54,8 @@
                     <td scope="row">{{forloop.counter}}</td>
                     <td>
                         <div class="d-flex justify-content-between">
-                        
-                        {{item.username}} 
-                        <button>ClickMe</button> 
+                            {{item.username}} 
+                            <button type="button" data-username="{{item.username}}" data-plant1="{{item.plant1}}" data-plant2="{{item.plant2}}" data-plant3="{{item.plant3}}" data-plant4="{{item.plant4}}" data-plant5="{{item.plant5}}" data-plant6="{{item.plant6}}" data-bs-toggle="modal" data-bs-target="#exampleModal">ClickMe</button> 
                         </div>
                     </td>
                     <td> {{item.points}}</td>
@@ -102,9 +101,69 @@
                     <td>{{points}}</td>
                 </tr>
                 {% endif %}
-            </tbody>
+                </tbody>
             </table>
         </div>
-      </div>
+    </div>
 </div>
+
+  
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalText">Player's Garden</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="container mx-auto w-md-50 w-100" style="position: relative;">
+                <img width=100% src="{% static 'garden.png' %}" alt="garden background">
+                <img id="plant1img" width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);">
+                <img id="plant2img" width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);">
+                <img id="plant3img" width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);">
+                <img id="plant4img" width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);">
+                <img id="plant5img" width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);">
+                <img id="plant6img" width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- JavaScript to update modal body -->
+<script>
+    var exampleModal = document.getElementById('exampleModal');
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget; // Button that triggered the modal
+      var username = button.getAttribute('data-username');
+      var plant1 = button.getAttribute('data-plant1');
+      var plant2 = button.getAttribute('data-plant2');
+      var plant3 = button.getAttribute('data-plant3');
+      var plant4 = button.getAttribute('data-plant4');
+      var plant5 = button.getAttribute('data-plant5');
+      var plant6 = button.getAttribute('data-plant6');
+  
+      var modalText = exampleModal.querySelector('#modalText');
+      modalText.textContent = username + "'s Garden";
+      var plant1img = exampleModal.querySelector('#plant1img');
+      plant1img.src = plant1;
+      var plant1img = exampleModal.querySelector('#plant3img');
+      plant2img.src = plant2;
+      var plant1img = exampleModal.querySelector('#plant3img');
+      plant3img.src = plant3;
+      var plant1img = exampleModal.querySelector('#plant4img');
+      plant4img.src = plant4;
+      var plant1img = exampleModal.querySelector('#plant5img');
+      plant5img.src = plant5;
+      var plant1img = exampleModal.querySelector('#plant6img');
+      plant6img.src = plant6;
+    });
+</script>
+
 {% endblock %}
