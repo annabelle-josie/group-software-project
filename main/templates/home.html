@@ -1,56 +1,89 @@
 {% extends 'base.html' %}
-{% load auth_extras %}
+{% load auth_extras static %}
 
 {% block title %} Home {% endblock %}
-{% load static %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Garden Section (Unchanged as requested) -->
-    <div class="container mx-auto w-md-50 w-100 position-relative">
+
+    <div id="garden-display" class="container mx-auto w-md-50 w-100" style="position: relative;">
         <img width="100%" src="{% static 'garden.png' %}" alt="garden background">
-        <img width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
-        <img width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
-        <img width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
-        <img width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
-        <img width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
-        <img width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+        <img class="nonClickable" id="1" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+        <img class="nonClickable" id="2" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+        <img class="nonClickable" id="3" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+        <img class="nonClickable" id="4" width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+        <img class="nonClickable" id="5" width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+        <img class="nonClickable" id="6" width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
     </div>
 
-    <!-- Make this section scrollable if content overflows -->
-    <div class="row mt-4 scrollable-section">
-        {% if user.get_incoming_friend_requests.exists %}
-            <div class="col-md-6 col-12 mb-3">
-                <a href="{% url 'login' %}" class="btn btn-primary btn-lg btn-block">
-                    You have new friend requests
-                </a>
-            </div>
-        {% endif %}
+    <button class="mt-3 col-12 text-center btn btn-primary" type="button" onclick="swapClickable()">Edit garden</button>
 
-        <div class="col-md-6 col-12 mb-3">
-            <div class="p-3 rounded shadow" style="background-color: #f7b2b2;">
+    <!-- Modal for updating garden plant -->
+    <div class="modal fade" id="editPlantModal" tabindex="-1" role="dialog" aria-labelledby="editPlantModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+              <h5 class="modal-title" id="editPlantModal">Choose a New Plant</h5>
+              <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for plant in available %}
+                        <button id="owned{{ plant.id }}" type="button" class="col-4 btn btn-outline-success" onclick='updatePlantOwned("{{ plant.name }}", "owned{{ plant.id }}")'>
+                          <img src="{{ plant.image.url }}" class="img-fluid" alt="{{ plant.name }}">
+                          <p class="text-center">{{ plant.name }}</p>
+                        </button>
+                        {% endfor %}
+                    </div>    
+                    <input name="slot" id="slot" hidden value="0"> 
+                    <input name="plantname" id="plantname" hidden value="{{ available.0.name }}"> 
+                    <button class="mt-3 col-12 text-center btn btn-primary" type="submit" data-bs-dismiss="modal">Change</button>
+                </form>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    {% if user.get_incoming_friend_requests.exists %}
+    <div class="row mt-4">
+         <div class="col-12 mb-3">
+             <a href="{% url 'login' %}" class="btn btn-primary btn-lg btn-block">
+                 You have new friend requests
+             </a>
+         </div>
+    </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-6">
+            <div class="p-3" style="background-color: #f7b2b2;">
                 <h2 class="text-center">Current Tasks</h2>
-                <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
+                <ul class="list-group">
                     {% for item in challenge_list %}
                         {% if forloop.counter <= 4 %}
                             <li class="list-group-item">
                                 <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points</p>
-                                
+                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points
                                 {% if item.isQR %}
                                     <button class="form-check-input border border-dark" qr="{{ item.qrvalue }}" id="button-{{ item.id }}" onclick="startScanner({{ item.id }})"></button>
+                                    </p>
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                    <div id="reader-{{ item.id }}-reader" class="mt-2"></div>
+                                    <div id="reader-{{ item.id }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
                                 {% else %}
                                     <button class="remove-button form-check-input border border-dark"
                                         progress="{{ item.progress }}" 
                                         data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" 
                                         data-points="{{ item.rewardValue }}">
                                     </button>
+                                    </p>
                                 {% endif %}
-                                {% if item.repeatable is False %}
+                                {% if item.repeatable is False %} 
                                     <span class="badge bg-success text-dark">Achievement</span>
-                                {% endif %}
+                                {% endif %} 
                             </li>
                         {% endif %}
                     {% empty %}
@@ -60,18 +93,23 @@
                 <button class="btn btn-light mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
             </div>
         </div>
+
+        <!-- QR Code Scanner Section -->
+        <div class="col-6">
+            <div class="p-3 text-black rounded shadow text-center h-100" style="background-color: #C2C2F0;">
+                <h2>Scan QR Code</h2>
+                <div class="d-flex justify-content-center">
+                    <div id="reader" qrcode="0"></div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Enable scrolling if content overflows on mobile
-        document.querySelectorAll('.list-group').forEach(el => {
-            el.style.overflowY = "auto";
-            el.style.maxHeight = "300px";  // Prevents overflowing off-screen
-        });
-
         const removeButtons = document.querySelectorAll('.remove-button');
         removeButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -80,7 +118,6 @@
                 const tasks = button.getAttribute('data-tasks');
                 const progress = button.getAttribute('progress');
                 const confirmRemove = confirm('Are you sure you have completed this task?');
-
                 if (confirmRemove) {
                     if (tasks == (parseInt(progress) + 1)) {
                         fetch('api/v1/removeChallenge', {
@@ -113,9 +150,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': '{{ csrf_token }}',
                             },
-                            body: JSON.stringify({
-                                challengeId: challengeId
-                            })
+                            body: JSON.stringify({ challengeId: challengeId })
                         })
                         .then(response => {
                             if (response.ok) {
@@ -140,14 +175,13 @@
         const button = document.getElementById(`button-${challengeId}`);
         readerContainer.style.display = "block"; 
         button.style.display = "none";
-
         const qr = button.getAttribute('qr');
         let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
         var html5QrcodeScanner = new Html5QrcodeScanner(
             `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
         html5QrcodeScanner.render(function(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText) {
+            if (qr == decodedText){
                 alert("QR code scanned");
                 fetch(`/challenge_increment_progress/${challengeId}/`, {
                     method: "POST",
@@ -165,54 +199,50 @@
         });
     }
 
-    function updatePlantOwned(plantName, test){
+    function updatePlantOwned(plantName, test) {
         const $plantname = document.querySelector('#plantname');
         $plantname.value = plantName;
         console.log(plantName);
-
-        let allImages = document.querySelectorAll('[id^="owned"]');
-        allImages.forEach(image => {
-            image.setAttribute("class", "col-4 btn btn-outline-success");
+        let allButtons = document.querySelectorAll('[id^="owned"]');
+        allButtons.forEach(btn => {
+            btn.setAttribute("class", "col-4 btn btn-outline-success");
         });
         document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
     }
 
-    function swapClickable(){
-        var plantImages = document.querySelectorAll(".clickable")
-        console.log(plantImages)
-        if(plantImages.length != 0){
-            plantImages.forEach( plant => {
+    function swapClickable() {
+        var plantImages = document.querySelectorAll(".clickable");
+        if(plantImages.length !== 0){
+            plantImages.forEach(plant => {
                 plant.setAttribute("class", "nonClickable");
                 plant.removeEventListener('click', handleClick);
             });
-            console.log("No longer clickable")
-        } else{
-            plantImages = document.querySelectorAll(".nonClickable")
-            plantImages.forEach( plant => {
+            console.log("Garden images are now non-clickable");
+        } else {
+            plantImages = document.querySelectorAll(".nonClickable");
+            plantImages.forEach(plant => {
                 plant.setAttribute("class", "clickable");
                 plant.addEventListener('click', handleClick);
             });
-            console.log("Clickable")
+            console.log("Garden images are now clickable");
         }
     }
 
     function handleClick(event) {
         makeClickable(event.currentTarget);
     }
+
     function makeClickable(plant) {
-            const id = plant.getAttribute('id');
-            document.submitform.slot.value = id;
-            //    alert(id)
-            $('#editPlantModal').modal('show');
+        const id = plant.getAttribute('id');
+        document.submitform.slot.value = id;
+        $('#editPlantModal').modal('show');
     }
 </script>
 
 <style>
-    .clickable{
-        /* width: 150px; */
-  -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
-  filter: drop-shadow(5px 5px 5px #eaff00);
+    .clickable {
+        -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
+        filter: drop-shadow(5px 5px 5px #eaff00);
     }
 </style>
-
 {% endblock %}
