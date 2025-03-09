@@ -7,7 +7,7 @@
 <div class="container-fluid">
 
     <div id="garden-display" class="container mx-auto w-md-50 w-100" style="position: relative;">
-        <img width="100%" src="{% static 'garden.png' %}" alt="garden background">
+        <img width="100%" src="static/backgrounds/garden.png" alt="garden background">
         <img class="nonClickable" id="1" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
         <img class="nonClickable" id="2" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
         <img class="nonClickable" id="3" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
@@ -59,7 +59,7 @@
     {% endif %}
 
     <div class="row mt-4">
-        <div class="col-6">
+        <div class="col-12">
             <div class="p-3" style="background-color: #f7b2b2;">
                 <h2 class="text-center">Current Tasks</h2>
                 <ul class="list-group">
@@ -94,15 +94,6 @@
             </div>
         </div>
 
-        <!-- QR Code Scanner Section -->
-        <div class="col-6">
-            <div class="p-3 text-black rounded shadow text-center h-100" style="background-color: #C2C2F0;">
-                <h2>Scan QR Code</h2>
-                <div class="d-flex justify-content-center">
-                    <div id="reader" qrcode="0"></div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 

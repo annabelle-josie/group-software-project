@@ -1,34 +1,167 @@
 {% extends 'base.html' %}
 {% block title %}Friends{% endblock %}
 {% block content %}
+{% load static %}
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5"> <!-- Added bottom margin -->
     <h1 class="text-center mb-4">Friends</h1>
 
+    <!-- View Friends Section -->
     <div class="card mb-3 shadow-sm">
-        <div class="card-body text-center">
-            <h3 class="card-title">View Friends</h3>
-            <p class="card-text">See your current friends list.</p>
-            <a href="{% url 'login' %}" class="btn btn-primary">Go to Friends List</a>
+        <div class="card-body">
+            <h3 class="card-title text-center">Your Friends</h3>
+            <p class="card-text text-center">Click to view a friend's garden or remove them.</p>
+
+            {% if friends_page %}
+                <div class="list-group">
+                    {% for friend in friends_page %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ friend.username }}</strong>
+                                <span class="badge bg-info text-dark ms-2">{{ friend.stats.points }} points</span>
+                            </div>
+                            <div>
+                                <!-- View Garden Button -->
+                                <button type="button" class="btn btn-primary btn-sm"
+                                    data-username="{{ friend.username }}"
+                                    data-plant1="{{ friend.usergarden.plant1Id.image.url|default_if_none:'' }}"
+                                    data-plant2="{{ friend.usergarden.plant2Id.image.url|default_if_none:'' }}"
+                                    data-plant3="{{ friend.usergarden.plant3Id.image.url|default_if_none:'' }}"
+                                    data-plant4="{{ friend.usergarden.plant4Id.image.url|default_if_none:'' }}"
+                                    data-plant5="{{ friend.usergarden.plant5Id.image.url|default_if_none:'' }}"
+                                    data-plant6="{{ friend.usergarden.plant6Id.image.url|default_if_none:'' }}"
+                                    data-bs-toggle="modal" data-bs-target="#gardenModal">
+                                    View Garden
+                                </button>
+
+                                <!-- Remove Friend Button -->
+                                <button type="button" class="btn btn-danger btn-sm ms-2"
+                                    data-username="{{ friend.username }}"
+                                    data-userid="{{ friend.id }}"
+                                    data-bs-toggle="modal" data-bs-target="#confirmRemoveModal">
+                                    Remove Friend
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination (Only Show if More than 8 Friends Exist) -->
+                {% if friends_total > 8 %}
+                    <nav aria-label="Friends pagination" class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            {% if friends_page.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo; First</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ friends_page.previous_page_number }}">Previous</a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link">Page {{ friends_page.number }} of {{ friends_page.paginator.num_pages }}</span>
+                            </li>
+
+                            {% if friends_page.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ friends_page.next_page_number }}">Next</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ friends_page.paginator.num_pages }}">Last &raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <p class="text-center">You have no friends yet.</p>
+            {% endif %}
         </div>
     </div>
 
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body text-center">
-            <h3 class="card-title">Add Friend</h3>
-            <p class="card-text">Search for users and send friend requests.</p>
-            <a href="{% url 'login' %}" class="btn btn-success">Find Friends</a>
-        </div>
+    <!-- Add Friend Button -->
+    <div class="text-center">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFriendModal">
+            Add Friend
+        </button>
     </div>
-
-    <div class="card mb-3 shadow-sm">
-        <div class="card-body text-center">
-            <h3 class="card-title">Friend Requests</h3>
-            <p class="card-text">See and respond to incoming friend requests.</p>
-            <a href="{% url 'login' %}" class="btn btn-warning">Check Requests</a>
-        </div>
-    </div>
-
 </div>
+
+<!-- Friend Garden Modal -->
+<div class="modal fade" id="gardenModal" tabindex="-1" aria-labelledby="modalText" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalText">Player's Garden</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container mx-auto w-100 position-relative">
+                    <img width="100%" src="static/backgrounds/garden.png" alt="garden background">
+                    <img id="plant1img" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);">
+                    <img id="plant2img" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);">
+                    <img id="plant3img" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);">
+                    <img id="plant4img" width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);">
+                    <img id="plant5img" width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);">
+                    <img id="plant6img" width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Remove Friend Modal -->
+<div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-labelledby="removeFriendLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Remove Friend</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove <strong id="removeFriendName"></strong> as a friend?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmRemoveButton">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Removing Friends -->
+<script>
+    var confirmRemoveModal = document.getElementById('confirmRemoveModal');
+    var removeFriendButton = document.getElementById("confirmRemoveButton");
+    var removeFriendUserId = null;
+
+    confirmRemoveModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var username = button.getAttribute("data-username");
+        removeFriendUserId = button.getAttribute("data-userid");
+        document.getElementById("removeFriendName").textContent = username;
+    });
+
+    removeFriendButton.addEventListener("click", function () {
+        fetch("/remove_friend/", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user_id: removeFriendUserId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+</script>
 
 {% endblock %}

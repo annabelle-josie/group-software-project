@@ -99,13 +99,15 @@ class CustomUser(AbstractUser):
         return False
 
     def get_friends(self):
-        """Returns a queryset of all accepted friends."""
+        """Returns a queryset of all accepted friends, including their garden and plants."""
         friends = Friendship.objects.filter(
             models.Q(user1=self, status="accepted") | models.Q(user2=self, status="accepted")
         ).values_list("user1", "user2")
 
         friend_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
-        return CustomUser.objects.filter(id__in=friend_ids)
+        
+        return CustomUser.objects.filter(id__in=friend_ids).select_related('usergarden')
+
     
     def get_incoming_friend_requests(self):
         """Returns a queryset of friend requests that were sent to the user."""
