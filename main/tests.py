@@ -16,9 +16,10 @@ class HomePageTest(TestCase):
         # List of all protected views that require authentication
         self.protected_urls = [
             reverse('home'),
+            reverse('friends'),
+            reverse('events'),
             reverse('leaderboard'),
             reverse('market'),
-            reverse('events'),
         ]
 
     def test_redirects_for_unauthenticated_users(self):

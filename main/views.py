@@ -618,3 +618,8 @@ def delete_account(request):
         messages.success(request, 'Your account has been deleted successfully.')
         return redirect('home')
     return render(request, 'settings.html')
+
+
+@login_required(login_url="/auth/login")
+def friends(request):
+    return render(request, "friends.html")
