@@ -93,8 +93,7 @@ def home(request):
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
 
 @login_required(login_url="/auth/login")
-
-View(request):
+def gardenView(request):
     """View to display the garden on the main page"""
     userGarden = UserGarden.objects.get(user=request.user)
     users = CustomUser.objects.get(username= request.user)
