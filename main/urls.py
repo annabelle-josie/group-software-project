@@ -11,6 +11,7 @@ urlpatterns = [
     # path("save", views.save_image,name="save" ),
     # path("garden/", include("garden.urls")),  # Include garden app URLs
     path("friends/", views.friends, name="friends"),
+    path("remove_friend/", views.remove_friend, name="remove_friend"),
     path("events", views.events, name="events"),  # Events page
     path("market/", views.market_view, name="market"),  # Market page
     # path("addChallenge", views.add_challenge),  # Add challenge endpoint

@@ -12,6 +12,7 @@ from .serializers import *
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -671,4 +672,35 @@ def delete_account(request):
 
 @login_required(login_url="/auth/login")
 def friends(request):
-    return render(request, "friends.html")
+    user_friends = request.user.get_friends()
+    friends_total = user_friends.count()
+
+    if friends_total > 8:
+        paginator = Paginator(user_friends, 8)
+        page_number = request.GET.get('page')
+        friends_page = paginator.get_page(page_number)
+    else:
+        friends_page = user_friends
+
+    return render(request, "friends.html", {"friends_page": friends_page, "friends_total": friends_total})
+
+@login_required
+def remove_friend(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            friend_id = data.get("user_id")
+            if not friend_id:
+                return JsonResponse({"success": False, "message": "Invalid request."})
+
+            friend = get_object_or_404(CustomUser, id=friend_id)
+            success = request.user.unfriend(friend)
+
+            if success:
+                return JsonResponse({"success": True, "message": "Friend removed successfully."})
+            else:
+                return JsonResponse({"success": False, "message": "You are not friends."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    
+    return JsonResponse({"success": False, "message": "Invalid request method."})
