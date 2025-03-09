@@ -88,7 +88,9 @@ def home(request):
         for challenge_participant in user_challenge
     ]
 
-    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
+    users = CustomUser.objects.get(username= request.user)
+    available = users.owned_plants.all()
+    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
 
 # leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
@@ -101,10 +103,6 @@ def leaderboard(request):
 
 def garden(request):
     return render(request, "garden.html")
-
-
-
-
 
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
