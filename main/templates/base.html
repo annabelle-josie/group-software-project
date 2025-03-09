@@ -59,8 +59,6 @@
             <p class="mb-0">{{ user.stats.leaves }}</p>
             <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-2" alt="leaf icon">
           </div>
-        {% else %}
-          <span>Guest</span>
         {% endif %}
     </div>
 
@@ -72,15 +70,18 @@
         </a>
         <!-- Dropdown Items -->
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-          <li><a class="dropdown-item" href="/">Home</a></li>
-          <li><a class="dropdown-item" href="/garden">Garden</a></li>
-          <li><a class="dropdown-item" href="/events">Events</a></li>
-          <li><a class="dropdown-item" href="/leaderboard">Leaderboard</a></li>
-          <li><a class="dropdown-item" href="/market">Market</a></li>
-          <li><a class="dropdown-item" href="/settings">Settings</a></li>
-          {% if user.is_authenticated %}
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
+            {% if user.is_authenticated %}
+                <li><a class="dropdown-item" href="/">Home</a></li>
+                <li><a class="dropdown-item" href="/garden">Garden</a></li>
+                <li><a class="dropdown-item" href="/events">Events</a></li>
+                <li><a class="dropdown-item" href="/leaderboard">Leaderboard</a></li>
+                <li><a class="dropdown-item" href="/market">Market</a></li>
+                <li><a class="dropdown-item" href="/settings">Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" id="logoutButton">Log Out</a></li>
+            {%else%} 
+                <a class="dropdown-item" href="{% url 'login' %}">Login</a>
+                <a class="dropdown-item" href="{% url 'signup' %}">Sign Up</a>
           {% endif %}
         </ul>
       </div>
