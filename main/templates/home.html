@@ -6,97 +6,61 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- <div class="row">
-        <div class="col-12 p-3 text-center bg-light">
-            {% if user.is_authenticated %}
-                {% if user.username|last != "s" %}
-                    <h1>{{ user.username }}'s Garden</h1>
-                {% else %}
-                    <h1>{{ user.username }}' Garden</h1>
-                {% endif %}
-            {% else %}
-                <h1>Guest's Garden!</h1>
-            {% endif %}
-        </div>
-    </div> -->
+    <!-- Garden Section (Unchanged as requested) -->
+    <div class="container mx-auto w-md-50 w-100 position-relative">
+        <img width="100%" src="{% static 'garden.png' %}" alt="garden background">
+        <img width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+        <img width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+        <img width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+        <img width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+        <img width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+        <img width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+    </div>
 
-    <!-- Garden Section -->
-    <!-- <div class="mt-3 h-60 row">
-            <div class="d-flex flex-wrap justify-content-center"> 
-                {% for plant in plant_slots %}
-                    <a href="/garden" class="col-4 col-md-2 p-2">
-                        <div class="p-3 rounded" style="background-color: #f7b2b2;">
-                            {% if plant and plant.image %}
-                                <img class="img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
-                            {% else %}
-                                <img class="img-fluid" src="{% static 'placeholder.jpg' %}" alt="empty_slot">
-                            {% endif %}
-                        </div>
-                    </a>
-                {% empty %}
-                    <p>You have not created a garden yet. <a href="/garden">Go to the garden page.</a></p>
-                {% endfor %}
-            </div> -->
-    <!-- </div>  -->
+    <!-- Make this section scrollable if content overflows -->
+    <div class="row mt-4 scrollable-section">
+        {% if user.get_incoming_friend_requests.exists %}
+            <div class="col-md-6 col-12 mb-3">
+                <div class="p-3 rounded shadow" style="background-color: #C2C2F0;">
+                    <h2 class="text-center">Friends</h2>
+                    <div class="d-flex justify-content-center">
+                        <div id="reader" qrcode="0"></div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
 
-        <!-- Garden Section -->
-        <div class="container mx-auto w-md-50 w-100" style="position: relative;">
-            <img width=100% src="{% static 'garden.png' %}" alt="garden background">
-            <img width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
-            <img width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
-            <img width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
-            <img width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
-            <img width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
-            <img width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
-        </div>
-
-    <!-- Tasks & QR Scanner Section -->
-    <div class="row mt-4">
-        <!-- Current Tasks Section -->
-        <div class="col-6">
-            <div class="p-3" style="background-color: #f7b2b2;">
+        <div class="col-md-6 col-12 mb-3">
+            <div class="p-3 rounded shadow" style="background-color: #f7b2b2;">
                 <h2 class="text-center">Current Tasks</h2>
-                <ul class="list-group">
+                <ul class="list-group" style="max-height: 300px; overflow-y: auto;">
                     {% for item in challenge_list %}
                         {% if forloop.counter <= 4 %}
                             <li class="list-group-item">
                                 <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points
+                                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points</p>
+                                
                                 {% if item.isQR %}
-                                    
-                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
-                                    </button> </p>
+                                    <button class="form-check-input border border-dark" qr="{{ item.qrvalue }}" id="button-{{ item.id }}" onclick="startScanner({{ item.id }})"></button>
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                    <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                                    <div id="reader-{{ item.id }}-reader" class="mt-2"></div>
                                 {% else %}
-
-                                <button class="remove-button form-check-input border border-dark"
-                                    progress="{{ item.progress }}" 
-                                    data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" 
-                                    data-points="{{ item.rewardValue }}">
-    
-                                </button> </p>
+                                    <button class="remove-button form-check-input border border-dark"
+                                        progress="{{ item.progress }}" 
+                                        data-tasks="{{ item.noOfTasks }}" data-id="{{ item.id }}" 
+                                        data-points="{{ item.rewardValue }}">
+                                    </button>
                                 {% endif %}
-                                {% if item.repeatable is False %} 
-                                    <span class="badge bg-success text-dark">Achievment</span>
-                                {% endif %} 
+                                {% if item.repeatable is False %}
+                                    <span class="badge bg-success text-dark">Achievement</span>
+                                {% endif %}
                             </li>
-                            {% endif %}
+                        {% endif %}
                     {% empty %}
                         <p class="text-center">No challenges left</p>
                     {% endfor %}
                 </ul>
                 <button class="btn btn-light mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
-            </div>
-        </div>
-
-        <!-- QR Code Scanner Section -->
-        <div class="col-6">
-            <div class="p-3 text-black rounded shadow text-center h-100" style="background-color: #C2C2F0;">
-                <h2>Scan QR Code</h2>
-                <div class="d-flex justify-content-center">
-                    <div id="reader" qrcode="0"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -105,6 +69,12 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Enable scrolling if content overflows on mobile
+        document.querySelectorAll('.list-group').forEach(el => {
+            el.style.overflowY = "auto";
+            el.style.maxHeight = "300px";  // Prevents overflowing off-screen
+        });
+
         const removeButtons = document.querySelectorAll('.remove-button');
         removeButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -115,54 +85,54 @@
                 const confirmRemove = confirm('Are you sure you have completed this task?');
 
                 if (confirmRemove) {
-                        if (tasks == (parseInt(progress) + 1)) {
-                            fetch('api/v1/removeChallenge', {
-                                method: 'DELETE',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': '{{ csrf_token }}',
-                                },
-                                body: JSON.stringify({
-                                    challengeId: challengeId,
-                                    points: points
-                                })
+                    if (tasks == (parseInt(progress) + 1)) {
+                        fetch('api/v1/removeChallenge', {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify({
+                                challengeId: challengeId,
+                                points: points
                             })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert('Challenge completed!');
-                                    location.reload();
-                                } else {
-                                    alert('Error completing challenge.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Challenge completed!');
+                                location.reload();
+                            } else {
                                 alert('Error completing challenge.');
-                            });
-                        } else {
-                            fetch('api/v1/removeTask', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': '{{ csrf_token }}',
-                                },
-                                body: JSON.stringify({
-                                    challengeId: challengeId
-                                })
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error completing challenge.');
+                        });
+                    } else {
+                        fetch('api/v1/removeTask', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify({
+                                challengeId: challengeId
                             })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert('Task completed!');
-                                    location.reload();
-                                } else {
-                                    alert('Error completing task.');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('Task completed!');
+                                location.reload();
+                            } else {
                                 alert('Error completing task.');
-                            });
-                        }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error completing task.');
+                        });
+                    }
                 }
             });
         });
@@ -171,19 +141,17 @@
     function startScanner(challengeId) {
         const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
         const button = document.getElementById(`button-${challengeId}`);
-        alert(challengeId)
         readerContainer.style.display = "block"; 
         button.style.display = "none";
-        alert(challengeId)
+
         const qr = button.getAttribute('qr');
-        alert("hi")
         let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
         var html5QrcodeScanner = new Html5QrcodeScanner(
             `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
         html5QrcodeScanner.render(function(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText){
-                alert("qrcode scanned")
+            if (qr == decodedText) {
+                alert("QR code scanned");
                 fetch(`/challenge_increment_progress/${challengeId}/`, {
                     method: "POST",
                     headers: {
@@ -191,16 +159,14 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ qrCode: decodedText })
-                })
-                alert('task completed!');
+                });
+                alert('Task completed!');
                 window.location.reload();
-            }
-            else{
-                alert("try a different code")
+            } else {
+                alert("Try a different code");
             }
         });
     }
 </script>
 
 {% endblock %}
-

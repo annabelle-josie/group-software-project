@@ -108,12 +108,11 @@ class CustomUser(AbstractUser):
         return CustomUser.objects.filter(id__in=friend_ids)
     
     def get_incoming_friend_requests(self):
-        """Returns a queryset of all friend requests."""
-        friends = Friendship.objects.filter(
-            models.Q(user1=self, status="pending") | models.Q(user2=self, status="pending")
-        ).values_list("user1", "user2")
+        """Returns a queryset of friend requests that were sent to the user."""
+        request_ids = Friendship.objects.filter(
+            user2=self, status="pending"
+        ).values_list("user1", flat=True)
 
-        request_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
         return CustomUser.objects.filter(id__in=request_ids)
 
 
