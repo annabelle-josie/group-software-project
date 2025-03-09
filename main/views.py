@@ -556,7 +556,7 @@ def profile(request, username):
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
 
-@login_required
+@login_required()
 def settings(request):
     user_form = ProfileUpdateForm(instance=request.user)
     password_form = CustomPasswordChangeForm(user=request.user)
