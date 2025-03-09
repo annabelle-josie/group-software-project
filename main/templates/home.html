@@ -6,49 +6,48 @@
 
 {% block content %}
 <div class="container-fluid">
-    <!-- <div class="row">
-        <div class="col-12 p-3 text-center bg-light">
-            {% if user.is_authenticated %}
-                {% if user.username|last != "s" %}
-                    <h1>{{ user.username }}'s Garden</h1>
-                {% else %}
-                    <h1>{{ user.username }}' Garden</h1>
-                {% endif %}
-            {% else %}
-                <h1>Guest's Garden!</h1>
-            {% endif %}
-        </div>
-    </div> -->
-
-    <!-- Garden Section -->
-    <!-- <div class="mt-3 h-60 row">
-            <div class="d-flex flex-wrap justify-content-center"> 
-                {% for plant in plant_slots %}
-                    <a href="/garden" class="col-4 col-md-2 p-2">
-                        <div class="p-3 rounded" style="background-color: #f7b2b2;">
-                            {% if plant and plant.image %}
-                                <img class="img-fluid" src="{{ plant.image.url }}" alt="{{ plant.name }}">
-                            {% else %}
-                                <img class="img-fluid" src="{% static 'placeholder.jpg' %}" alt="empty_slot">
-                            {% endif %}
-                        </div>
-                    </a>
-                {% empty %}
-                    <p>You have not created a garden yet. <a href="/garden">Go to the garden page.</a></p>
-                {% endfor %}
-            </div> -->
-    <!-- </div>  -->
-
         <!-- Garden Section -->
-        <div class="container mx-auto w-md-50 w-100" style="position: relative;">
-            <img width=100% src="{% static 'garden.png' %}" alt="garden background">
-            <img width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
-            <img width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
-            <img width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
-            <img width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
-            <img width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
-            <img width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+            <div id="garden-display" class="container mx-auto w-md-50 w-100" style="position: relative;">
+                <img width=100% src="{% static 'garden.png' %}" alt="garden background">
+                <img class="nonClickable" id="1" width=20% style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+                <img class="nonClickable" id="2" width=20% style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+                <img class="nonClickable" id="3" width=20% style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+                <img class="nonClickable" id="4" width=20% style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+                <img class="nonClickable" id="5" width=20% style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+                <img class="nonClickable" id="6" width=20% style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+            </div>
+            <button class="mt-3 col-12 text-center btn btn-primary" type="button" onclick="swapClickable()">Edit garden</button>        
+
+          <!-- Modal -->
+  <div class="modal fade" id="editPlantModal" tabindex="-1" role="dialog" aria-labelledby="editPlantModal" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-between">
+          <h5 class="modal-title" id="editPlantModal">Choose a New Plant</h5>
+          <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+            <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                {% csrf_token %}
+                <div class="row">
+                    {% for plant in available %}
+                    <button id="owned{{plant.id}}" type="button" class="col-4 btn btn-outline-success" onclick='updatePlantOwned( "{{plant.name}}", "owned{{plant.id}}")'>
+                      <img src="{{ plant.image.url }}" class="img-fluid" alt="ahhhhh">
+                      <p class="text-center">{{ plant.name }}</p>
+                    </button>
+                    {% endfor %}
+                </div>    
+                <input name="slot" id="slot" hidden value="0"> 
+                <input name="plantname" id="plantname" hidden value={{available.0.name}}> 
+                <button class="mt-3 col-12 text-center btn btn-primary" type="submit" data-bs-dismiss="modal">Change</button>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
     <!-- Tasks & QR Scanner Section -->
     <div class="row mt-4">
@@ -200,7 +199,56 @@
             }
         });
     }
+
+    function updatePlantOwned(plantName, test){
+        const $plantname = document.querySelector('#plantname');
+        $plantname.value = plantName;
+        console.log(plantName);
+
+        let allImages = document.querySelectorAll('[id^="owned"]');
+        allImages.forEach(image => {
+            image.setAttribute("class", "col-4 btn btn-outline-success");
+        });
+        document.getElementById(test).setAttribute("class", "col-4 btn btn-outline-success active");
+    }
+
+    function swapClickable(){
+        var plantImages = document.querySelectorAll(".clickable")
+        console.log(plantImages)
+        if(plantImages.length != 0){
+            plantImages.forEach( plant => {
+                plant.setAttribute("class", "nonClickable");
+                plant.removeEventListener('click', handleClick);
+            });
+            console.log("No longer clickable")
+        } else{
+            plantImages = document.querySelectorAll(".nonClickable")
+            plantImages.forEach( plant => {
+                plant.setAttribute("class", "clickable");
+                plant.addEventListener('click', handleClick);
+            });
+            console.log("Clickable")
+        }
+    }
+
+    function handleClick(event) {
+        makeClickable(event.currentTarget);
+    }
+    function makeClickable(plant) {
+            const id = plant.getAttribute('id');
+            document.submitform.slot.value = id;
+            //    alert(id)
+            $('#editPlantModal').modal('show');
+    }
 </script>
+
+<style>
+    .clickable{
+        /* width: 150px; */
+  -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
+  filter: drop-shadow(5px 5px 5px #eaff00);
+    }
+</style>
 
 {% endblock %}
 

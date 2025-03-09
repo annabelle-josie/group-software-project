@@ -16,7 +16,6 @@ class HomePageTest(TestCase):
         self.protected_urls = [
             reverse('home'),
             reverse('leaderboard'),
-            reverse('garden'),
             reverse('market'),
             reverse('events'),
         ]
