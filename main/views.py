@@ -583,3 +583,7 @@ def settings(request):
         'password_form': password_form
     }
     return render(request, "settings.html", context)
+
+@login_required(login_url="/auth/login")
+def friends(request):
+    return render(request, "friends.html")

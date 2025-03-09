@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Friends{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Friends</h1>
+
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body text-center">
+            <h3 class="card-title">View Friends</h3>
+            <p class="card-text">See your current friends list.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary">Go to Friends List</a>
+        </div>
+    </div>
+
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body text-center">
+            <h3 class="card-title">Add Friend</h3>
+            <p class="card-text">Search for users and send friend requests.</p>
+            <a href="{% url 'login' %}" class="btn btn-success">Find Friends</a>
+        </div>
+    </div>
+
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body text-center">
+            <h3 class="card-title">Friend Requests</h3>
+            <p class="card-text">See and respond to incoming friend requests.</p>
+            <a href="{% url 'login' %}" class="btn btn-warning">Check Requests</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
