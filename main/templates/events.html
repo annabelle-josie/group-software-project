@@ -3,8 +3,9 @@
 {% load static %}
 
 {% block content %}
-<div style="background-image: url('../static/backgrounds/leafBackground.jpg')">
-    <div class="w-100 p-3 h-8 text-center">
+<div class="pb-3" style="background-image: url('../static/backgrounds/leafBackground.jpg')">
+    <div class="w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
+            <div class="col-5 bg-success text-light rounded">
         {% if user.is_authenticated %}
             {% if user.username|last != "s" %}
                 <h1>{{ user.username }}'s Events</h1>
@@ -14,6 +15,7 @@
         {% else %}
             <h1>You are not logged on.</h1>
         {% endif %}
+        </div>
     </div>
     <div class="album">
         <div class="container">
@@ -47,7 +49,9 @@
             </div>
         </div>
 
-        <h1 class="mt-5 w-100 p-3 h-8 text-center mb-3">Available Events</h1>
+        <h1 class="mt-5 w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
+            <div class="col-5 bg-success text-light rounded">Available Events</div>
+        </h1>
         <div class="album">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
@@ -478,8 +482,6 @@
         });
     }
     }
-
-    </script>
 
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
