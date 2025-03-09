@@ -10,6 +10,7 @@ urlpatterns = [
     # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),
     # path("garden/", include("garden.urls")),  # Include garden app URLs
+    path("friends/", views.friends, name="friends"),
     path("events", views.events, name="events"),  # Events page
     path("market/", views.market_view, name="market"),  # Market page
     # path("addChallenge", views.add_challenge),  # Add challenge endpoint
@@ -27,6 +28,6 @@ urlpatterns = [
     path('settings/', views.settings, name='settings'),
     path("api/get_garden/<int:user_id>/", views.get_garden, name="get_garden"),
     path("updateGarden", views.updateGarden, name="updateGarden"),
-    path('scan-qr/<int:event_id>/<str:qr_code>/', views.scan_qr, name='scan_qr')
-
+    path('scan-qr/<int:event_id>/<str:qr_code>/', views.scan_qr, name='scan_qr'),
+    path('delete_account/', views.delete_account, name='delete_account'),
 ]
