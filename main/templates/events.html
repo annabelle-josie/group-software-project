@@ -27,9 +27,9 @@
                             <p class="card-text">{{ event.desc }}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-toggle="modal" data-target="#activeEventModal">View</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
                                 {% if event.eventMaster == user.username %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-toggle="modal" data-target="#availableEventModal">Edit</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
                                 {% endif %}
                                 </div>
                                 <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
@@ -58,7 +58,7 @@
                         <div class="card-body">
                         <div class="d-flex justify-content-center align-items-center">
                             <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#createEventModal">Create a New Event</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createEventModal">Create a New Event</button>
                             </div>
                         </div>
                         </div>
@@ -76,9 +76,9 @@
                     <p class="card-text">{{ event.desc }}</p>
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-toggle="modal" data-target="#availableEventModal">View</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
                         {% if event.eventMaster == user.username %}
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-toggle="modal" data-target="#availableEventModal">Edit</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
                         {% endif %}
                         </div>
                         <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
@@ -102,7 +102,7 @@
         {% with events.0 as event %}
             <div class="modal-header d-flex justify-content-between">
             <h5 class="modal-title" id="activeEventModalLabel">{{ event.title }}</h5>
-            <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
             </div>
@@ -156,7 +156,7 @@
         {% with available_events.0 as event %}
             <div class="modal-header d-flex justify-content-between">
             <h5 class="modal-title" id="availableEventModalLabel">{{ event.title }}</h5>
-            <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+            <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
             </div>
@@ -183,7 +183,7 @@
       <div class="modal-content">
         <div class="modal-header d-flex justify-content-between">
           <h5 class="modal-title" id="createEventModal">Create a New Event</h5>
-          <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+          <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -487,6 +487,5 @@ if (confirm("Are you sure you want to delete this event?")) {
 
 </script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 {% endblock %}
