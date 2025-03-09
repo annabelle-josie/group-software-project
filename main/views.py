@@ -16,7 +16,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from event_management.models import Events, EventParticipants
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from garden.models import UserGarden
 from user_management.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
@@ -150,8 +150,33 @@ def leaderboard(request):
     for person in userrank:
         rank = person.userrank
     context['rank'] = rank
+    for entry in context['leaderboard']:
+        try:
+            user = CustomUser.objects.get(username=entry['username'])
+            user_garden = UserGarden.objects.get(user_id=user.id)
+            plant1 = Plant.objects.get(id=user_garden.plant1Id_id)
+            plant2 = Plant.objects.get(id=user_garden.plant2Id_id)
+            plant3 = Plant.objects.get(id=user_garden.plant3Id_id)
+            plant4 = Plant.objects.get(id=user_garden.plant4Id_id)
+            plant5 = Plant.objects.get(id=user_garden.plant5Id_id)
+            plant6 = Plant.objects.get(id=user_garden.plant6Id_id)
+            entry['plant1'] = plant1.image.url
+            entry['plant2'] = plant2.image.url
+            entry['plant3'] = plant3.image.url
+            entry['plant4'] = plant4.image.url
+            entry['plant5'] = plant5.image.url
+            entry['plant6'] = plant6.image.url
+        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist, Plant.DoesNotExist):
+            entry['plant1'] = '/static/potted_plant.png'
+            entry['plant2'] = '/static/potted_plant.png'
+            entry['plant3'] = '/static/potted_plant.png'
+            entry['plant4'] = '/static/potted_plant.png'
+            entry['plant5'] = '/static/potted_plant.png'
+            entry['plant6'] = '/static/potted_plant.png'
     return render(request, "leaderboard.html", context)
 
+def garden(request):
+    return render(request, "garden.html")
 
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
@@ -583,6 +608,17 @@ def settings(request):
         'password_form': password_form
     }
     return render(request, "settings.html", context)
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your account has been deleted successfully.')
+        return redirect('home')
+    return render(request, 'settings.html')
+
 
 @login_required(login_url="/auth/login")
 def friends(request):

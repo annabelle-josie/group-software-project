@@ -43,10 +43,10 @@ class FriendshipTests(TestCase):
 
     def setUp(self):
         """Create two users for testing friendships."""
-        self.user_a = CustomUser.objects.create_user(username="userA", password="testpassword")
-        self.user_b = CustomUser.objects.create_user(username="userB", password="testpassword")
-        self.user_c = CustomUser.objects.create_user(username="userC", password="testpassword")
-        self.user_d = CustomUser.objects.create_user(username="userD", password="testpassword")
+        self.user_a = CustomUser.objects.create_user(username="userA", email='testemail1@email.com', password="testpassword")
+        self.user_b = CustomUser.objects.create_user(username="userB", email='testemail2@email.com', password="testpassword")
+        self.user_c = CustomUser.objects.create_user(username="userC", email='testemail3@email.com', password="testpassword")
+        self.user_d = CustomUser.objects.create_user(username="userD", email='testemail4@email.com', password="testpassword")
 
     def test_send_friend_request(self):
         """Test sending a friend request."""
