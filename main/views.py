@@ -93,10 +93,13 @@ def home(request):
 # leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
 def leaderboard(request):
+    user = request.user
     context = get_leaderboard(request).content
     context = json.loads(context)
-    context['points'] = UserStats.objects.get(user_id=request.user.id).points
-    context['leaves'] = UserStats.objects.get(user_id=request.user.id).leaves
+    userrank = UserStats.objects.raw("SELECT userrank, id FROM (SELECT user_management_userstats.*, RANK() OVER (ORDER BY points DESC) as userrank FROM user_management_userstats) user_management_userstats WHERE user_id = " + str(user.id))
+    for person in userrank:
+        rank = person.userrank
+    context['rank'] = rank
     return render(request, "leaderboard.html", context)
 
 def garden(request):
