@@ -14,17 +14,17 @@
     <div class="row d-flex justify-content-center">
         <div class="col-3 text-center">
             <img class="img-fluid " style="max-width:30px" src="{% static 'icons/crown.png' %}" alt="crown icon">
-            <h1>10</h1>
-            <p>Rank HARDCODE</p>
+            <h1>{{rank}}</h1>
+            <p>Rank</p>
         </div>
         <div class="col-3 text-center">
             <img class="img-fluid " style="max-width:30px" src="{% static 'icons/leaf.png' %}" alt="leaf icon">
-            <h1>{{leaves}}</h1>
+            <h1>{{user.stats.leaves}}</h1>
             <p>Leaves</p>
         </div>
         <div class="col-3 text-center">
             <img class="img-fluid " style="max-width:30px" src="{% static 'icons/point.png' %}" alt="point icon">
-            <h1>{{points}}</h1>
+            <h1>{{user.stats.points}}</h1>
             <p>Points</p>
         </div>
     </div>
@@ -64,13 +64,13 @@
                 {% endfor %}
                 {% if user.is_authenticated %}
                 <tr>
-                    <td>You</td>
+                    <td>{{rank}}</td>
                     <td>
                         <div class="d-flex justify-content-between">
                         {{user.username}}
                     </div>
                     </td>
-                    <td>{{points}}</td>
+                    <td>{{user.stats.points}}</td>
                 </tr>
                 {% endif %}
             </tbody>
