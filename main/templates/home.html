@@ -21,12 +21,9 @@
     <div class="row mt-4 scrollable-section">
         {% if user.get_incoming_friend_requests.exists %}
             <div class="col-md-6 col-12 mb-3">
-                <div class="p-3 rounded shadow" style="background-color: #C2C2F0;">
-                    <h2 class="text-center">Friends</h2>
-                    <div class="d-flex justify-content-center">
-                        <div id="reader" qrcode="0"></div>
-                    </div>
-                </div>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg btn-block">
+                    You have new friend requests
+                </a>
             </div>
         {% endif %}
 
