@@ -675,32 +675,71 @@ def friends(request):
     user_friends = request.user.get_friends()
     friends_total = user_friends.count()
 
-    if friends_total > 8:
-        paginator = Paginator(user_friends, 8)
+    if friends_total > 4:
+        paginator = Paginator(user_friends, 4)
         page_number = request.GET.get('page')
         friends_page = paginator.get_page(page_number)
     else:
         friends_page = user_friends
 
     return render(request, "friends.html", {"friends_page": friends_page, "friends_total": friends_total})
-
 @login_required
 def remove_friend(request):
     if request.method == "POST":
+        data = json.loads(request.body)
+        friend_id = data.get("user_id")
+        if not friend_id:
+            return HttpResponse("Invalid request", status=400)
+        friend = get_object_or_404(CustomUser, id=friend_id)
+        request.user.unfriend(friend)
+        return HttpResponse(status=200)
+    return HttpResponse("Invalid request method", status=405)
+
+
+@login_required
+def send_friend_request(request):
+    if request.method == "POST":
         try:
             data = json.loads(request.body)
-            friend_id = data.get("user_id")
-            if not friend_id:
-                return JsonResponse({"success": False, "message": "Invalid request."})
-
-            friend = get_object_or_404(CustomUser, id=friend_id)
-            success = request.user.unfriend(friend)
-
-            if success:
-                return JsonResponse({"success": True, "message": "Friend removed successfully."})
-            else:
-                return JsonResponse({"success": False, "message": "You are not friends."})
-        except Exception as e:
+            username = data.get("username")
+            if not username:
+                return JsonResponse({"success": False, "message": "Username is required."})
+            try:
+                to_user = CustomUser.objects.get(username=username)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"success": False, "message": "User does not exist."})
+            request.user.send_friend_request(to_user)
+            return JsonResponse({"success": True, "message": "Friend request sent."})
+        except ValueError as e:
             return JsonResponse({"success": False, "message": str(e)})
-    
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+
+
+@login_required
+def accept_friend_request(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        friend_id = data.get("user_id")
+        if not friend_id:
+            return HttpResponse("Invalid request.", status=400)
+        friend = get_object_or_404(CustomUser, id=friend_id)
+        request.user.accept_friend_request(friend)
+        return HttpResponse(status=200)
+    return HttpResponse("Invalid request method", status=405)
+
+
+@login_required
+def reject_friend_request(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        friend_id = data.get("user_id")
+        if not friend_id:
+            return HttpResponse("Invalid request.", status=400)
+        friend = get_object_or_404(CustomUser, id=friend_id)
+        request.user.reject_friend_request(friend)
+        return HttpResponse(status=200)
+    return HttpResponse("Invalid request method", status=405)
+
+@login_required
+def get_friend_requests(request):
+    friend_requests = request.user.get_incoming_friend_requests().values("id", "username")
+    return JsonResponse({"friend_requests": list(friend_requests)})

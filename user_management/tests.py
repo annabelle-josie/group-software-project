@@ -82,8 +82,9 @@ class FriendshipTests(TestCase):
         self.user_b.reject_friend_request(self.user_a)
         self.user_b.send_friend_request(self.user_a)
 
-        friendship = Friendship.objects.get(user1=self.user_a, user2=self.user_b)
+        friendship = Friendship.objects.get(user1=self.user_b, user2=self.user_a)
         self.assertEqual(friendship.status, "pending")
+        self.assertFalse(Friendship.objects.filter(user1=self.user_a, user2=self.user_b).exists())
 
     def test_accept_friend_request(self):
         """Ensure friend requests can be accepted."""
