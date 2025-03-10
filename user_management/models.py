@@ -43,6 +43,7 @@ class CustomUser(AbstractUser):
         target_user.stats.save()
 
     def send_friend_request(self, to_user):
+        """Send a friend request to another user, with a lot of cases covered."""
         if self == to_user:
             raise ValueError("You cannot send a friend request to yourself.")
 
@@ -58,8 +59,14 @@ class CustomUser(AbstractUser):
             reverse_request.delete()
             Friendship.objects.create(user1=self, user2=to_user, status="pending")
             return
+        
+        # CASE 3: If there's already a pending request from the recipient, accept it.
+        if reverse_request and reverse_request.status == "pending":
+            reverse_request.status = "accepted"
+            reverse_request.save()
+            return
 
-        # CASE 3: New Request
+        # CASE 4: New Request
         if not existing_request:
             Friendship.objects.create(user1=self, user2=to_user, status="pending")
         else:

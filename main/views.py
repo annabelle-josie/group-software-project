@@ -650,14 +650,19 @@ def remove_friend(request):
 @login_required
 def send_friend_request(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        username = data.get("username")
-        if not username:
-            return HttpResponse("Username is required.", status=400)
-        to_user = get_object_or_404(CustomUser, username=username)
-        request.user.send_friend_request(to_user)
-        return HttpResponse(status=200)
-    return HttpResponse("Invalid request method", status=405)
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            if not username:
+                return JsonResponse({"success": False, "message": "Username is required."})
+            try:
+                to_user = CustomUser.objects.get(username=username)
+            except CustomUser.DoesNotExist:
+                return JsonResponse({"success": False, "message": "User does not exist."})
+            request.user.send_friend_request(to_user)
+            return JsonResponse({"success": True, "message": "Friend request sent."})
+        except ValueError as e:
+            return JsonResponse({"success": False, "message": str(e)})
 
 
 @login_required

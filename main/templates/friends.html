@@ -13,9 +13,17 @@
             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFriendModal">
                 Add Friend
             </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#friendRequestsModal">
-                View Friend Requests
-            </button>
+            <div class="position-relative d-inline-block">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#friendRequestsModal">
+                    View Friend Requests
+                </button>
+                {% if request.user.get_incoming_friend_requests.count %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        !
+                        <span class="visually-hidden">Pending friend requests</span>
+                    </span>
+                {% endif %}
+            </div>
         </div>
     
         <div class="card mb-4 shadow-sm">
@@ -139,7 +147,7 @@
             </div>
             <div class="modal-body">
                 <input type="text" id="friendUsername" class="form-control" placeholder="Enter Username">
-                <div class="text-danger mt-2" id="friendError" style="display: none;"></div>
+                <div id="friendResponseMessage" class="mt-2"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -218,22 +226,43 @@
     });
 
     function sendFriendRequest() {
-        var username = document.getElementById("friendUsername").value;
-        fetch("/send_friend_request/", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username: username })
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    }
+    var username = document.getElementById("friendUsername").value;
+    var responseDiv = document.getElementById("friendResponseMessage");
+
+    responseDiv.textContent = "";
+    responseDiv.className = ""; 
+
+    fetch("/send_friend_request/", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username: username })
+    })
+    .then(response => response.json())
+    .then(data => {
+         responseDiv.textContent = data.message;
+         if (data.success) {
+             responseDiv.classList.add("text-success");
+             document.getElementById("friendUsername").value = "";
+         } else {
+             responseDiv.classList.add("text-danger");
+         }
+
+         if (data.success) {
+             setTimeout(() => {
+                 modal.hide();
+                 window.location.reload();
+             }, 2500);
+         }
+    })
+    .catch(error => {
+         console.error("Error:", error);
+         responseDiv.textContent = "An error occurred.";
+         responseDiv.classList.add("text-danger");
+    });
+}
 
     function loadFriendRequests() {
         fetch("/get_friend_requests/")
