@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
+{% load static %}
 
 {% block content %}
-    <div class="w-100 p-3 h-8 text-center">
+<div class="pb-3" style="background-image: url('../static/backgrounds/leafBackground.jpg')">
+    <div class="w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
+            <div class="col-5 bg-success text-light rounded">
         {% if user.is_authenticated %}
             {% if user.username|last != "s" %}
                 <h1>{{ user.username }}'s Events</h1>
@@ -12,481 +15,476 @@
         {% else %}
             <h1>You are not logged on.</h1>
         {% endif %}
-    </div>
-<div class="album">
-    <div class="container">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            {% if events %}
-                {% for event in events %}
-                        <div class="col">
-                        <div class="card shadow-sm">
-                            <!-- Replace this image with one for each event!! -->
-                            <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
-                            <div class="card-body">
-                            <p class="card-text fw-bold">{{ event.title }}</p>
-                            <p class="card-text">{{ event.desc }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-toggle="modal" data-target="#activeEventModal">View</button>
-                                {% if event.eventMaster == user.username %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-toggle="modal" data-target="#availableEventModal">Edit</button>
-                                {% endif %}
-                                </div>
-                                <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
-                            </div>
-                            </div>
-                        </div>
-                        </div>
-                {% endfor %}
-            {% else %}
-                <p class="alert alert-info">You are not signed up for any events.</p>
-            {% endif %}
-            </div>
         </div>
     </div>
-
-    <h1 class="mt-5 w-100 p-3 h-8 text-center">Available Events</h1>
     <div class="album">
         <div class="container">
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            
-            {% if isGamekeeper %}
-                <div class="col">
-                    <div class="card shadow-sm">
-                        <!-- Replace this image with one for each event!! -->
-                        <img src="../media/other/add.png" class="bd-placeholder-img card-img-top" width="100%" height="225">
-                        <div class="card-body">
-                        <div class="d-flex justify-content-center align-items-center">
-                            <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="modal" data-target="#createEventModal">Create a New Event</button>
+                {% if events %}
+                    {% for event in events %}
+                            <div class="col">
+                            <div class="card shadow-sm">
+                                <!-- Replace this image with one for each event!! -->
+                                <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
+                                <div class="card-body">
+                                <p class="card-text fw-bold">{{ event.title }}</p>
+                                <p class="card-text">{{ event.desc }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
+                                    {% if event.eventMaster == user.username %}
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                                    {% endif %}
+                                    </div>
+                                    <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="alert alert-info">You are not signed up for any events.</p>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mt-5 w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
+            <div class="col-5 bg-success text-light rounded">Available Events</div>
+        </h1>
+        <div class="album">
+            <div class="container">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                
+                {% if isGamekeeper %}
+                    <div class="col">
+                        <div class="card shadow-sm">
+                            <!-- Replace this image with one for each event!! -->
+                            <img src="{% static 'icons/add.png' %}" class="bd-placeholder-img card-img-top" width="100%" height="225">
+                            <div class="card-body">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createEventModal">Create a New Event</button>
+                                </div>
+                            </div>
                             </div>
                         </div>
+                    </div>
+                {% endif %}
+                {% if available_events %}
+                    {% for event in available_events %}
+                    <div class="col">
+                    <div class="card shadow-sm">
+                        <!-- Replace this image with one for each event!! -->
+                        <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
+                        <div class="card-body">
+                        <p class="card-text fw-bold">{{ event.title }}</p>
+                        <p class="card-text">{{ event.desc }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
+                            {% if event.eventMaster == user.username %}
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                            {% endif %}
+                            </div>
+                            <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
+                        </div>
                         </div>
                     </div>
-                </div>
-            {% endif %}
-            {% if available_events %}
-                {% for event in available_events %}
-                <div class="col">
-                <div class="card shadow-sm">
-                    <!-- Replace this image with one for each event!! -->
-                    <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
-                    <div class="card-body">
-                    <p class="card-text fw-bold">{{ event.title }}</p>
-                    <p class="card-text">{{ event.desc }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-toggle="modal" data-target="#availableEventModal">View</button>
-                        {% if event.eventMaster == user.username %}
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-toggle="modal" data-target="#availableEventModal">Edit</button>
-                        {% endif %}
-                        </div>
-                        <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
                     </div>
-                    </div>
-                </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-            {% else %}
-                <p class="alert alert-info">There are no available events to register for.</p>
-            {% endif %}
+                {% else %}
+                    <p class="alert alert-info">There are no available events to register for.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
-  </div>
 
-  <!-- Active Event Modal -->
-  <div class="modal fade" id="activeEventModal" tabindex="-1" role="dialog" aria-labelledby="activeEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        {% with events.0 as event %}
-            <div class="modal-header d-flex justify-content-between">
-            <h5 class="modal-title" id="activeEventModalLabel">{{ event.title }}</h5>
-            <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <p id="eventDesc"><strong>Description:</strong> {{ event.desc }}</p>
-                <p id="eventStartDate"><strong>Start Date:</strong> {{ event.startDate }}</p>
-                <p id="eventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
-                <p id="eventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
-                <p id="eventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
-                
-                <p id="eventProgress">
-                    <strong>Progress:</strong> 
-                    <span id="progress-{{ event.eventId }}">
-                        {{ event.progress }}/{{ event.noOfTasks }}
-                    </span>
-                </p>
-
-                <p id="eventStatus"><strong>Status:</strong> 
-                    <span id="status-{{ event.eventId }}" 
-                        class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
-                        {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
-                    </span>
-                </p>
-
-                <div id="eventReader" class="eventReader">
-                {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
-                        <div id="reader-{{ event.eventId }}" class="p-2">
-                            <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
-                                Scan QR Code
-                            </button>
-                            <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-                        </div>
-                    {% else %}
-                        {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
-                            <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
-                                Increment Progress
-                            </button>
-                        {% endif %}
-                    {% endif %}
-                </div>
-            {% endwith %}
-        </div>
-      </div>
-    </div>
-  </div>
-
- <!-- Available Event Modal -->
- <div class="modal fade" id="availableEventModal" tabindex="-1" role="dialog" aria-labelledby="availableEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        {% with available_events.0 as event %}
-            <div class="modal-header d-flex justify-content-between">
-            <h5 class="modal-title" id="availableEventModalLabel">{{ event.title }}</h5>
-            <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <p id="availableEventDesc"><strong>Description:</strong> {{ event.desc }}</p>
-                <p id="availableEventStartDate"><strong>Start Date:</strong> {{ event.startDate }}</p>
-                <p id="availableEventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
-                <p id="availableEventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
-                <p id="availableEventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
-                <div id="qrCodeViewer"></div>
-                <button id="availableSignUpButton" class="btn btn-primary" onclick="signUpEvent({{ event.eventId }})">
-                    Register for Event
+    <!-- Active Event Modal -->
+    <div class="modal fade" id="activeEventModal" tabindex="-1" role="dialog" aria-labelledby="activeEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            {% with events.0 as event %}
+                <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title" id="activeEventModalLabel">{{ event.title }}</h5>
+                <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
-            {% endwith %}
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <p id="eventDesc"><strong>Description:</strong> {{ event.desc }}</p>
+                    <p id="eventStartDate"><strong>Start Date:</strong> {{ event.startDate }}</p>
+                    <p id="eventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
+                    <p id="eventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                    <p id="eventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                    
+                    <p id="eventProgress">
+                        <strong>Progress:</strong> 
+                        <span id="progress-{{ event.eventId }}">
+                            {{ event.progress }}/{{ event.noOfTasks }}
+                        </span>
+                    </p>
 
+                    <p id="eventStatus"><strong>Status:</strong> 
+                        <span id="status-{{ event.eventId }}" 
+                            class="badge {% if event.participant.status == 'complete' or event.progress == event.noOfTasks %}bg-success{% else %}bg-warning{% endif %}">
+                            {% if event.participant.status == "complete" or event.progress == event.noOfTasks%}Completed{% else %}In Progress{% endif %}
+                        </span>
+                    </p>
+
+                    <div id="eventReader" class="eventReader">
+                    {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                            <div id="reader-{{ event.eventId }}" class="p-2">
+                                <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
+                                    Scan QR Code
+                                </button>
+                                <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+                            </div>
+                        {% else %}
+                            {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
+                                <button class="btn btn-primary" id="increment-{{ event.eventId }}" onclick="incrementProgress({{ event.eventId }})">
+                                    Increment Progress
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% endwith %}
+            </div>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Create Event Modal -->
-  <div class="modal fade" id="createEventModal" tabindex="-1" role="dialog" aria-labelledby="createEventModal" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header d-flex justify-content-between">
-          <h5 class="modal-title" id="createEventModal">Create a New Event</h5>
-          <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body" id="modal-body">
-            <h2 class="mt-5">Create An Event</h2>
-            <form method="post" class="mt-3" enctype="multipart/form-data">
-                {% csrf_token %}
-                
-                <div class="mb-3">
-                    <label for="title" class="form-label">Title:</label>
-                    <input type="text" name="title" class="form-control" required>
+    <!-- Available Event Modal -->
+    <div class="modal fade" id="availableEventModal" tabindex="-1" role="dialog" aria-labelledby="availableEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            {% with available_events.0 as event %}
+                <div class="modal-header d-flex justify-content-between">
+                <h5 class="modal-title" id="availableEventModalLabel">{{ event.title }}</h5>
+                <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 </div>
-                
-                <div class="mb-3">
-                    <label for="desc" class="form-label">Description:</label>
-                    <textarea name="desc" class="form-control" required></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="qrCode" class="form-label">Event Type:</label>
-                    <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
-                        <option value="non-qr">Non-QR Event</option>
-                        <option value="qr">QR Event</option>
-                    </select>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                    <input type="number" name="noOfTasks" id="noOfTasks" max="20" min="1" class="form-control" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="rewardValue" class="form-label">Reward Value:</label>
-                    <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="startDate" class="form-label">Start Date:</label>
-                    <input type="datetime-local" name="startDate" id="startDate" class="form-control" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="endDate" class="form-label">End Date:</label>
-                    <input type="datetime-local" name="endDate" id="endDate" class="form-control" required>
-                </div>
+                <div class="modal-body" id="modal-body">
+                    <p id="availableEventDesc"><strong>Description:</strong> {{ event.desc }}</p>
+                    <p id="availableEventStartDate"><strong>Start Date:</strong> {{ event.startDate }}</p>
+                    <p id="availableEventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
+                    <p id="availableEventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
+                    <p id="availableEventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                    <div id="qrCodeViewer"></div>
+                    <button id="availableSignUpButton" class="btn btn-primary" onclick="signUpEvent({{ event.eventId }})">
+                        Register for Event
+                    </button>
+                {% endwith %}
 
-                <div class="mb-3">
-                    <label for="eventImage" class="form-label">Event Image:</label>
-                    <input type="file" name="eventImage" id="eventImage" class="form-control" accept="image/*">
-                </div>
-                
-                
-                <button type="submit" class="btn btn-primary">Create Event</button>
-            </form>
+            </div>
         </div>
-      </div>
+        </div>
     </div>
-  </div>
+
+    <!-- Create Event Modal -->
+    <div class="modal fade" id="createEventModal" tabindex="-1" role="dialog" aria-labelledby="createEventModal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between">
+            <h5 class="modal-title" id="createEventModal">Create a New Event</h5>
+            <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <h2 class="mt-5">Create An Event</h2>
+                <form method="post" class="mt-3" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title:</label>
+                        <input type="text" name="title" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="desc" class="form-label">Description:</label>
+                        <textarea name="desc" class="form-control" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="qrCode" class="form-label">Event Type:</label>
+                        <select name="qrCode" id="qrCode" class="form-control" required onchange="toggleTaskInput(this)">
+                            <option value="non-qr">Non-QR Event</option>
+                            <option value="qr">QR Event</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="noOfTasks" class="form-label">Number of Tasks:</label>
+                        <input type="number" name="noOfTasks" id="noOfTasks" max="20" min="1" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="rewardValue" class="form-label">Reward Value:</label>
+                        <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Start Date:</label>
+                        <input type="datetime-local" name="startDate" id="startDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="endDate" class="form-label">End Date:</label>
+                        <input type="datetime-local" name="endDate" id="endDate" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="eventImage" class="form-label">Event Image:</label>
+                        <input type="file" name="eventImage" id="eventImage" class="form-control" accept="image/*">
+                    </div>
+                    
+                    
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
 
 
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script>
-    function updateModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventProgress, eventTasks, eventStatus, eventQR){
-        document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
-        document.getElementById("eventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
-        document.getElementById("eventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
-        document.getElementById("eventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
-        document.getElementById("eventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
-        document.getElementById("eventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
-        
-        const progressString = 
-        "<strong>Progress:</strong> \
-        <span id='progress-" + eventId + "'> " + eventProgress + "/" + eventTasks + "</span>";
-        document.getElementById("eventProgress").innerHTML = progressString;
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        function updateModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventProgress, eventTasks, eventStatus, eventQR){
+            document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
+            document.getElementById("eventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
+            document.getElementById("eventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
+            document.getElementById("eventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
+            document.getElementById("eventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
+            document.getElementById("eventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+            
+            const progressString = 
+            "<strong>Progress:</strong> \
+            <span id='progress-" + eventId + "'> " + eventProgress + "/" + eventTasks + "</span>";
+            document.getElementById("eventProgress").innerHTML = progressString;
 
-        var statusMessage;
-        var statusWords;
-        if (eventStatus == 'complete' || eventProgress == eventTasks){
-            statusMessage = "bg-success";
-            statusWords = "Complete";
-        } else {
-            statusMessage = "bg-warning";
-            statusWords = "In Progress";
-        }
-       
-        const statusString = "<strong>Status:</strong> \
-        <span id='status-" + eventId + "' class='badge " + statusMessage + "'> " + statusWords +" </span>";
-        document.getElementById("eventStatus").innerHTML =  statusString;
-
-        var readerString = "";
-        if(eventQR == "True" && eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
-            readerString = "<div id='reader-" + eventId + "' class='p-2'> \
-                <button class='btn btn-primary' onclick='startScanner(" + eventId + ")'> Scan QR Code </button> \
-                 <div id='reader-" + eventId + "-reader' style='width: 100%; max-width: 400px; margin: auto;'></div> \
-                                 </div>";
-        } else{
-            if(eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
-                readerString = "<button class='btn btn-primary' id='increment-" + eventId + "' onclick='incrementProgress("  + eventId + ")'> \
-                    Increment Progress </button>";
+            var statusMessage;
+            var statusWords;
+            if (eventStatus == 'complete' || eventProgress == eventTasks){
+                statusMessage = "bg-success";
+                statusWords = "Complete";
+            } else {
+                statusMessage = "bg-warning";
+                statusWords = "In Progress";
             }
+        
+            const statusString = "<strong>Status:</strong> \
+            <span id='status-" + eventId + "' class='badge " + statusMessage + "'> " + statusWords +" </span>";
+            document.getElementById("eventStatus").innerHTML =  statusString;
+
+            var readerString = "";
+            if(eventQR == "True" && eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
+                readerString = "<div id='reader-" + eventId + "' class='p-2'> \
+                    <button class='btn btn-primary' onclick='startScanner(" + eventId + ")'> Scan QR Code </button> \
+                    <div id='reader-" + eventId + "-reader' style='width: 100%; max-width: 400px; margin: auto;'></div> \
+                                    </div>";
+            } else{
+                if(eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
+                    readerString = "<button class='btn btn-primary' id='increment-" + eventId + "' onclick='incrementProgress("  + eventId + ")'> \
+                        Increment Progress </button>";
+                }
+            }
+
+            console.log("id = " + eventId); //eventID doesn't seem to exist?
+            console.log(readerString);
+            document.getElementById("eventReader").innerHTML = readerString;
         }
 
-        console.log("id = " + eventId); //eventID doesn't seem to exist?
-        console.log(readerString);
-        document.getElementById("eventReader").innerHTML = readerString;
-    }
-
-    function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId){
-        document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
-        document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
-        document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
-        document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
-        document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
-        document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
-        document.getElementById("availableSignUpButton").innerHTML = ("Register For Event");
-        // document.getElementById("availableSignUpButton").setAttribute = ("onclick", ("signUpEvent(" + parseInt(eventId) + ")"));
-        const onClickString = "signUpEvent(" + eventId + ")";
-        console.log(onClickString);
-        document.getElementById("availableSignUpButton").onclick = onClickString;
-        document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
-        document.getElementById("qrCodeViewer").innerHTML = "";
-        console.log("complete");
-    }
-
-    function gamekeeperModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventIsQR, eventQRImage){
-        document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
-        document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
-        document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
-        document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
-        document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
-        document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
-        document.getElementById("availableSignUpButton").innerHTML = ("Delete Event");
-        // document.getElementById("availableSignUpButton").setAttribute = ("onclick", ("deleteEvent(" + parseInt(eventId) + ")"));
-        const onClickString = ("deleteEvent(" + eventId + ")");
-        console.log(eventId);
-        document.getElementById("availableSignUpButton").onclick = (() => deleteEvent(eventId));
-        document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
-        console.log(eventQRImage);
-        if(eventIsQR == "True"){
-            document.getElementById("qrCodeViewer").innerHTML = ("<img src='" + eventQRImage + "' alt='QR Code'> ");
+        function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId){
+            document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
+            document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
+            document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
+            document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
+            document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
+            document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+            document.getElementById("availableSignUpButton").innerHTML = ("Register For Event");
+            document.getElementById("availableSignUpButton").onclick = (() => signUpEvent(eventId));
+            document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
+            document.getElementById("qrCodeViewer").innerHTML = "";
+            console.log("complete");
         }
-        console.log("complete");
+
+        function gamekeeperModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventIsQR, eventQRImage){
+            document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
+            document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
+            document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
+            document.getElementById("availableEventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
+            document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
+            document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+            document.getElementById("availableSignUpButton").innerHTML = ("Delete Event");
+            document.getElementById("availableSignUpButton").onclick = (() => deleteEvent(eventId));
+            document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
+            console.log(eventQRImage);
+            if(eventIsQR == "True"){
+                document.getElementById("qrCodeViewer").innerHTML = ("<img src='" + eventQRImage + "' alt='QR Code' height=250px>");
+            }
+            console.log("complete");
+        }
+
+    function signUpEvent(eventId) {
+        fetch(`/sign_up_for_event/${eventId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ eventId: eventId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload the page to update "My Events"
+            } else {
+                alert(data.message);
+            }
+        });
     }
 
-function signUpEvent(eventId) {
-    fetch(`/sign_up_for_event/${eventId}/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ eventId: eventId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload(); // Reload the page to update "My Events"
-        } else {
-            alert(data.message);
-        }
+
+    function toggleTaskInput(selectElement) {
+    const noOfTasksInput = document.getElementById('noOfTasks');
+    if (selectElement.value === 'qr') {
+        noOfTasksInput.value = 1;  
+        noOfTasksInput.setAttribute('readonly', 'readonly'); 
+    } else {
+        noOfTasksInput.removeAttribute('readonly');  
+    }
+    }
+
+    function startScanner(eventId) {
+    const readerContainer = document.getElementById(`reader-${eventId}-reader`);
+    const button = document.querySelector(`#reader-${eventId} button`);
+
+    button.style.display = "none";  
+    readerContainer.style.display = "block"; 
+
+    let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+        `reader-${eventId}-reader`, { fps: 10, qrbox: qrBoxSize });
+
+    html5QrcodeScanner.render(function(decodedText, decodedResult) {
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+        fetch(`/incrementProgress/${eventId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ qrCode: decodedText })  
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "complete") {
+                const statusElement = document.getElementById(`status-${eventId}`);
+                statusElement.innerText = "Completed";
+                statusElement.classList.remove("bg-warning");
+                statusElement.classList.add("bg-success");
+
+                readerContainer.innerHTML = "";
+                readerContainer.style.display = "none";
+                button.style.display = "none";
+                window.location.reload();
+            }
+
+            const progressElement = document.getElementById(`progress-${eventId}`);
+            progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+        })
+        .catch(err => {
+            alert("Invalid QR Code. Please try again.");
+            console.error(err);
+        });
     });
-}
+    }
 
 
-function toggleTaskInput(selectElement) {
-const noOfTasksInput = document.getElementById('noOfTasks');
-if (selectElement.value === 'qr') {
-    noOfTasksInput.value = 1;  
-    noOfTasksInput.setAttribute('readonly', 'readonly'); 
-} else {
-    noOfTasksInput.removeAttribute('readonly');  
-}
-}
 
-function startScanner(eventId) {
-const readerContainer = document.getElementById(`reader-${eventId}-reader`);
-const button = document.querySelector(`#reader-${eventId} button`);
-
-button.style.display = "none";  
-readerContainer.style.display = "block"; 
-
-let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
-
-var html5QrcodeScanner = new Html5QrcodeScanner(
-    `reader-${eventId}-reader`, { fps: 10, qrbox: qrBoxSize });
-
-html5QrcodeScanner.render(function(decodedText, decodedResult) {
-    console.log(`Scan result: ${decodedText}`, decodedResult);
+    function incrementProgress(eventId) {
     fetch(`/incrementProgress/${eventId}/`, {
         method: "POST",
         headers: {
             "X-CSRFToken": "{{ csrf_token }}",
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ qrCode: decodedText })  
+        body: JSON.stringify({ qrCode: null })  
     })
     .then(response => response.json())
     .then(data => {
-        if (data.status === "complete") {
+        const progressElement = document.getElementById(`progress-${eventId}`);
+        progressElement.innerText = `${data.progress}/${data.totalTasks}`;
+
+        if (data.completed) {  
             const statusElement = document.getElementById(`status-${eventId}`);
             statusElement.innerText = "Completed";
             statusElement.classList.remove("bg-warning");
             statusElement.classList.add("bg-success");
-
-            readerContainer.innerHTML = "";
-            readerContainer.style.display = "none";
-            button.style.display = "none";
             window.location.reload();
-        }
-
-        const progressElement = document.getElementById(`progress-${eventId}`);
-        progressElement.innerText = `${data.progress}/${data.totalTasks}`;
-    })
-    .catch(err => {
-        alert("Invalid QR Code. Please try again.");
-        console.error(err);
-    });
-});
-}
-
-
-
-function incrementProgress(eventId) {
-fetch(`/incrementProgress/${eventId}/`, {
-    method: "POST",
-    headers: {
-        "X-CSRFToken": "{{ csrf_token }}",
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ qrCode: null })  
-})
-.then(response => response.json())
-.then(data => {
-    const progressElement = document.getElementById(`progress-${eventId}`);
-    progressElement.innerText = `${data.progress}/${data.totalTasks}`;
-
-    if (data.completed) {  
-        const statusElement = document.getElementById(`status-${eventId}`);
-        statusElement.innerText = "Completed";
-        statusElement.classList.remove("bg-warning");
-        statusElement.classList.add("bg-success");
-        window.location.reload();
-        const incrementButton = document.getElementById(`increment-${eventId}`);
-        if (incrementButton) {
-            incrementButton.style.display = "none";  
-        }
-    }
-})
-.catch(err => {
-    alert("There was an issue incrementing the progress.");
-    console.error(err);
-});
-}
-
-
-document.addEventListener("DOMContentLoaded", function () {
-let now = new Date();
-let minDateTime = now.toISOString().slice(0, 16); 
-
-let startDateInput = document.getElementById("startDate");
-let endDateInput = document.getElementById("endDate");
-
-startDateInput.setAttribute("min", minDateTime);
-endDateInput.setAttribute("min", minDateTime);
-
-startDateInput.addEventListener("input", function () {
-    if (endDateInput.value < startDateInput.value) {
-        endDateInput.value = startDateInput.value;
-    }
-    endDateInput.setAttribute("min", startDateInput.value);
-});
-
-});
-
-function deleteEvent(eventId) {
-if (confirm("Are you sure you want to delete this event?")) {
-    fetch(`/delete_event/${eventId}/`, {
-        method: "DELETE",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Event deleted successfully.");
-            window.location.reload();  
-        } else {
-            alert("Error deleting event.");
+            const incrementButton = document.getElementById(`increment-${eventId}`);
+            if (incrementButton) {
+                incrementButton.style.display = "none";  
+            }
         }
     })
     .catch(err => {
-        alert("There was an issue deleting the event.");
+        alert("There was an issue incrementing the progress.");
         console.error(err);
     });
-}
-}
+    }
 
-</script>
 
-</script>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    document.addEventListener("DOMContentLoaded", function () {
+    let now = new Date();
+    let minDateTime = now.toISOString().slice(0, 16); 
 
+    let startDateInput = document.getElementById("startDate");
+    let endDateInput = document.getElementById("endDate");
+
+    startDateInput.setAttribute("min", minDateTime);
+    endDateInput.setAttribute("min", minDateTime);
+
+    startDateInput.addEventListener("input", function () {
+        if (endDateInput.value < startDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
+        endDateInput.setAttribute("min", startDateInput.value);
+    });
+
+    });
+
+    function deleteEvent(eventId) {
+    if (confirm("Are you sure you want to delete this event?")) {
+        fetch(`/delete_event/${eventId}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Event deleted successfully.");
+                window.location.reload();  
+            } else {
+                alert("Error deleting event.");
+            }
+        })
+        .catch(err => {
+            alert("There was an issue deleting the event.");
+            console.error(err);
+        });
+    }
+    }
+
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+</div>
 {% endblock %}

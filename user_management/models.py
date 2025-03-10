@@ -25,7 +25,7 @@ class CustomUserManager(BaseUserManager):
     
 class CustomUser(AbstractUser):
     """Custom user model extending the default Django user model with friends, owned plants, and stats."""
-    email = models.EmailField(null=True, blank=True) # TODO: Allows no email, potentially remove in sprint 2
+    email = models.EmailField(null=False, blank=False)
     owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
 
@@ -99,21 +99,22 @@ class CustomUser(AbstractUser):
         return False
 
     def get_friends(self):
-        """Returns a queryset of all accepted friends."""
+        """Returns a queryset of all accepted friends, including their garden and plants."""
         friends = Friendship.objects.filter(
             models.Q(user1=self, status="accepted") | models.Q(user2=self, status="accepted")
         ).values_list("user1", "user2")
 
         friend_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
-        return CustomUser.objects.filter(id__in=friend_ids)
+        
+        return CustomUser.objects.filter(id__in=friend_ids).select_related('usergarden')
+
     
     def get_incoming_friend_requests(self):
-        """Returns a queryset of all friend requests."""
-        friends = Friendship.objects.filter(
-            models.Q(user1=self, status="pending") | models.Q(user2=self, status="pending")
-        ).values_list("user1", "user2")
+        """Returns a queryset of friend requests that were sent to the user."""
+        request_ids = Friendship.objects.filter(
+            user2=self, status="pending"
+        ).values_list("user1", flat=True)
 
-        request_ids = [user_id for pair in friends for user_id in pair if user_id != self.id]
         return CustomUser.objects.filter(id__in=request_ids)
 
 

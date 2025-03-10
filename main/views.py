@@ -12,11 +12,12 @@ from .serializers import *
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
+from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from event_management.models import Events, EventParticipants
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from garden.models import UserGarden
 from user_management.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
@@ -24,6 +25,9 @@ from user_management.models import UserStats, CustomUser
 from garden.models import Plant
 import json
 from login.forms import ProfileUpdateForm, CustomPasswordChangeForm
+from django.urls import reverse
+from django.conf import settings
+
 
 
 # Create views here
@@ -88,7 +92,57 @@ def home(request):
         for challenge_participant in user_challenge
     ]
 
-    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress})
+    users = CustomUser.objects.get(username= request.user)
+    available = users.owned_plants.all()
+    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
+
+@login_required(login_url="/auth/login")
+def gardenView(request):
+    """View to display the garden on the main page"""
+    userGarden = UserGarden.objects.get(user=request.user)
+    users = CustomUser.objects.get(username= request.user)
+    # available = users.owned_plants.all().values()
+    available = users.owned_plants.all()
+    allplants= Plant.objects.filter(onMarket=True)
+
+    plantSlots = []
+    if userGarden:
+        for slot in range(1, 7):  # Loop through all 6 slots
+            plant = getattr(userGarden, f"plant{slot}Id", None)  # Get Plant object directly
+            # print(f"Plant Slot {slot}: {plant}")  # Debugging line
+            # print(f"Plant Slot {slot}: {plant}")  # Debugging line
+            plantSlots.append(plant)
+    # print("Final Plant Slots:", plantSlots)  # Debugging line
+    return render(request, "garden/garden.html", {"plantSlots": plantSlots,"available":available, "allplants": allplants})
+
+@api_view(["GET"])
+def get_garden(request, user_id):
+    """API used to display garden on the main page"""
+    try:
+        garden = userGarden.objects.get(user__id=user_id)
+        serializer = GardenSerializer(garden)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except userGarden.DoesNotExist:
+        return Response({"error": "Garden not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+def updateGarden(request):
+    """View to updte the user's garden with a new plant"""
+    # print("hello")
+    plantname = request.POST.get('plantname')
+    slot = request.POST.get('slot')
+    print(slot)
+    if not plantname:
+        return redirect("/")
+    try:
+        plant= Plant.objects.get(name=plantname)
+        # print(plant)
+        plantslots = UserGarden.objects.get(user=request.user)
+        plantslot = setattr(plantslots, f"plant{slot}Id",plant)
+        plantslots.save()
+        # get right plant list and plant ID 
+    except Plant.DoesNotExist:
+        return Response({"error": "no "}, status=status.HTTP_404_NOT_FOUND)
+    return HttpResponseRedirect(redirect_to="/")
 
 # leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
@@ -100,11 +154,72 @@ def leaderboard(request):
     for person in userrank:
         rank = person.userrank
     context['rank'] = rank
+    for entry in context['leaderboard']:
+        try:
+            user = CustomUser.objects.get(username=entry['username'])
+            user_garden = UserGarden.objects.get(user_id=user.id)
+            plant1 = Plant.objects.get(id=user_garden.plant1Id_id)
+            plant2 = Plant.objects.get(id=user_garden.plant2Id_id)
+            plant3 = Plant.objects.get(id=user_garden.plant3Id_id)
+            plant4 = Plant.objects.get(id=user_garden.plant4Id_id)
+            plant5 = Plant.objects.get(id=user_garden.plant5Id_id)
+            plant6 = Plant.objects.get(id=user_garden.plant6Id_id)
+            entry['plant1'] = plant1.image.url
+            entry['plant2'] = plant2.image.url
+            entry['plant3'] = plant3.image.url
+            entry['plant4'] = plant4.image.url
+            entry['plant5'] = plant5.image.url
+            entry['plant6'] = plant6.image.url
+        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist, Plant.DoesNotExist):
+            entry['plant1'] = '/static/potted_plant.png'
+            entry['plant2'] = '/static/potted_plant.png'
+            entry['plant3'] = '/static/potted_plant.png'
+            entry['plant4'] = '/static/potted_plant.png'
+            entry['plant5'] = '/static/potted_plant.png'
+            entry['plant6'] = '/static/potted_plant.png'
     return render(request, "leaderboard.html", context)
 
 def garden(request):
     return render(request, "garden.html")
 
+
+@login_required(login_url="/auth/login")
+def scan_qr(request, event_id, qr_code):
+    """Handles QR scanning, auto-registers user if not registered, and increments progress if valid."""
+    try:
+        event = Events.objects.get(eventId=event_id)
+    except Events.DoesNotExist:
+        return JsonResponse({'error': 'Invalid event.'}, status=404)
+
+    try:
+        eventParticipant = EventParticipants.objects.get(username=request.user, eventId=event)
+    except EventParticipants.DoesNotExist:
+        eventParticipant = EventParticipants(username=request.user, eventId=event, progress=0, status="in_progress")
+        eventParticipant.save()
+
+    if event.isQR and event.eventQR == qr_code:
+        if eventParticipant.progress < event.noOfTasks:
+            eventParticipant.progress += 1
+            if eventParticipant.progress >= event.noOfTasks:
+                eventParticipant.status = "complete"
+            
+            eventParticipant.save()
+
+            if eventParticipant.status == "complete":
+                user_stats = UserStats.objects.get(user=request.user)
+                user_stats.leaves += event.rewardValue
+                user_stats.points += event.rewardValue
+                user_stats.save()
+                return redirect('events')  
+
+        return JsonResponse({
+            'progress': eventParticipant.progress,
+            'totalTasks': event.noOfTasks,
+            'status': eventParticipant.status,
+            'completed': False
+        })
+
+    return JsonResponse({'error': 'Invalid QR code.'}, status=400)
 
 
 
@@ -212,7 +327,7 @@ def events(request):
         eventImage = request.FILES.get('eventImage')
 
         # Generate a random QR code if selected
-        eventQR = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
+        qr_secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
         # Create the new event without assigning it to users yet
         newEvent = Events.objects.create(
@@ -223,14 +338,18 @@ def events(request):
             startDate=startDate,
             endDate=endDate,
             eventMaster=request.user,
-            eventQR=eventQR,
+            eventQR=qr_secret,
             isQR=isQR,
             eventImage=eventImage
         )
 
-        # If the event requires a QR code, generate it
         if isQR:
-            newEvent.generateQrImage()
+            base_url = 'down2earth.eu.pythonanywhere.com'
+            qr_url = f"{base_url}{reverse('scan_qr', args=[newEvent.eventId, qr_secret])}"
+            qr = qrcode.make(qr_url)
+            buffer = BytesIO()
+            qr.save(buffer, format="PNG")
+            newEvent.eventQRImage.save(f"qr_{newEvent.eventId}.png", ContentFile(buffer.getvalue()), save=False)
             newEvent.save()
 
         return HttpResponseRedirect(request.path)
@@ -512,7 +631,7 @@ def profile(request, username):
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
 
-@login_required
+@login_required()
 def settings(request):
     user_form = ProfileUpdateForm(instance=request.user)
     password_form = CustomPasswordChangeForm(user=request.user)
@@ -539,3 +658,49 @@ def settings(request):
         'password_form': password_form
     }
     return render(request, "settings.html", context)
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        user = request.user
+        logout(request)
+        user.delete()
+        messages.success(request, 'Your account has been deleted successfully.')
+        return redirect('home')
+    return render(request, 'settings.html')
+
+
+@login_required(login_url="/auth/login")
+def friends(request):
+    user_friends = request.user.get_friends()
+    friends_total = user_friends.count()
+
+    if friends_total > 8:
+        paginator = Paginator(user_friends, 8)
+        page_number = request.GET.get('page')
+        friends_page = paginator.get_page(page_number)
+    else:
+        friends_page = user_friends
+
+    return render(request, "friends.html", {"friends_page": friends_page, "friends_total": friends_total})
+
+@login_required
+def remove_friend(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            friend_id = data.get("user_id")
+            if not friend_id:
+                return JsonResponse({"success": False, "message": "Invalid request."})
+
+            friend = get_object_or_404(CustomUser, id=friend_id)
+            success = request.user.unfriend(friend)
+
+            if success:
+                return JsonResponse({"success": True, "message": "Friend removed successfully."})
+            else:
+                return JsonResponse({"success": False, "message": "You are not friends."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    
+    return JsonResponse({"success": False, "message": "Invalid request method."})

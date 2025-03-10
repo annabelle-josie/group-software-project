@@ -1,34 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy</title>
-    <style>
-        [data-custom-class='body'], [data-custom-class='body'] * {
-            font-family: Arial, sans-serif;
-        }
-        [data-custom-class='title'], [data-custom-class='title'] * {
-            font-family: Arial !important;
-            font-size: 26px !important;
-        }
-        ul {
-            list-style-type: square;
-        }
-        ul > li > ul {
-            list-style-type: circle;
-        }
-        ul > li > ul > li > ul {
-            list-style-type: square;
-        }
-        ol li {
-            font-family: Arial;
-        }
-    </style>
-</head>
-<body data-custom-class="body">
+{% extends 'base.html' %}
+{% block title %}Privacy Policy{% endblock %}
+{% block content %}
     <h1 data-custom-class="title">PRIVACY POLICY</h1>
-    <p>Last updated February 23, 2025</p>
+    <p>Last updated March 9, 2025</p>
     <p>In compliance with GDPR legislation.</p>
     <p>This Privacy Notice for Down2Earth ('we', 'us', or 'our'), describes how and why we might access, collect, store, use, and/or share ('process') your personal information when you use our services ('Services'), including when you:</p>
     <ul>
@@ -74,6 +48,7 @@
     <ul>
         <li>usernames</li>
         <li>passwords</li>
+        <li>email addresses</li>
     </ul>
     <p>Sensitive Information. We do not process sensitive information.</p>
     <p>Application Data. If you use our application(s), we also may collect the following information if you choose to provide us with access or permission:</p>
@@ -85,16 +60,20 @@
     <p>All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.</p>
     <h2>2. HOW DO WE PROCESS YOUR INFORMATION?</h2>
     <p>In Short: We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent.</p>
-    <p>We process your personal information for a variety of reasons, depending on how you interact with our Services.</p>
+    <p>We process your personal information for a variety of reasons, depending on how you interact with our Services, including:</p>
+    <ul>
+        <li>To facilitate account creation account and authentication and otherwise manage user accounts. We may process your information so you can create and log into your account, as well as keep your account in working order.</li>
+    </ul>
     <h2>3. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</h2>
     <p>In Short: We may share information in specific situations described in this section and/or with the following third parties.</p>
     <p>We may need to share your personal information in the following situations:</p>
     <ul>
-        <li>Business Transfers. We may share or transfer your information in connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.</li>
+        <li>University Collaboration. We may share your information with other departments or research groups within the university for academic and research purposes.</li>
+        <li>Service Providers. We may share your information with third-party service providers, such as PythonAnywhere, who provide hosting services and may have access to some data as part of their services.</li>
     </ul>
     <h2>4. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</h2>
     <p>In Short: We may transfer, store, and process your information in countries other than your own.</p>
-    <p>Our servers are based in the United Kingdom (UK). If you are accessing our Services from outside, please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see 'WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?' above), in and other countries.</p>
+    <p>Our servers are hosted on PythonAnywhere, which primarily hosts their servers in the USA. Although this is a UK-based project and the services are intended for the UK, if you are accessing our Services from outside the UK, please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see 'WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?' above), in the USA and other countries.</p>
     <h2>5. HOW LONG DO WE KEEP YOUR INFORMATION?</h2>
     <p>In Short: We keep your information for as long as necessary to fulfil the purposes outlined in this Privacy Notice unless otherwise required by law.</p>
     <p>We will only keep your personal information for as long as it is necessary for the purposes set out in this Privacy Notice, unless a longer retention period is required or permitted by law (such as tax, accounting, or other legal requirements). No purpose in this notice will require us keeping your personal information for longer than the period of time in which users have an account with us.</p>
@@ -112,6 +91,7 @@
     <p>Account Information</p>
     <p>If you would at any time like to review or change the information in your account or terminate your account, you can:</p>
     <ul>
+        <li>Update your account details or delete your account in the settings page</li>
         <li>Contact us using the contact information provided.</li>
     </ul>
     <p>Upon your request to terminate your account, we will deactivate or delete your account and information from our active databases. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any investigations, enforce our legal terms and/or comply with applicable legal requirements.</p>
@@ -126,6 +106,8 @@
     <p>Down2Earth<br>
     </p>
     <h2>12. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</h2>
-    <p>You have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. To request to review, update, or delete your personal information, please email: at969@exeter.ac.uk.</p>
+    <p>You have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law.</p>
+    <p>When logged in, you can update your details or delete your account in the settings page. To do this, navigate to the settings page and follow the instructions to update your profile or delete your account. Alternatively, to request to review, update, or delete your personal information, please email: at969@exeter.ac.uk.</p>
 </body>
-</html>
+{% endblock %}
+
