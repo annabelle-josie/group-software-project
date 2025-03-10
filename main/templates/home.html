@@ -4,6 +4,15 @@
 {% block title %} Home {% endblock %}
 
 {% block content %}
+{% if not user.is_game_keeper %}
+<style>
+    /* Force mobile–like view for non–gamekeeper users */
+    body {
+        max-width: 375px;
+        margin: 0 auto;
+    }
+</style>
+{% endif %}
 <div class="container-fluid">
 
     <div id="garden-display" class="container mx-auto w-md-50 w-100" style="position: relative;">

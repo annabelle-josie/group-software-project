@@ -5,144 +5,251 @@
 {% block title %}Market{% endblock %}
 
 {% block content %}
+<!-- Container ensures enough page height so the footer appears at bottom -->
+<div class="container my-4" style="min-height: 80vh;">
 
-<!-- <div class="container"> -->
-    <div class="row h-50 col-12 col-md-6 p-3" style="background-color: rgb(176, 239, 255);">
-
-        <!-- Image & Details Section - shows selected plant's information -->
-        <!-- If no plant is selected (on first load of page) show the 0th plant -->
-         <!-- TODO: Image is wrong size, but mostly fixed. It's all bootstrap, 
-          and all  completely reactive -->
-        {% with plants.0 as firstPlant %}
-        <div class="col-6">
-            <img class="img-fluid h-100" 
-                id="chosen-plant-image"
-                src="{{ firstPlant.image.url }}" 
-                alt="{{ firstPlant.name }}" >
-        </div>
-        <div class="col">
-            <br>
-            <h1 class="text-center" id="chosen-plant-name"> {{ firstPlant.name }}</h1>
-            <div class="align-items-center">
-                <div class="d-flex align-items-center">
-                    <p class="mb-0" id="chosen-plant-price"><strong>Cost: </strong>{{ firstPlant.price }}</p>
-                <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-1" alt="leaf icon">
+  <!-- Blue box (max 500px), with chosen plant on the left, text and button on the right -->
+  <div class="row">
+    <div class="col-12 d-flex justify-content-center">
+        <div class="display-box">
+            {% with plants.0 as firstPlant %}
+            <div class="row no-gutters align-items-center">
+              <!-- Left half: Pink background + chosen plant -->
+              <div class="col-5 d-flex justify-content-center">
+                <div class="chosen-plant-card position-relative">
+                  <img class="pink-bg-chosen" src="{% static 'icons/PlantBG.png' %}" alt="Plant BG">
+                  <img class="plant-img-chosen"
+                       id="chosen-plant-image"
+                       src="{{ firstPlant.image.url }}"
+                       alt="{{ firstPlant.name }}">
                 </div>
-            </div>
-<!--            <h4 class="text-center" id="chosen-plant-price"> {{ firstPlant.price }} <strong>leaves</strong></h4> -->
-            <p id="chosen-plant-fact" class=""><strong>Fact:</strong> {{ firstPlant.fact }}</p>
-        {% if firstPlant in ownedPlants %}
-            <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
-                <button id="chosen-plant-buy" class="btn btn-danger w-100" onClick="">Owned</button>
-        {% else %}
-        <!-- Otherwise let them buy the plant as usual -->
-            <button id="chosen-plant-buy" class="btn btn-primary w-100" onClick="buyPlant('{{user}}', '{{ firstPlant.name }}')">Buy plant</button>
-        {%endif%}
-    </div>
-</div>
-
-       
-        {% endwith %}
-    <!-- </div> -->
-
-    <!-- Plant Selection Grid -->
-     <!-- Display all avaialble plants -->
-    <div class="h-50 col-12 col-md-6 d-flex flex-row overflow-x-auto" style="background-image: url('../static/backgrounds/shop.png'); background-repeat: no-repeat; height: 100vh; background-size: cover;">
-        {% for plant in plants %}
-        {% if plant in ownedPlants %}
-        <!-- If the plant is already owned by the user (therefore cannot be bought again) -->
-            <div class="col-3 col-sm-2 d-flex flex-column align-items-center position-relative"
-            onclick='updatePlantOwned( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-            <img class="img-fluid position-absolute z-index-0" 
-                    src="{% static 'icons/PlantBG.png' %}" 
-                    style="top: 20px; height: 60%; width: 88%;"
-                    alt="Plant Background"
-                    tabindex="0">    
-            <img class="img-fluid position-relative w-100 z-index-1"
-                    src="{{ plant.image.url }}" 
-                    alt="{{ plant.name }}"
-                    tabindex="0">
-                <img class="img-fluid w-50 position-absolute top-50 end-0 m-1 z-index-2" 
-                    src="{% static 'icons/Sold.png' %}" 
-                    alt="Sold!"
-                    tabindex="0">
-            </div>
-        {% else %}
-        <!-- Otherwise let them buy the plant as usual -->
-            <div class="col-3 col-sm-2 d-flex flex-column align-items-center position-relative"
-            onclick='updatePlant( "{{ plant.image.url }}",  "{{ plant.name }}", "{{ plant.price }}",  "{{ plant.fact }}", "{{user}}", "{{ plant }}")'>
-                <img class="img-fluid position-absolute z-index-0" 
-                    src="{% static 'icons/PlantBG.png' %}" 
-                    style="top: 20px; height: 60%; width: 88%;"
-                    alt="Plant Background"
-                    tabindex="0">    
-                <img class="img-fluid position-relative w-100 z-index-1"
-                    src="{{ plant.image.url }}" 
-                    alt="{{ plant.name }}"
-                    tabindex="0">
-            </div>
-        {%endif%}
-        {% endfor %}
-    </div>
-</div>
-
-<!-- JavaScript for Dynamic Plant Selection -->
-<script>
-    // If plant is not owned by the user, allow them to view all information about the plant, and to purchase it
-    function updatePlant(image, name, price, fact, user, plantObject) {
-        document.getElementById("chosen-plant-image").src = image;
-        document.getElementById("chosen-plant-name").innerHTML = name;
-        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
-        document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
-
-        const onClickString = "buyPlant('" + user + "','" + name + "');"
-        document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
-        document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-primary w-100");
-        document.getElementById("chosen-plant-buy").innerHTML = "Buy plant";
-    }
+              </div>
+              <!-- Right half: Plant details & buy button -->
+              <div class="col-6">
+                <h2 class="mt-2 text-center" id="chosen-plant-name">{{ firstPlant.name }}</h2>
+                <div class="d-flex align-items-center justify-content-center">
+                  <p class="mb-0" id="chosen-plant-price">
+                    <strong>Cost: </strong>{{ firstPlant.price }}
+                  </p>
+                  <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-1" alt="leaf icon">
+                </div>
+                <p id="chosen-plant-fact" class="mt-2 text-center">
+                  <strong>Fact:</strong> {{ firstPlant.fact }}
+                </p>
     
-    // If a plant is already owned, still allow a user to see the information associated with it, but do not allow re-purchase
-    function updatePlantOwned(image, name, price, fact, user, plantObject) {
-        document.getElementById("chosen-plant-image").src = image;
-        document.getElementById("chosen-plant-name").innerHTML = name;
-        document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
-        document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+                {% if firstPlant in ownedPlants %}
+                  <button id="chosen-plant-buy" class="btn btn-danger w-100">Owned</button>
+                {% else %}
+                  <button id="chosen-plant-buy" class="btn btn-primary w-100"
+                          onClick="buyPlant('{{ user }}', '{{ firstPlant.name }}')">
+                    Buy plant
+                  </button>
+                {% endif %}
+              </div>
+            </div>
+            {% endwith %}
+        </div>    
+    </div>
+  </div>
 
-        const onClickString = "#"
-        document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
-        document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-danger w-100");
-        document.getElementById("chosen-plant-buy").innerHTML = "Owned";
-    }
+  <!-- Shop area below: scaled up to 500px wide, plants aligned near bottom, horizontally scrollable -->
+  <div class="row mt-4">
+    <div class="col-12 d-flex justify-content-center">
+      <div class="shop-container">
+        <div class="shop-background"></div>
+        <div class="shop-plants">
+          {% for plant in plants %}
+            {% if plant in ownedPlants %}
+            <!-- Owned plant card -->
+            <div class="plant-card"
+                 onclick='updatePlantOwned("{{ plant.image.url }}",
+                                           "{{ plant.name }}",
+                                           "{{ plant.price }}",
+                                           "{{ plant.fact }}",
+                                           "{{ user }}",
+                                           "{{ plant }}")'>
+              <img class="pink-bg" src="{% static 'icons/PlantBG.png' %}" alt="Plant Background" tabindex="0">
+              <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
+              <img class="sold-badge" src="{% static 'icons/Sold.png' %}" alt="Sold!" tabindex="0">
+            </div>
+            {% else %}
+            <!-- Unowned plant card -->
+            <div class="plant-card"
+                 onclick='updatePlant("{{ plant.image.url }}",
+                                      "{{ plant.name }}",
+                                      "{{ plant.price }}",
+                                      "{{ plant.fact }}",
+                                      "{{ user }}",
+                                      "{{ plant }}")'>
+              <img class="pink-bg" src="{% static 'icons/PlantBG.png' %}" alt="Plant Background" tabindex="0">
+              <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    // Send data back to backend to facilitate purchase of a plant
-    function buyPlant(userData, plantName){
-        fetch('api/add_purchased_plant', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}', // Ensure CSRF token is sent
-                    },
-                    body: JSON.stringify({
-                        "user": userData, 
-                        "plantName": plantName
-                    })
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('Plant purchased successfully!');
-                        location.reload(); // Refresh the page after successful purchase
-                    } else {
-                        alert('Error purchasing item.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error purchasing item.');
-                });
-    }
+<!-- Styles for the blue box, chosen plant, shop, and plant cards -->
+<style>
+  /* BLUE BOX */
+  .display-box {
+    max-width: 500px;
+    width: 100%;
+    background-color: rgb(176, 239, 255);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  /* CHOSEN PLANT CARD (on the left side of the blue box) */
+  .chosen-plant-card {
+    width: 150px;
+    height: 150px;
+  }
+  .pink-bg-chosen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: auto;
+    z-index: 1;
+  }
+  .plant-img-chosen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 60%;
+    z-index: 2;
+  }
+
+  /* SHOP CONTAINER - up to 500px, keeps the original ratio */
+  .shop-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 305 / 155;
+    border: 3px solid #444;
+    margin-bottom: 2rem;
+  }
+  .shop-background {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url("{% static 'backgrounds/shop.png' %}") no-repeat center center;
+    background-size: contain;
+    z-index: 1;
+  }
+
+  /* SCROLLABLE PLANTS */
+  .shop-plants {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    z-index: 2;
+    scrollbar-width: thin;
+    scrollbar-color: #d988a7 #888;
+  }
+
+
+  /* PLANT CARDS (in the shop) */
+  .plant-card {
+    position: relative;
+    width: 100px;
+    height: 100%;
+    margin: 0.5rem;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .pink-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: auto;
+    z-index: 1;
+  }
+  .plant-img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 60%;
+    z-index: 2;
+  }
+  .sold-badge {
+    position: absolute;
+    width: 35%;
+    top: 50%;
+    right: -10%;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+</style>
+
+<!-- JavaScript for dynamic updates and purchases -->
+<script>
+  // Show info & enable "Buy" if not owned
+  function updatePlant(image, name, price, fact, user, plantObject) {
+    document.getElementById("chosen-plant-image").src = image;
+    document.getElementById("chosen-plant-name").innerHTML = name;
+    document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
+    document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+
+    const onClickString = "buyPlant('" + user + "','" + name + "');";
+    document.getElementById("chosen-plant-buy").setAttribute("onClick", onClickString);
+    document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-primary w-100");
+    document.getElementById("chosen-plant-buy").innerHTML = "Buy plant";
+  }
+
+  // Show info & disable "Buy" if owned
+  function updatePlantOwned(image, name, price, fact, user, plantObject) {
+    document.getElementById("chosen-plant-image").src = image;
+    document.getElementById("chosen-plant-name").innerHTML = name;
+    document.getElementById("chosen-plant-price").innerHTML = "<strong>Cost: </strong>" + price;
+    document.getElementById("chosen-plant-fact").innerHTML = "<strong>Fact:</strong> " + fact;
+
+    document.getElementById("chosen-plant-buy").setAttribute("onClick", "#");
+    document.getElementById("chosen-plant-buy").setAttribute("class", "btn btn-danger w-100");
+    document.getElementById("chosen-plant-buy").innerHTML = "Owned";
+  }
+
+  // Purchase a plant
+  function buyPlant(userData, plantName) {
+    fetch('api/add_purchased_plant', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({
+        "user": userData,
+        "plantName": plantName
+      })
+    })
+    .then(response => {
+      if (response.ok) {
+        alert('Plant purchased successfully!');
+        location.reload();
+      } else {
+        alert('Error purchasing item.');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error purchasing item.');
+    });
+  }
 </script>
-
-<!-- Styling for Proper Mobile Layout -->
-
 {% endblock %}
-

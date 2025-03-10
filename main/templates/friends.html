@@ -3,96 +3,100 @@
 {% block content %}
 {% load static %}
 
-<div class="d-flex flex-column" style="min-height: calc(100vh - 110px);">
-  <!-- This container will expand if content is short -->
-  <div class="flex-grow-1">
-    <div class="container mt-4 mb-5">
-        <h1 class="text-center mb-4">Friends</h1>
-    
-        <div class="d-flex justify-content-between mb-3">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFriendModal">
-                Add Friend
-            </button>
-            <div class="position-relative d-inline-block">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#friendRequestsModal">
-                    View Friend Requests
-                </button>
-                {% if request.user.get_incoming_friend_requests.count %}
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        !
-                        <span class="visually-hidden">Pending friend requests</span>
-                    </span>
-                {% endif %}
-            </div>
-        </div>
-    
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title text-center">Your Friends</h3>
-                <p class="card-text text-center">Click to view a friend's garden.</p>
+<div class="mobile-wrapper">
 
-                {% if friends_page %}
-                    <div class="list-group">
-                        {% for friend in friends_page %}
-                            <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
-                                <div class="mb-2 mb-md-0">
-                                    <strong class="d-block">{{ friend.username }}</strong>
-                                    <span class="badge bg-info text-dark">{{ friend.stats.points }} points</span>
-                                </div>
-                                <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
-                                    <button type="button" class="btn btn-primary btn-sm px-4"
-                                        data-username="{{ friend.username }}"
-                                        data-plant1="{{ friend.usergarden.plant1Id.image.url|default_if_none:'' }}"
-                                        data-plant2="{{ friend.usergarden.plant2Id.image.url|default_if_none:'' }}"
-                                        data-plant3="{{ friend.usergarden.plant3Id.image.url|default_if_none:'' }}"
-                                        data-plant4="{{ friend.usergarden.plant4Id.image.url|default_if_none:'' }}"
-                                        data-plant5="{{ friend.usergarden.plant5Id.image.url|default_if_none:'' }}"
-                                        data-plant6="{{ friend.usergarden.plant6Id.image.url|default_if_none:'' }}"
-                                        data-bs-toggle="modal" data-bs-target="#gardenModal">
-                                        View Garden
-                                    </button>
-                                
-                                    <button type="button" class="btn btn-danger btn-sm px-4"
-                                        data-username="{{ friend.username }}"
-                                        data-userid="{{ friend.id }}"
-                                        data-bs-toggle="modal" data-bs-target="#confirmRemoveModal">
-                                        Remove Friend
-                                    </button>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-    
-                    {% if friends_total > 4 %}
-                        <nav aria-label="Friends pagination" class="mt-3">
-                            <ul class="pagination justify-content-center">
-                                {% if friends_page.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1">&laquo; First</a>
-                                    </li>
-                                {% endif %}
-    
-                                {% for num in friends_page.paginator.page_range %}
-                                    <li class="page-item {% if num == friends_page.number %} active {% endif %}">
-                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                                    </li>
-                                {% endfor %}
-    
-                                {% if friends_page.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ friends_page.paginator.num_pages }}">Last &raquo;</a>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </nav>
+    <div class="d-flex flex-column" style="min-height: calc(100vh - 110px);">
+    <!-- This container will expand if content is short -->
+    <div class="flex-grow-1">
+        <div class="container mt-4 mb-5">
+            <h1 class="text-center mb-4">Friends</h1>
+        
+            <div class="d-flex justify-content-between mb-3">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFriendModal">
+                    Add Friend
+                </button>
+                <div class="position-relative d-inline-block">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#friendRequestsModal">
+                        View Friend Requests
+                    </button>
+                    {% if request.user.get_incoming_friend_requests.count %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            !
+                            <span class="visually-hidden">Pending friend requests</span>
+                        </span>
                     {% endif %}
-                {% else %}
-                    <p class="text-center">You have no friends yet.</p>
-                {% endif %}
+                </div>
+            </div>
+        
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Your Friends</h3>
+                    <p class="card-text text-center">Click to view a friend's garden.</p>
+
+                    {% if friends_page %}
+                        <div class="list-group">
+                            {% for friend in friends_page %}
+                                <div class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start">
+                                    <div class="mb-2 mb-md-0">
+                                        <strong class="d-block">{{ friend.username }}</strong>
+                                        <span class="badge bg-info text-dark">{{ friend.stats.points }} points</span>
+                                    </div>
+                                    <div class="d-flex flex-column flex-md-row gap-2 justify-content-center">
+                                        <button type="button" class="btn btn-primary btn-sm px-4"
+                                            data-username="{{ friend.username }}"
+                                            data-plant1="{{ friend.usergarden.plant1Id.image.url|default_if_none:'' }}"
+                                            data-plant2="{{ friend.usergarden.plant2Id.image.url|default_if_none:'' }}"
+                                            data-plant3="{{ friend.usergarden.plant3Id.image.url|default_if_none:'' }}"
+                                            data-plant4="{{ friend.usergarden.plant4Id.image.url|default_if_none:'' }}"
+                                            data-plant5="{{ friend.usergarden.plant5Id.image.url|default_if_none:'' }}"
+                                            data-plant6="{{ friend.usergarden.plant6Id.image.url|default_if_none:'' }}"
+                                            data-bs-toggle="modal" data-bs-target="#gardenModal">
+                                            View Garden
+                                        </button>
+                                    
+                                        <button type="button" class="btn btn-danger btn-sm px-4"
+                                            data-username="{{ friend.username }}"
+                                            data-userid="{{ friend.id }}"
+                                            data-bs-toggle="modal" data-bs-target="#confirmRemoveModal">
+                                            Remove Friend
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+        
+                        {% if friends_total > 4 %}
+                            <nav aria-label="Friends pagination" class="mt-3">
+                                <ul class="pagination justify-content-center">
+                                    {% if friends_page.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">&laquo; First</a>
+                                        </li>
+                                    {% endif %}
+        
+                                    {% for num in friends_page.paginator.page_range %}
+                                        <li class="page-item {% if num == friends_page.number %} active {% endif %}">
+                                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                        </li>
+                                    {% endfor %}
+        
+                                    {% if friends_page.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ friends_page.paginator.num_pages }}">Last &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-center">You have no friends yet.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-  </div>
+    </div>
+
 </div>
 
 <!-- Friend Garden Modal -->
