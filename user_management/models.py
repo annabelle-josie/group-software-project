@@ -43,22 +43,20 @@ class CustomUser(AbstractUser):
         target_user.stats.save()
 
     def send_friend_request(self, to_user):
-        """Send a friend request unless the sender was already rejected. If recipient sends a request, remove restriction."""
         if self == to_user:
             raise ValueError("You cannot send a friend request to yourself.")
 
-        # Check if a request already exists in either direction
         existing_request = Friendship.objects.filter(user1=self, user2=to_user).first()
         reverse_request = Friendship.objects.filter(user1=to_user, user2=self).first()
 
-        # CASE 1: Sender has been previously rejected → Cannot send again
+        # CASE 1: Sender has been previously rejected → Do nothing
         if existing_request and existing_request.status == "rejected":
             return
 
-        # CASE 2: Recipient had rejected but now sends a request → Remove restriction
+        # CASE 2: Recipient had rejected but now sends a request → Remove old record and create a new one.
         if reverse_request and reverse_request.status == "rejected":
-            reverse_request.status = "pending"
-            reverse_request.save()
+            reverse_request.delete()
+            Friendship.objects.create(user1=self, user2=to_user, status="pending")
             return
 
         # CASE 3: New Request
