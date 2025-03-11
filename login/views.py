@@ -6,6 +6,8 @@ from .forms import CustomUserCreationForm
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
+import os
+import dotenv
 
 CustomUser = get_user_model()
 # Explicitly set correct template path, as we arent using registration, so without this it assumes the path as /registration/login.html 
@@ -25,6 +27,10 @@ class PrivacyView(TemplateView):
 
 class PasswordResetView(auth_views.PasswordResetView):
     template_name = 'login/password_reset.html'
+
+    def form_valid(self, form):
+        print("PASSWORD: ", os.getenv("EMAIL_HOST_PASSWORD"))
+        return super().form_valid(form)
 
 class PasswordResetDoneView(auth_views.PasswordResetDoneView):
     template_name = 'login/password_reset_done.html'

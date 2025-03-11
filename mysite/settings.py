@@ -142,10 +142,8 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Email settings
 load_dotenv()  # loads the configs from .env
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.zoho.eu'
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "down2earth.exeter@gmail.com"
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'down2earth-password-reset@zohomail.eu'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'down2earth-password-reset@zohomail.eu'
