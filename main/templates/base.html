@@ -4,92 +4,151 @@
     <title>{% block title %}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- jQuery, Bootstrap JS/CSS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+          rel="stylesheet" 
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+          crossorigin="anonymous">
+
+    <!-- Font imports -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
+
+
     {% load static %}
 
     <style>
-        body {
-            background: url("{% static 'backgrounds/greenhouse5.jpg' %}") no-repeat center center fixed;
-            background-size: cover;
+      /* Base styles for a full-page background */
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Raleway', sans-serif;
         }
+        body {
+            /* background: url("{% static 'backgrounds/greenhouse5.jpg' %}") no-repeat center center fixed; */
+            background: #F7F7FF;
+            background-size: cover;
+            padding-top: 60px;
+        }
+
+        .content {
+            flex: 1 0 auto;
+        }
+        .footer {
+            flex-shrink: 0;
+        }
+        
+        /* Mobile wrapper for non-authenticated users */
+        .mobile-wrapper {
+            max-width: var(--mobile-width, 500px);
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Navbar overlay styling */
+        .navbar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1030;
+            background-color: #7eb37b;
+            padding: 0.2rem 1rem;
+        }
+        .navbar-overlay .container-fluid {
+            padding: 0;
+        }
+        .navbar-overlay .nav-link {
+            font-size: 1.0rem;
+            padding: 0;
+            margin: 0.5rem 0;
+        }
+        .navbar-overlay .navbar-brand img {
+            max-height: 50px;
+        }
+        .navbar-overlay .navbar-brand img.leaf {
+            padding: 0.2rem 1rem;
+        }
+        .navbar-light .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(230,230,230,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+        }
+        .custom-dropdown {
+            background-color: #F7F7FF !important;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .custom-dropdown.show {
+            transform: translateX(0);
+            opacity: 1;
+            margin-top: 12px !important;
+            margin-right: -20px !important;
+            animation: slideInRight 0.3s ease forwards;
+        }
+        .custom-dropdown .dropdown-item:hover {
+            background-color: #e0e0e0 !important;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .nav-link.show {
+            position: relative;
+        }
+        .nav-link.show::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-{% load static %}
-
-{% if not user.is_game_keeper %}
-<style>
-    .mobile-wrapper {
-        max-width: var(--mobile-width, 500px);
-        width: 100%;
-        margin: 0 auto;
-    }
-</style>
-{% endif %}
-<!-- Custom Styles for a Thinner Navbar and Larger, Better-Spaced Text -->
-<style>
-    .navbar-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1030;
-        background-color: #f8f9fa;
-        padding: 0.2rem 1rem; /* Adjust to control navbar thickness */
-    }
-    .navbar-overlay .container-fluid {
-        padding: 0;
-    }
-    .navbar-overlay .nav-link {
-        font-size: 1.0rem;      /* Adjust to control link text size of the navbar */
-        padding: 0rem 0;      /* Adjust to control spacing */
-        margin: 0.5rem 0;
-    }
-
-    .navbar-overlay .navbar-brand img {
-        max-height: 50px; /* Adjust this value for thinner images on the navbar */
-    }
-
-    .navbar-overlay .navbar-brand img.leaf {
-        padding: 0.2rem 1rem;
-    }
-
-    body {
-        padding-top: 60px;
-    }
-
-    
-</style>
-
-<nav class="navbar navbar-light fixed-top navbar-overlay">
+  
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-light fixed-top navbar-overlay">
     <div class="container-fluid">
       <!-- Brand -->
-    <a class="navbar-brand" href="/">
+      <a class="navbar-brand" href="/">
         <img src="{% static 'icons/logo.png' %}" alt="site icon">
-    </a>
+      </a>
+
       <!-- User Info -->
-    <div class="d-flex align-items-center">
+      <div class="d-flex align-items-center">
         {% if user.is_authenticated %}
-          <p class="mb-0 me-3">{{ user.username }}</p>
-          <div class="d-flex align-items-center border rounded p-2">
-            <p class="mb-0">{{ user.stats.leaves }}</p>
+          <p class="mb-0 me-3 fw-bold">{{ user.username }}</p>
+          <div class="d-flex align-items-center border rounded p-2" style="background-color: #F7F7FF;">
+            <p class="mb-0 fw-bold">{{ user.stats.leaves }}</p>
             <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-2" alt="leaf icon">
           </div>
         {% endif %}
-    </div>
+      </div>
 
-    <!-- Collapsible Menu with Grid Layout -->
-    <div class="nav-item dropdown me-1">
+      <!-- Dropdown Menu (Hamburger) -->
+      <div class="nav-item dropdown me-1">
         <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdown" role="button"
-            data-bs-toggle="dropdown" aria-expanded="false">
-            <span class="navbar-toggler-icon"></span>
+           data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="navbar-toggler-icon"></span>
         </a>
-        <!-- Dropdown Items -->
-        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <!-- Use a custom class on the <ul> to override default styles -->
+        <ul class="dropdown-menu dropdown-menu-end custom-dropdown" aria-labelledby="navbarDropdown">
           {% if user.is_authenticated %}
             <li><a class="dropdown-item" href="/">Home</a></li>
             <li><a class="dropdown-item" href="/friends">Friends</a></li>
@@ -105,37 +164,49 @@
           {% endif %}
         </ul>
       </div>
-  </div>
-</nav>
+  </nav>
 
-{% block content %}
-{% endblock %}
+  <!-- MAIN CONTENT AREA -->
+  {% if not user.is_authenticated %}
+  <div class="mobile-wrapper">
+  {% endif %}
   
-    
-<!-- JavaScript to handle logout without a form -->
-<script>
-    document.getElementById("logoutButton").addEventListener("click", function (event) {
-        event.preventDefault();  // Prevent normal link behavior
-        fetch("{% url 'logout' %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
-                "Content-Type": "application/json"
-            },
-            credentials: "same-origin"
-        }).then(response => {
-            if (response.ok) {
-                window.location.href = "/";  // Redirect to home after logout
-            }
-        }).catch(error => console.error("Logout failed", error));
-    });
-</script>
+  <div class="content">
+    {% block content %}
+    {% endblock %}
+  </div>
+  
+  {% if not user.is_authenticated %}
+  </div>
+  {% endif %}
 
-
-<footer class="footer bg-primary text-white text-center py-3">
+  <!-- FOOTER -->
+  <footer class="footer text-white text-center py-3" style="background-color: #313628;">
     <div class="container">
-        <p>&copy; <script>document.write(new Date().getFullYear());</script> Down2Earth. All rights reserved.</p>
+      <p>&copy; <script>document.write(new Date().getFullYear());</script> Down2Earth. All rights reserved.</p>
     </div>
-</footer>
+  </footer>
+
+  <!-- JavaScript to handle logout without a form -->
+  <script>
+    const logoutBtn = document.getElementById("logoutButton");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (event) {
+          event.preventDefault();
+          fetch("{% url 'logout' %}", {
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+                  "Content-Type": "application/json"
+              },
+              credentials: "same-origin"
+          }).then(response => {
+              if (response.ok) {
+                  window.location.href = "/";
+              }
+          }).catch(error => console.error("Logout failed", error));
+      });
+    }
+  </script>
 </body>
 </html>
