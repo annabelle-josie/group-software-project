@@ -12,7 +12,7 @@
             <h1 class="text-center mb-4">Friends</h1>
         
             <div class="d-flex justify-content-between mb-3">
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFriendModal">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addFriendModal">
                     Add Friend
                 </button>
                 <div class="position-relative d-inline-block">
@@ -285,7 +285,7 @@
                     listItem.innerHTML = `
                         <span>${request.username}</span>
                         <div>
-                            <button class="btn btn-success btn-sm" onclick="acceptRequest(${request.id})">Accept</button>
+                            <button class="btn btn-secondary btn-sm" onclick="acceptRequest(${request.id})">Accept</button>
                             <button class="btn btn-danger btn-sm ms-2" onclick="rejectRequest(${request.id})">Reject</button>
                         </div>
                     `;

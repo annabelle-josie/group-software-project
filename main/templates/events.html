@@ -9,105 +9,134 @@
         background: url("{% static 'backgrounds/leafBackground.jpg' %}") no-repeat center center fixed;
         background-size: cover;
     }
+
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(33,33,33,.2); 
+    }
+
+    .truncate-overflow {
+        position: relative;
+        max-height: 3.1rem;
+        overflow: hidden;
+        padding-right: 1rem;
+        }
+
+    .truncate-overflow::before {
+        position: absolute;
+        content: "...";
+        bottom: 0;
+        right: 0;
+    }
+
+    .truncate-overflow::after {
+        content: " ";
+        position: absolute;
+        right: 0;
+        width: 1rem;
+        height: 1rem;
+    }
 </style>
 {% endblock %}
 
 
 {% block content %}
-<div class="pb-3">
-    <div class="w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
-            <div class="col-5 bg-success text-light rounded">
-        {% if user.is_authenticated %}
-            {% if user.username|last != "s" %}
-                <h1>{{ user.username }}'s Events</h1>
-            {% else %}
-                <h1>{{ user.username }}' Events</h1>
-            {% endif %}
-        {% else %}
-            <h1>You are not logged on.</h1>
-        {% endif %}
-        </div>
-    </div>
-    <div class="album">
-        <div class="container">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                {% if events %}
-                    {% for event in events %}
-                            <div class="col">
-                            <div class="card shadow-sm">
-                                <!-- Replace this image with one for each event!! -->
-                                <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
-                                <div class="card-body">
-                                <p class="card-text fw-bold">{{ event.title }}</p>
-                                <p class="card-text">{{ event.desc }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
-                                    {% if event.eventMaster == user.username %}
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
-                                    {% endif %}
-                                    </div>
-                                    <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
-                                </div>
-                                </div>
-                            </div>
-                            </div>
-                    {% endfor %}
+<div class="pb-3 d-flex justify-content-center">
+    <div class="col-12 col-md-9 p-5 mb-3" style="background-color: rgba(184, 224, 192, 0.75);">
+            <div class="w-100 p-3 text-center d-flex justify-content-center">
+                    <div class="col-5 rounded">
+                {% if user.is_authenticated %}
+                    {% if user.username|last != "s" %}
+                        <h1>{{ user.username }}'s Events</h1>
+                    {% else %}
+                        <h1>{{ user.username }}' Events</h1>
+                    {% endif %}
                 {% else %}
-                    <p class="alert alert-info">You are not signed up for any events.</p>
+                    <h1>You are not logged on.</h1>
                 {% endif %}
                 </div>
             </div>
-        </div>
+            <div class="album">
+                <div class="container">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                        {% if events %}
+                            {% for event in events %}
+                                    <div class="col">
+                                        <div class="card">
+                                            <!-- Replace this image with one for each event!! -->
+                                            <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
+                                            <div class="card-body">
+                                                <p class="card-text fw-bold">{{ event.title }}</p>
+                                                <p class="card-text truncate-overflow">{{ event.desc }}</p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="btn-group">
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
+                                                        {% if event.eventMaster == user.username %}
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                                                        {% endif %}
+                                                    </div>
+                                                    <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="alert alert-info">You are not signed up for any events.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
-        <h1 class="mt-5 w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
-            <div class="col-5 bg-success text-light rounded">Available Events</div>
-        </h1>
-        <div class="album">
-            <div class="container">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                
-                {% if isGamekeeper %}
-                    <div class="col">
-                        <div class="card shadow-sm">
-                            <!-- Replace this image with one for each event!! -->
-                            <img src="{% static 'icons/add.png' %}" class="bd-placeholder-img card-img-top" width="100%" height="225">
-                            <div class="card-body">
-                            <div class="d-flex justify-content-center align-items-center">
-                                <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#createEventModal">Create a New Event</button>
+            <h1 class="mt-5 w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
+                <div class="col-5 rounded">Available Events</div>
+            </h1>
+            <div class="album">
+                <div class="container">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                    
+                        {% if isGamekeeper %}
+                            <div class="col">
+                                <div class="card">
+                                    <!-- Replace this image with one for each event!! -->
+                                    <img src="{% static 'icons/add.png' %}" class="bd-placeholder-img card-img-top" width="100%" height="225">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#createEventModal">Create a New Event</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            </div>
-                        </div>
+                        {% endif %}
+                        {% if available_events %}
+                            {% for event in available_events %}
+                                <div class="col">
+                                    <div class="card">
+                                        <!-- Replace this image with one for each event!! -->
+                                        <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
+                                        <div class="card-body">
+                                            <p class="card-text fw-bold">{{ event.title }}</p>
+                                            <p class="card-text truncate-overflow">{{ event.desc }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="btn-group">
+                                                    <button type="button" class="btn btn-sm btn-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
+                                                    {% if event.eventMaster == user.username %}
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="alert alert-info">There are no available events to register for.</p>
+                        {% endif %}
                     </div>
-                {% endif %}
-                {% if available_events %}
-                    {% for event in available_events %}
-                    <div class="col">
-                    <div class="card shadow-sm">
-                        <!-- Replace this image with one for each event!! -->
-                        <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
-                        <div class="card-body">
-                        <p class="card-text fw-bold">{{ event.title }}</p>
-                        <p class="card-text">{{ event.desc }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
-                            {% if event.eventMaster == user.username %}
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
-                            {% endif %}
-                            </div>
-                            <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
-                        </div>
-                        </div>
-                    </div>
-                    </div>
-                    {% endfor %}
-
-                {% else %}
-                    <p class="alert alert-info">There are no available events to register for.</p>
-                {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -259,7 +288,6 @@
         </div>
         </div>
     </div>
-
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
@@ -496,6 +524,7 @@
 
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
 
 </div>
 {% endblock %}
