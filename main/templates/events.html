@@ -2,8 +2,19 @@
 {% load auth_extras %}
 {% load static %}
 
+{% block extra_css %} <!-- Copy this block to override the base html background for other pages -->
+<style>
+    body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/leafBackground.jpg' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+
+
 {% block content %}
-<div class="pb-3" style="background-image: url('../static/backgrounds/leafBackground.jpg')">
+<div class="pb-3">
     <div class="w-100 p-3 h-8 text-center mb-3 d-flex justify-content-center">
             <div class="col-5 bg-success text-light rounded">
         {% if user.is_authenticated %}
