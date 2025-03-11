@@ -32,7 +32,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 #CHANGE THIS TO WHATEVER HOSTNAME WE CHOOSE!
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['down2earth.eu.pythonanywhere.com', '127.0.0.1', '.localhost']
 
 AUTH_USER_MODEL = "user_management.CustomUser"
 
