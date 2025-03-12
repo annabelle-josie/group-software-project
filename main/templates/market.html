@@ -2,57 +2,72 @@
 {% load static %}
 {% load auth_extras %}
 
+{% block extra_css %} 
+<!-- Copy this block to override the base html background for other pages -->
+<style>
+  body {
+      padding-top: 60px; 
+      background: url("{% static 'backgrounds/shop_page_background.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
+  }
+</style>
+{% endblock %}
+
 {% block title %}Market{% endblock %}
 
 {% block content %}
-<!-- Container ensures enough page height so the footer appears at bottom -->
 <div class="container my-4">
-
-  <!-- Blue box (max 500px), with chosen plant on the left, text and button on the right -->
+  <!-- Top Display Box using overlay-with-hole -->
   <div class="row">
     <div class="col-12 d-flex justify-content-center">
-        <div class="display-box">
-            {% with plants.0 as firstPlant %}
-            <div class="row no-gutters align-items-center">
-              <!-- Left half: Pink background + chosen plant -->
-              <div class="col-5 d-flex justify-content-center">
-                <div class="chosen-plant-card position-relative">
-                  <img class="pink-bg-chosen" src="{% static 'icons/PlantBG.png' %}" alt="Plant BG">
-                  <img class="plant-img-chosen"
-                       id="chosen-plant-image"
-                       src="{{ firstPlant.image.url }}"
-                       alt="{{ firstPlant.name }}">
-                </div>
+      <div class="overlay-with-hole text-white mx-auto">
+        <div class="row position-relative" style="z-index: 2;">
+          <!-- On large screens (md+): image is order-md-1 (left), text is order-md-2 (right).
+               On small screens: text is order-1 (top), image is order-2 (below text). -->
+          <div class="col-md-5 col-12 order-md-1 order-2 d-flex justify-content-center">
+            <div class="chosen-plant-card position-relative">
+              <img class="plant-img-chosen"
+                   id="chosen-plant-image"
+                   src="{{ plants.0.image.url }}"
+                   alt="{{ plants.0.name }}">
+            </div>
+          </div>
+      
+          <div class="col-md-7 col-12 order-md-2 order-1 d-flex flex-column">
+            <div class="mb-2 text-center">
+              <div class="title-container">
+                <h2 class="mt-2" id="chosen-plant-name">{{ plants.0.name }}</h2>
               </div>
-              <!-- Right half: Plant details & buy button -->
-              <div class="col-6">
-                <h2 class="mt-2 text-center" id="chosen-plant-name">{{ firstPlant.name }}</h2>
+              <div class="text-container">
                 <div class="d-flex align-items-center justify-content-center">
                   <p class="mb-0" id="chosen-plant-price">
-                    <strong>Cost: </strong>{{ firstPlant.price }}
+                    <strong>Cost: </strong>{{ plants.0.price }}
                   </p>
                   <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-1" alt="leaf icon">
                 </div>
-                <p id="chosen-plant-fact" class="mt-2 text-center">
-                  <strong>Fact:</strong> {{ firstPlant.fact }}
-                </p>
-    
-                {% if firstPlant in ownedPlants %}
-                  <button id="chosen-plant-buy" class="btn btn-danger w-100">Owned</button>
-                {% else %}
-                  <button id="chosen-plant-buy" class="btn btn-primary w-100"
-                          onClick="buyPlant('{{ user }}', '{{ firstPlant.name }}')">
-                    Buy plant
-                  </button>
-                {% endif %}
+                <p class="mt-2" id="chosen-plant-fact">
+                  <strong>Fact:</strong> {{ plants.0.fact }}
               </div>
+              </p>
             </div>
-            {% endwith %}
-        </div>    
+      
+            <div class="button-container">
+              {% if plants.0 in ownedPlants %}
+                <button id="chosen-plant-buy" class="btn btn-danger w-100">Owned</button>
+              {% else %}
+                <button id="chosen-plant-buy" class="btn btn-primary w-100"
+                        onClick="buyPlant('{{ user }}', '{{ plants.0.name }}')">
+                  Buy Plant
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>   
     </div>
   </div>
 
-  <!-- Shop area below: scaled up to 500px wide, plants aligned near bottom, horizontally scrollable -->
+  <!-- Shop Area -->
   <div class="row mt-4">
     <div class="col-12 d-flex justify-content-center">
       <div class="shop-container">
@@ -60,30 +75,18 @@
         <div class="shop-plants">
           {% for plant in plants %}
             {% if plant in ownedPlants %}
-            <!-- Owned plant card -->
-            <div class="plant-card"
-                 onclick='updatePlantOwned("{{ plant.image.url }}",
-                                           "{{ plant.name }}",
-                                           "{{ plant.price }}",
-                                           "{{ plant.fact }}",
-                                           "{{ user }}",
-                                           "{{ plant }}")'>
-              <img class="pink-bg" src="{% static 'icons/PlantBG.png' %}" alt="Plant Background" tabindex="0">
-              <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
-              <img class="sold-badge" src="{% static 'icons/Sold.png' %}" alt="Sold!" tabindex="0">
-            </div>
+              <!-- Owned Plant Card -->
+              <div class="plant-card" onclick='updatePlantOwned("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{ user }}", "{{ plant }}")'>
+                <img class="plant-bg" src="{% static 'icons/PlantBGBlue.png' %}" alt="Plant Background" tabindex="0">
+                <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
+                <img class="sold-badge" src="{% static 'icons/Sold.png' %}" alt="Sold!" tabindex="0">
+              </div>
             {% else %}
-            <!-- Unowned plant card -->
-            <div class="plant-card"
-                 onclick='updatePlant("{{ plant.image.url }}",
-                                      "{{ plant.name }}",
-                                      "{{ plant.price }}",
-                                      "{{ plant.fact }}",
-                                      "{{ user }}",
-                                      "{{ plant }}")'>
-              <img class="pink-bg" src="{% static 'icons/PlantBG.png' %}" alt="Plant Background" tabindex="0">
-              <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
-            </div>
+              <!-- Unowned Plant Card -->
+              <div class="plant-card" onclick='updatePlant("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{ user }}", "{{ plant }}")'>
+                <img class="plant-bg" src="{% static 'icons/PlantBGBlue.png' %}" alt="Plant Background" tabindex="0">
+                <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
+              </div>
             {% endif %}
           {% endfor %}
         </div>
@@ -92,30 +95,39 @@
   </div>
 </div>
 
-<!-- Styles for the blue box, chosen plant, shop, and plant cards -->
 <style>
-  /* BLUE BOX */
-  .display-box {
-    max-width: 500px;
-    width: 100%;
-    background-color: rgb(176, 239, 255);
-    border-radius: 8px;
-    padding: 1rem;
+  .navbar-overlay {
+    background-color: #80ACFF !important;
   }
 
-  /* CHOSEN PLANT CARD (on the left side of the blue box) */
-  .chosen-plant-card {
-    width: 150px;
-    height: 150px;
+  /* Overlay With Hole */
+  .overlay-with-hole {
+    position: relative;
+    width: 700px;
+    border-radius: 8px;
+    padding: 40px;
+    background: transparent;
   }
-  .pink-bg-chosen {
+  .overlay-with-hole::before {
+    content: "";
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: auto;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #193F87;
+    mask-image: radial-gradient(ellipse 15% 45% at 21% 50%, transparent 0%, transparent 90%, black 91%);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
     z-index: 1;
+  }
+
+  /* Chosen Plant Card */
+  .chosen-plant-card {
+    width: 200px;
+    height: 200px;
+    right: 14px;
+    position: relative;
   }
   .plant-img-chosen {
     position: absolute;
@@ -126,19 +138,21 @@
     z-index: 2;
   }
 
-  /* SHOP CONTAINER - up to 500px, keeps the original ratio */
+  /* SHOP CONTAINER */
   .shop-container {
     position: relative;
     width: 100%;
-    max-width: 500px;
+    max-width: 700px;
     aspect-ratio: 305 / 155;
     border: 3px solid #444;
     margin-bottom: 2rem;
   }
   .shop-background {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: url("{% static 'backgrounds/Shop.png' %}") no-repeat center center;
     background-size: contain;
     z-index: 1;
@@ -152,7 +166,7 @@
     width: 100%;
     height: 100%;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
@@ -161,40 +175,95 @@
     scrollbar-color: #d988a7 #888;
   }
 
-
-  /* PLANT CARDS (in the shop) */
+  /* PLANT CARDS */
   .plant-card {
     position: relative;
-    width: 100px;
+    width: 25%;
     height: 100%;
-    margin: 0.5rem;
+    margin: 1rem;
     flex-shrink: 0;
     text-align: center;
+    overflow: hidden;
   }
-  .pink-bg {
+  .plant-bg {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80%;
+    width: 120%;
     height: auto;
     z-index: 1;
+    border-radius: 30%;
   }
   .plant-img {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-width: 60%;
+    max-width: 90%;
     z-index: 2;
   }
   .sold-badge {
     position: absolute;
     width: 35%;
     top: 50%;
-    right: -10%;
+    right: -5%;
     transform: translateY(-50%);
     z-index: 3;
+  }
+
+  /* Footer override */
+  .footer {
+    background-color: #011936 !important;
+  }
+
+  @media (max-width: 768px) {
+    .title-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      bottom: 210px;
+      width: 100%;
+      text-align: center;
+    }
+    .text-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      top: 195px;
+      width: 100%;
+      text-align: center;
+    }
+    .button-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      top: 280px;
+      width: 100%;
+      text-align: center;
+    }
+    .overlay-with-hole {
+      height: 123%;
+    }
+    .overlay-with-hole::before {
+      mask-image: radial-gradient(
+        ellipse 90px 95px at 50% 38%,
+        transparent 0%,
+        transparent 90%,
+        black 91%
+      );
+    }
+    .shop-container {
+      position: relative;
+      top: 50px;
+    }
+    .chosen-plant-card {
+        bottom: 25px;
+        right: 0px;
+    }
+    .plant-img-chosen {
+      max-width: 50%;
+    }
   }
 </style>
 
