@@ -3,6 +3,8 @@
 {% block title %} Log-In {% endblock %}
 
 {% block content %}
+
+
 {% if user.is_authenticated %}
 <p>You are already logged in.</p>
 <form action="{% url 'logout' %}" method="post">

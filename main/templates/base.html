@@ -16,11 +16,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;700&display=swap" rel="stylesheet">
 
-
     {% load static %}
 
     <style>
-      /* Base styles for a full-page background */
+        /* Base styles for a full-page background */
         html, body {
             height: 100%;
             margin: 0;
@@ -35,6 +34,7 @@
 
         .content {
             flex: 1 0 auto;
+            min-height: calc(100vh - 120px); /* 100vh minus header (60px) + footer (60px) */
         }
         .footer {
             flex-shrink: 0;
@@ -42,7 +42,7 @@
         
         /* Mobile wrapper for non-authenticated users */
         .mobile-wrapper {
-            max-width: var(--mobile-width, 500px);
+            max-width: var(--mobile-width, 700px);
             width: 100%;
             margin: 0 auto;
         }
@@ -115,6 +115,20 @@
             border-radius: 50%;
             z-index: -1;
         }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #3B322C;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #979797;
+            border-radius: 4px;
+            transition: opacity 0.5s ease;
+            opacity: 0; /* Hidden by default */
+        }
 
     </style>
     {% block extra_css %}{% endblock %}
@@ -164,6 +178,7 @@
           {% endif %}
         </ul>
       </div>
+    </div>
   </nav>
 
   <!-- MAIN CONTENT AREA -->
