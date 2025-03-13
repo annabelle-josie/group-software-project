@@ -6,34 +6,36 @@
 {% block content %}
 <div class="mobile-wrapper">
     
-    <div class="container-fluid">
-        <div id="garden-display" class="container mx-auto w-md-50 w-100" style="position: relative;">
-            <img width="100%" src="static/backgrounds/garden.png" alt="garden background">
-            <img class="nonClickable" id="1" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
-            <img class="nonClickable" id="2" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
-            <img class="nonClickable" id="3" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
-            <img class="nonClickable" id="4" width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
-            <img class="nonClickable" id="5" width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
-            <img class="nonClickable" id="6" width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+    <div class="container-fluid mt-5">
+        <h1 class="text-center">Your Garden</h1>
+        <div class="p-3 rounded">
+            <div id="garden-display" class="rounded container mx-auto w-md-50 w-100" style="position: relative;">
+                <img class="rounded" width="100%" src="static/backgrounds/garden.png" alt="garden background">
+                <img class="nonClickable" id="1" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
+                <img class="nonClickable" id="2" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
+                <img class="nonClickable" id="3" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
+                <img class="nonClickable" id="4" width="20%" style="position: absolute; left: 22.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.3.image.url }}" alt="{{ plant_slots.3.name }}">
+                <img class="nonClickable" id="5" width="20%" style="position: absolute; left: 50%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.4.image.url }}" alt="{{ plant_slots.4.name }}">
+                <img class="nonClickable" id="6" width="20%" style="position: absolute; left: 77.5%; top: 56.25%; transform: translateX(-50%);" src="{{ plant_slots.5.image.url }}" alt="{{ plant_slots.5.name }}">
+            </div>
+            <div class="row mt-4">
+                <div class="col-12 mb-3">
+                <button type="button" class="btn btn-primary btn-lg w-100" onclick="swapClickable()">Edit garden</button>
+                </div>
+            </div>
         </div>
 
         {% if user.get_incoming_friend_requests.exists %}
-        <div class="row mt-4">
-            <div class="col-6 mb-3">
-            <button type="button" class="btn btn-primary btn-lg w-100" onclick="swapClickable()">Edit garden</button>
+            <div class="row mt-4">
+                <div class="col-6 mb-3">
+                <button type="button" class="btn btn-primary btn-lg w-100" onclick="swapClickable()">Edit garden</button>
+                </div>
+                <div class="col-6 mb-3">
+                <a href="{% url 'friends' %}" class="btn btn-danger btn-lg w-100">
+                    You have new friend requests
+                </a>
+                </div>
             </div>
-            <div class="col-6 mb-3">
-            <a href="{% url 'friends' %}" class="btn btn-danger btn-lg w-100">
-                You have new friend requests
-            </a>
-            </div>
-        </div>
-        {% else %}
-        <div class="row mt-4">
-            <div class="col-12 mb-3">
-            <button type="button" class="btn btn-primary btn-lg w-100" onclick="swapClickable()">Edit garden</button>
-            </div>
-        </div>
         {% endif %}
         
         <div class="modal fade" id="editPlantModal" tabindex="-1" role="dialog" aria-labelledby="editPlantModal" aria-hidden="true">
@@ -65,9 +67,9 @@
             </div>
         </div>
 
-        <div class="row mt-4">
+        <div class="row pb-5">
             <div class="col-12">
-                <div class="p-3" style="background-color: #f7b2b2;">
+                <div class="p-3 rounded" style="background-color: #ffdfbe;">
                     <h2 class="text-center">Current Tasks</h2>
                     <ul class="list-group">
                         {% for item in challenge_list %}
@@ -97,7 +99,7 @@
                             <p class="text-center">No challenges left</p>
                         {% endfor %}
                     </ul>
-                    <button class="btn btn-light mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
+                    <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
                 </div>
             </div>
 

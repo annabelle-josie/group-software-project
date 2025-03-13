@@ -5,6 +5,14 @@
 {% block title %} Leaderboards {% endblock %}
 
 {% block content %}
+<style>
+    .nav-link{
+        color: #3B322C;
+    }
+    .nav-link:hover{
+        color: #3B322C;
+    }
+</style>
 <div class="container">
     <!-- Trophy Icon + Title -->
     <div class="d-flex justify-content-center m-4">
@@ -31,7 +39,6 @@
         </div>
     </div>
 
-    <!-- TABS: Global vs. Friend -->
     <ul class="nav nav-tabs nav-fill mt-5" id="myTab" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active" id="global-tab" data-bs-toggle="tab" data-bs-target="#global" type="button" role="tab" aria-controls="global" aria-selected="true">Global</button>
@@ -42,7 +49,6 @@
     </ul>
     
     <div class="tab-content" id="myTabContent">
-        <!-- Global Leaderboard Tab -->
         <div class="tab-pane fade show active" id="global" role="tabpanel" aria-labelledby="global-tab">
             <table class="table table-hover text-center mt-3">
                 <thead>
@@ -53,52 +59,45 @@
                     </tr>
                 </thead>
                 <tbody>
-                <!-- 1) Loop shows top 10 (including user if they're in it) -->
-                {% for item in leaderboard %}
-                  <tr>
-                      <td scope="row">{{ forloop.counter }}</td>
-                      <td>
-                          <div class="d-flex justify-content-between">
-                              {{ item.username }} 
-                              {% if item.username != user.username %}
-                                <button type="button" 
-                                        data-username="{{ item.username }}" 
-                                        data-plant1="{{ item.plant1 }}" 
-                                        data-plant2="{{ item.plant2 }}" 
-                                        data-plant3="{{ item.plant3 }}" 
-                                        data-plant4="{{ item.plant4 }}" 
-                                        data-plant5="{{ item.plant5 }}" 
-                                        data-plant6="{{ item.plant6 }}" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#exampleModal">
-                                  ClickMe
-                                </button>
-                              {% endif %}
-                          </div>
-                      </td>
-                      <td>{{ item.points }}</td>
-                  </tr>
-                {% endfor %}
-                
-                <!-- 2) Insert a gap row for visual spacing above the user's final row -->
-                <tr style="border-top: 2px solid #ccc;"></tr>
-                
-                <!-- 3) Final row for the current user, with actual rank from context -->
-                <tr>
-                  <td>{{ rank }}</td>
-                  <td>
-                    <div class="d-flex justify-content-between">
-                      {{ user.username }}
-                      <!-- No button for current user -->
-                    </div>
-                  </td>
-                  <td>{{ user.stats.points }}</td>
-                </tr>
+                    {% for item in leaderboard %}
+                    <tr>
+                        <td scope="row">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="d-flex justify-content-between">
+                                {{ item.username }} 
+                                {% if item.username != user.username %}
+                                  <button class="btn btn-primary btn-sm tight-button btn-view-garden" type="button" 
+                                          data-username="{{ item.username }}" 
+                                          data-plant1="{{ item.plant1 }}" 
+                                          data-plant2="{{ item.plant2 }}" 
+                                          data-plant3="{{ item.plant3 }}" 
+                                          data-plant4="{{ item.plant4 }}" 
+                                          data-plant5="{{ item.plant5 }}" 
+                                          data-plant6="{{ item.plant6 }}" 
+                                          data-bs-toggle="modal" 
+                                          data-bs-target="#exampleModal">
+                                    <span>View Garden</span>
+                                  </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ item.points }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr style="border-top: 2px solid #ccc;" class="table-success">
+                        <td>{{ user_friend_rank }}</td>
+                        <td>
+                            <div class="d-flex justify-content-between">
+                                {{ user.username }}
+                            </div>
+                        </td>
+                        <td>{{ user.stats.points }}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
         
-        <!-- Friend Leaderboard Tab -->
         <div class="tab-pane fade" id="friend" role="tabpanel" aria-labelledby="friend-tab">
             <table class="table table-hover text-center mt-3">
                 <thead>
@@ -109,52 +108,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                <!-- 1) Loop for friend_leaderboard (including user if they appear in the friend list, though typically they'd be excluded) -->
-                {% for item in friend_leaderboard %}
-                  <tr>
-                      <td scope="row">{{ forloop.counter }}</td>
-                      <td>
-                          <div class="d-flex justify-content-between">
-                              {{ item.username }} 
-                              {% if item.username != user.username %}
-                                <button type="button" 
-                                        data-username="{{ item.username }}" 
-                                        data-plant1="{{ item.plant1 }}" 
-                                        data-plant2="{{ item.plant2 }}" 
-                                        data-plant3="{{ item.plant3 }}" 
-                                        data-plant4="{{ item.plant4 }}" 
-                                        data-plant5="{{ item.plant5 }}" 
-                                        data-plant6="{{ item.plant6 }}" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#exampleModal">
-                                  ClickMe
-                                </button>
-                              {% endif %}
-                          </div>
-                      </td>
-                      <td>{{ item.points }}</td>
-                  </tr>
-                {% endfor %}
-                
-                {% if friend_leaderboard|length == 0 %}
-                <tr>
-                    <td colspan="3">No friends yet.</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td>{{ rank }}</td>
-                    <td>
-                      <div class="d-flex justify-content-between">
-                        {{ user.username }}
-                      </div>
-                    </td>
-                    <td>{{ user.stats.points }}</td>
-                </tr>
-                {% endif %}
-                
-                <tr style="border-top: 2px solid #ccc;"></tr>
-                
-                
+                    {% if friend_leaderboard|length == 0 %}
+                    <tr>
+                        <td colspan="3">No friends yet.</td>
+                    </tr>
+                    {% else %}
+                        {% for item in friend_leaderboard %}
+                        <tr>
+                            <td scope="row">{{ item.friend_rank }}</td>
+                            <td>
+                                <div class="d-flex justify-content-between">
+                                    {{ item.username }} 
+                                    {% if item.username != user.username %}
+                                      <button class="btn btn-primary btn-sm tight-button btn-view-garden" type="button" 
+                                              data-username="{{ item.username }}" 
+                                              data-plant1="{{ item.plant1 }}" 
+                                              data-plant2="{{ item.plant2 }}" 
+                                              data-plant3="{{ item.plant3 }}" 
+                                              data-plant4="{{ item.plant4 }}" 
+                                              data-plant5="{{ item.plant5 }}" 
+                                              data-plant6="{{ item.plant6 }}" 
+                                              data-bs-toggle="modal" 
+                                              data-bs-target="#exampleModal">
+                                        <span>View Garden</span>
+                                      </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>{{ item.points }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr style="border-top: 2px solid #ccc;" class="table-success">
+                            <td>{{ user_friend_rank }}</td>
+                            <td>
+                                <div class="d-flex justify-content-between">
+                                    {{ user.username }}
+                                </div>
+                            </td>
+                            <td>{{ user.stats.points }}</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
@@ -165,9 +158,11 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="modalText" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header d-flex justify-content-between">
                 <h5 class="modal-title" id="modalText">Player's Garden</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close btn btn-outline-danger" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="container mx-auto w-100 position-relative">
@@ -184,6 +179,29 @@
     </div>
 </div>
 
+<style>
+    .btn-view-garden span {
+        display: inline;
+    }
+    @media (max-width: 450px) {
+    .btn-view-garden span {
+        visibility: hidden;
+    }
+    .btn-view-garden::after {
+        content: "Garden";
+    }
+    .tight-button {
+        display: inline-flex; 
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding: 0.3rem !important;
+        font-size: 0.85rem !important;
+        width: 60px;
+        height: 30px;
+        line-height: normal;
+    }
+    }
+</style>
 <!-- JavaScript to update modal body -->
 <script>
     var exampleModal = document.getElementById('exampleModal');
