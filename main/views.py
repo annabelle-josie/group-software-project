@@ -96,6 +96,9 @@ def home(request):
     available = users.owned_plants.all()
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
 
+def garden(request):
+    return render(request, "garden.html")
+
 @login_required(login_url="/auth/login")
 def gardenView(request):
     """View to display the garden on the main page"""
@@ -144,43 +147,91 @@ def updateGarden(request):
         return Response({"error": "no "}, status=status.HTTP_404_NOT_FOUND)
     return HttpResponseRedirect(redirect_to="/")
 
-# leaderboard view, displays the top 10 users with the most points
 @login_required(login_url="/auth/login")
 def leaderboard(request):
-    user = request.user
-    context = get_leaderboard(request).content
-    context = json.loads(context)
-    userrank = UserStats.objects.raw("SELECT userrank, id FROM (SELECT user_management_userstats.*, RANK() OVER (ORDER BY points DESC) as userrank FROM user_management_userstats) user_management_userstats WHERE user_id = " + str(user.id))
-    for person in userrank:
-        rank = person.userrank
-    context['rank'] = rank
-    for entry in context['leaderboard']:
-        try:
-            user = CustomUser.objects.get(username=entry['username'])
-            user_garden = UserGarden.objects.get(user_id=user.id)
-            plant1 = Plant.objects.get(id=user_garden.plant1Id_id)
-            plant2 = Plant.objects.get(id=user_garden.plant2Id_id)
-            plant3 = Plant.objects.get(id=user_garden.plant3Id_id)
-            plant4 = Plant.objects.get(id=user_garden.plant4Id_id)
-            plant5 = Plant.objects.get(id=user_garden.plant5Id_id)
-            plant6 = Plant.objects.get(id=user_garden.plant6Id_id)
-            entry['plant1'] = plant1.image.url
-            entry['plant2'] = plant2.image.url
-            entry['plant3'] = plant3.image.url
-            entry['plant4'] = plant4.image.url
-            entry['plant5'] = plant5.image.url
-            entry['plant6'] = plant6.image.url
-        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist, Plant.DoesNotExist):
-            entry['plant1'] = '/static/potted_plant.png'
-            entry['plant2'] = '/static/potted_plant.png'
-            entry['plant3'] = '/static/potted_plant.png'
-            entry['plant4'] = '/static/potted_plant.png'
-            entry['plant5'] = '/static/potted_plant.png'
-            entry['plant6'] = '/static/potted_plant.png'
+    global_data = json.loads(get_leaderboard(request).content)
+    friends_data = json.loads(get_friends_leaderboard(request).content)
+    
+    context = {
+        'leaderboard': global_data.get('leaderboard', []),
+        'friend_leaderboard': friends_data.get('friend_leaderboard', []),
+        'rank': global_data.get('global_rank', 0),
+        'user_friend_rank': friends_data.get('user_friend_rank', 0),
+    }
     return render(request, "leaderboard.html", context)
 
-def garden(request):
-    return render(request, "garden.html")
+
+@api_view(['GET'])
+def get_leaderboard(request):
+    user = request.user
+    global_leaders = UserStats.objects.raw(
+        "SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10"
+    )
+    data = {'leaderboard': []}
+    for leader in global_leaders:
+        uid = leader.user_id
+        username = CustomUser.objects.get(pk=uid).get_username()
+        points = leader.points
+        data['leaderboard'].append({'username': username, 'points': points})
+
+    for entry in data['leaderboard']:
+        try:
+            user_obj = CustomUser.objects.get(username=entry['username'])
+            user_garden = UserGarden.objects.get(user_id=user_obj.id)
+            for slot in range(1, 7):
+                try:
+                    plant = Plant.objects.get(id=getattr(user_garden, f"plant{slot}Id_id"))
+                    entry[f'plant{slot}'] = plant.image.url
+                except Plant.DoesNotExist:
+                    entry[f'plant{slot}'] = '/static/potted_plant.png'
+        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist):
+            for slot in range(1, 7):
+                entry[f'plant{slot}'] = '/static/potted_plant.png'
+
+    user_rank_queryset = UserStats.objects.raw(
+        "SELECT userrank, id FROM (SELECT user_management_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM user_management_userstats) AS ranking WHERE user_id = %s",
+        [user.id]
+    )
+    global_rank = None
+    for item in user_rank_queryset:
+        global_rank = item.userrank
+    data['global_rank'] = global_rank if global_rank is not None else 0
+    return JsonResponse(data)
+
+@api_view(['GET'])
+def get_friends_leaderboard(request):
+    user = request.user
+    friend_ids = list(user.get_friends().values_list('id', flat=True))
+    friend_ids.append(user.id)
+    friend_stats = UserStats.objects.filter(user_id__in=friend_ids).order_by('-points')
+    data = {'friend_leaderboard': []}
+    user_friend_rank = None
+    for position, friend_stat in enumerate(friend_stats, start=1):
+        username = friend_stat.user.get_username()
+        points = friend_stat.points
+        data['friend_leaderboard'].append({
+            'username': username,
+            'points': points,
+            'friend_rank': position,
+        })
+        if friend_stat.user == user:
+            user_friend_rank = position
+    data['user_friend_rank'] = user_friend_rank if user_friend_rank is not None else 0
+
+    for entry in data['friend_leaderboard']:
+        try:
+            user_obj = CustomUser.objects.get(username=entry['username'])
+            user_garden = UserGarden.objects.get(user_id=user_obj.id)
+            for slot in range(1, 7):
+                try:
+                    plant = Plant.objects.get(id=getattr(user_garden, f"plant{slot}Id_id"))
+                    entry[f'plant{slot}'] = plant.image.url
+                except Plant.DoesNotExist:
+                    entry[f'plant{slot}'] = '/static/potted_plant.png'
+        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist):
+            for slot in range(1, 7):
+                entry[f'plant{slot}'] = '/static/potted_plant.png'
+    return JsonResponse(data)
 
 
 @login_required(login_url="/auth/login")
@@ -220,7 +271,6 @@ def scan_qr(request, event_id, qr_code):
         })
 
     return JsonResponse({'error': 'Invalid QR code.'}, status=400)
-
 
 
 
@@ -469,18 +519,6 @@ def remove_challenge(request):
         return Response(status=status.HTTP_200_OK)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
-# function to get the leaderboard, returns a JSON response with the top 10 users with the most points
-@api_view(['GET'])
-def get_leaderboard(request):
-    leaders = UserStats.objects.raw("SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10")
-    data = {'leaderboard': []}
-    for person in leaders:
-        id = person.user_id
-        username = CustomUser.objects.get(pk=id).get_username()
-        points = person.points
-        data['leaderboard'].append({'username': username, 'points': points})
-    return JsonResponse(data)
     
 # function to remove a task from a challenge, returns a JSON response that indicates success or failure
 @api_view(['POST'])
