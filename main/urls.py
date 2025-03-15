@@ -23,7 +23,7 @@ urlpatterns = [
     path("api/v1/removeChallenge", views.remove_challenge),  # API endpoint to remove challenge
     path("api/v1/removeTask", views.remove_task),  # API endpoint to remove task
     path("api/v1/leaderboard", views.get_leaderboard),  # API endpoint to get leaderboard
-    path("auth/", include("login.urls")),  # Include login app URLs
+    path("auth/", include("users.urls")),  # Include users app URLs
     path('incrementProgress/<int:event_id>/', views.incrementProgress, name='incrementProgress'),  # Increment progress endpoint
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),  # Add purchased plant endpoint
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),

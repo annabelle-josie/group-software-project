@@ -19,12 +19,12 @@ from django.contrib.auth.decorators import login_required
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model, logout
 from garden.models import UserGarden
-from user_management.models import CustomUser, UserStats
+from users.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
-from user_management.models import UserStats, CustomUser
+from users.models import UserStats, CustomUser
 from garden.models import Plant
 import json
-from login.forms import ProfileUpdateForm, CustomPasswordChangeForm
+from users.forms import ProfileUpdateForm, CustomPasswordChangeForm
 from django.urls import reverse
 from django.conf import settings
 
@@ -165,7 +165,7 @@ def leaderboard(request):
 def get_leaderboard(request):
     user = request.user
     global_leaders = UserStats.objects.raw(
-        "SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10"
+        "SELECT id, user_id, points FROM users_userstats ORDER BY points DESC LIMIT 10"
     )
     data = {'leaderboard': []}
     for leader in global_leaders:
@@ -189,7 +189,7 @@ def get_leaderboard(request):
                 entry[f'plant{slot}'] = '/static/potted_plant.png'
 
     user_rank_queryset = UserStats.objects.raw(
-        "SELECT userrank, id FROM (SELECT user_management_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM user_management_userstats) AS ranking WHERE user_id = %s",
+        "SELECT userrank, id FROM (SELECT users_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM users_userstats) AS ranking WHERE user_id = %s",
         [user.id]
     )
     global_rank = None
