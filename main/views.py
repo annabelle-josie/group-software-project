@@ -607,7 +607,7 @@ These are then returned to the front-end within context to the market.html templ
 @login_required(login_url="/auth/login")
 def market_view(request):
     # Fetching all plants, plants owned by the user, and how many leaves that user has
-    plants = Plant.objects.filter(onMarket=True)   # Fetch from DB only plants that are allowed to be on market
+    plants = Plant.objects.filter(onMarket=True).order_by('price')   # Fetch from DB only plants that are allowed to be on market
     user = CustomUser.objects.get(username=request.user)
     currentLeaves = UserStats.objects.get(user_id=user.id).leaves
     ownedPlants = user.owned_plants.all()

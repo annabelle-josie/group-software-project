@@ -5,7 +5,7 @@ from django.conf import settings
 def get_or_create_default_plant():
     plant_name = "Potted Plant"
     plant_price = 0
-    plant_fact = "This is a default plant."
+    plant_fact = "A common, easy-to-care-for plant often found indoors."
     plant_on_market = False
 
     static_image_path = "static/system_plants/potted_plant.png"
