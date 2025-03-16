@@ -1,9 +1,12 @@
+import secrets
+import string
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.forms import ModelForm
 from django.contrib.auth import get_user_model
 import qrcode
+from django.contrib import admin
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.utils.timezone import now
@@ -24,14 +27,22 @@ class Challenge(models.Model):
 
     def __str__(self):
         return self.title  # String representation of the challenge
-    def generateQrImage(self):
-        if self.qrvalue:
-            qr = qrcode.make(self.qrvalue)
+# Form for creating or updating a challenge
+class ChallengeAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        print(obj.challengeId)
+        if (obj.isQR is True):
+            obj.qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80))
+            qr = qrcode.make(obj.qrvalue)
             buffer = BytesIO()
             qr.save(buffer, format="PNG")
-            self.QRImage.save(f"Cqr_{self.challengeId}.png", ContentFile(buffer.getvalue()), save=False)
+            obj.QRImage.save(f"qr_{obj.challengeId}.png", ContentFile(buffer.getvalue()), save=False)
+        return super().save_model(request, obj, form, change)
+    
+    readonly_fields =("qrvalue","QRImage")
+    list_display=["challengeId","title","qrvalue","QRImage"]
+    #,"desc", "noOfTasks","rewardValue", "isQR","repeatable"
 
-# Form for creating or updating a challenge
 class challengeForm(ModelForm):
     class Meta:
         model = Challenge

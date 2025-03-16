@@ -550,7 +550,7 @@ def my_challenges(request):
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     try:
-        allchallenges= Challenge.objects.latest('challengeId')
+        allchallenges= Challenge.objects.all()
     except:
         allchallenges = None
     challenge_in_progress = [
@@ -604,7 +604,7 @@ def my_challenges(request):
 
     return render(request, 'allchallenges.html', {
         'form':challengeForm(),
-        'challenge_list': challenge_in_progress, 'isGamekeeper': isGamekeeper, 'challenges':allchallenges})
+        'challenge_list': challenge_in_progress, 'isGamekeeper': isGamekeeper, 'allchallenges':allchallenges})
         
 '''Market: only availble if logged in (otherwise nowhere to purchase plant to)
 Retrieves all plants available on the market, plants owned by a given user and their points
