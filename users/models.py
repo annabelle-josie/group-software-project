@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.timezone import now
 from django.contrib.auth.models import AbstractUser, Group, BaseUserManager
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -21,26 +20,16 @@ class CustomUserManager(BaseUserManager):
         """Create and return a superuser with the given username and password via create_user function."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
-        return self.create_user(username, email, password, **extra_fields)
+        user = self.create_user(username, email, password, **extra_fields)
+        group, created = Group.objects.get_or_create(name="Game Keepers")
+        user.groups.add(group)
+        return user
     
 class CustomUser(AbstractUser):
     """Custom user model extending the default Django user model with friends, owned plants, and stats."""
     email = models.EmailField(null=False, blank=False)
     owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
     objects = CustomUserManager()
-
-    def is_game_keeper(self):
-        """Check if the user belongs to the 'Game Keepers' group."""
-        return self.groups.filter(name="Game Keepers").exists()
-
-    def award_points_and_leaves(self, target_user, amount):
-        """Allows Game Keepers to award points and leaves to other users."""
-        if not self.is_game_keeper():
-            raise PermissionError("Only Game Keepers can award points or leaves.")
-
-        target_user.stats.points += amount
-        target_user.stats.leaves += amount
-        target_user.stats.save()
 
     def send_friend_request(self, to_user):
         """Send a friend request to another user, with a lot of cases covered."""
@@ -122,11 +111,6 @@ class CustomUser(AbstractUser):
 
         return CustomUser.objects.filter(id__in=request_ids)
 
-
-def ensure_game_keeper_group():
-    """Creates the 'Game Keepers' group if it doesn't exist."""
-    Group.objects.get_or_create(name="Game Keepers")
-
 class UserStats(models.Model):
     """Model to store user stats like leaves and points."""
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="stats")
@@ -138,38 +122,6 @@ class UserStats(models.Model):
 
     def __str__(self):
         return f"| {self.user.username} | {self.leaves} Leaves Remaining | {self.points} Total Points |"
-
-@receiver(post_save, sender=CustomUser)
-def create_user_stats(sender, instance, created, **kwargs):
-    """Automatically creates a UserStats entry for every new user."""
-    if created:
-        UserStats.objects.create(user=instance, leaves=50, points=50)
-
-@receiver(post_save, sender=CustomUser)
-def create_userGarden(sender, instance, created, **kwargs):
-    """Automatically creates a UserGarden for every new user."""
-    if created:
-        from garden.models import UserGarden, Plant  # Prevent circular imports
-        
-        try:
-            default_plant = Plant.objects.get(name="Potted Plant")  
-        except Plant.DoesNotExist:
-            default_plant = None  # If the plant isn't found, leave slots empty
-        
-        # Create the UserGarden with the default plant in all six slots
-        UserGarden.objects.create(
-            user=instance,
-            plant1Id=default_plant,
-            plant2Id=default_plant,
-            plant3Id=default_plant,
-            plant4Id=default_plant,
-            plant5Id=default_plant,
-            plant6Id=default_plant,
-        )
-
-        # Also add this plant to the owned plants list
-        if default_plant:
-            instance.owned_plants.add(default_plant)
 
 class Friendship(models.Model):
     """Model to track friendships explicitly, replacing the ManyToManyField."""
