@@ -82,10 +82,14 @@ class Achievement(models.Model):
     rewardValue = models.IntegerField()
 
     TYPE_CHOICES = [
-        ("onPointGain", "Points Gained")
+        ("onPointGain", "Points Gained"),
+        ("onEventComplete", "Events Completed"),
+        ("onChallengeComplete", "Challenges Completed"),
+        ("onVisitSite", "Visited Website")
     ]
 
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="onPointGain")
+    url = models.CharField(max_length=200, null=True, default=None)
 
     def __str__(self):
         return self.name

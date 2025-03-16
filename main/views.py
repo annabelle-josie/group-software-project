@@ -261,6 +261,7 @@ def scan_qr(request, event_id, qr_code):
                 user_stats.leaves += event.rewardValue
                 user_stats.points += event.rewardValue
                 achievementProgress(request, "onPointGain", event.rewardValue)
+                achievementProgress(request, "onEventComplete", 1)
                 user_stats.save()
                 return redirect('events')  
 
@@ -460,6 +461,7 @@ def incrementProgress(request, event_id):
         user_stats.leaves += event.rewardValue
         user_stats.points += event.rewardValue
         achievementProgress(request, "onPointGain", event.rewardValue)
+        achievementProgress(request, "onEventComplete", 1)
         user_stats.save()
 
         return JsonResponse({
@@ -517,6 +519,7 @@ def remove_challenge(request):
         newleaves =setattr(users,f'leaves',leaves)
         newchallenge =setattr(user_challenge,f'status',"complete")
         achievementProgress(request, "onPointGain", int(point))
+        achievementProgress(request, "onChallengeComplete", 1)
         users.save()
         user_challenge.save()
         return Response(status=status.HTTP_200_OK)
@@ -785,22 +788,24 @@ def get_friend_requests(request):
     friend_requests = request.user.get_incoming_friend_requests().values("id", "username")
     return JsonResponse({"friend_requests": list(friend_requests)})
 
+@login_required
 def achievementProgress(request, type, amount):
     """Handle the progress increment request."""
+
+    if type == "onVisitSite":
+        return HttpResponse("Can not progress achievements of type onVisitSite.", status=400)
+    
     try:
         achievements = Achievement.objects.filter(type=type)
-        print(achievements)
     except:
-        print("womp womp")
+        return HttpResponse("Invalid request", status=400)
 
     for achievement in achievements:
         try:
             achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement.achievementId)
-            print(achievementParticipant)
 
             achievementParticipant.progress += amount
             achievementParticipant.save()
-            print(str(achievementParticipant.progress) + "/" + str(achievement.amount)) 
 
             if achievementParticipant.progress >= achievement.amount and achievementParticipant.status == "incomplete":
                 user_stats = UserStats.objects.get(user=request.user)
@@ -812,28 +817,27 @@ def achievementProgress(request, type, amount):
                 achievementProgress(request, "onPointGain", achievement.rewardValue)
             
         except:
-            print("womp womp 2")
-
+            return HttpResponse("Something went wrong progressing this achievement.", status=400)
         
+@login_required
+def achievementVisitURL(request, achievement_id):
+    try:
+        achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement_id)
+        achievement = achievementParticipant.achievementId
+    except AchievementParticipants.DoesNotExist:
+        return JsonResponse({'error': 'Achievement participant not found.'}, status=404)
+    
+    if achievement.type != "onVisitSite":
+        return HttpResponse("Can only complete achievements of type onVisitSite.", status=400)
+    
+    achievementParticipant.progress = 1
+    achievementParticipant.save()
 
-
-
-
-    #try:
-    #    eventParticipant = EventParticipants.objects.get(username=request.user, eventId=event_id)
-    #    event = eventParticipant.eventId
-    #except EventParticipants.DoesNotExist:
-    #    return JsonResponse({'error': 'Event participant not found.'}, status=404)
-
-    #if eventParticipant.progress < event.noOfTasks:
-    #    eventParticipant.progress += 1  
-    #    if eventParticipant.progress >= event.noOfTasks:  
-    #        eventParticipant.status = "complete"
-    #    eventParticipant.save()
-
-    #if eventParticipant.status == "complete":
-    #    user_stats = UserStats.objects.get(user=request.user)
-    #    user_stats.leaves += event.rewardValue
-    #    user_stats.points += event.rewardValue
-    #    user_stats.save()
-
+    if achievementParticipant.status == "incomplete":
+        user_stats = UserStats.objects.get(user=request.user)
+        user_stats.leaves += achievement.rewardValue
+        user_stats.points += achievement.rewardValue
+        user_stats.save()
+        achievementParticipant.status = "complete"
+        achievementParticipant.save()
+        achievementProgress(request, "onPointGain", achievement.rewardValue)
