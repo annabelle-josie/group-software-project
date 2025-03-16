@@ -53,35 +53,23 @@
 </div>
 
     <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
-<!-- {% if isGamekeeper %} -->
+{% if isGamekeeper %}
     <!-- Create new challenge column -->
-    <!-- QR image column -->
-    <!-- <select>
-        
+   <h2> challenge qr codes</h2>
+    <ul>
     {% for challenge in allchallenges %}
     {% if challenge.QRImage %}
-        <option>
+        <li>
         {{ challenge.title }} 
         <a href="{{ challenge.QRImage.url }}" target="_blank">
             <img src="{{ challenge.QRImage.url }}" style="width: 100px;" />
         </a>
-    </option>
+    </li>
     {% endif %}
     {% endfor %}
+</ul>
 
-</select> -->
-<div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Qr codes for challenges
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      <p class="dropdown-item" > hhhh</p>
-      <a class="dropdown-item" >Another action</a>
-      <a class="dropdown-item">Something else here</a>
-    </div>
-  </div>
-
-<!-- {% endif %} -->
+{% endif %}
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
