@@ -12,8 +12,7 @@
 {% if isGamekeeper %}
     <h2> scroll to create new challenges</h2>
 {% endif %}
-
-<!-- First row for current tasks (pink) and QR scan (purple) -->
+  
 <div class="row">
   <!-- Pink column -->
   <div class="col-12 col-md-12" style="background-color: rgb(255, 176, 176)">
@@ -52,65 +51,37 @@
   </div>
 
 </div>
+
     <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
-{% if isGamekeeper %}
-<div class="row h-100">
+<!-- {% if isGamekeeper %} -->
     <!-- Create new challenge column -->
-    <div class="col-md-6 col-12 mb-3" style="background-color: lightgreen">
-        <h1>create new challenge</h1>
-        <form  method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="title" class="form-label">Title:</label>
-                <input type="text" name="title" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="desc" class="form-label">Description:</label>
-                <textarea name="desc" class="form-control" required></textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label for="qrCode" class="form-label"> challenge Type:</label>
-                <select name="qrCode" id="qrCode" class="form-control" required>
-                    <option value="non-qr">Non-QR Event</option>
-                    <option value="qr">QR Event</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="repeatable" class="form-label"> repeatable:</label>
-                <select name="repeatable" id="repeatable" class="form-control" required>
-                    <option value="repeatable">Daily</option>
-                    <option value="not-repeatable">Achievment</option>
-                </select>
-            </div>
-            
-            <div class="mb-3">
-                <label for="noOfTasks" class="form-label">Number of Tasks:</label>
-                <input type="number" name="noOfTasks" id="noOfTasks" max="20" min="1" class="form-control" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="rewardValue" class="form-label">Reward Value:</label>
-                <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
-            </div>
-            
-            <button type="submit" class="submit">submit</button>
-        </form>
-    </div>
-
     <!-- QR image column -->
-    {% if challenges.QRImage %}
-    <div class="col-md-6 col-12 mb-3" id="qrimage">
-        click to download QR code for {{ challenges.title }}
-        <a href="{{ challenges.QRImage.url }}" target="_blank">
-            <img src="{{ challenges.QRImage.url }}" style="width: 100px;" />
+    <!-- <select>
+        
+    {% for challenge in allchallenges %}
+    {% if challenge.QRImage %}
+        <option>
+        {{ challenge.title }} 
+        <a href="{{ challenge.QRImage.url }}" target="_blank">
+            <img src="{{ challenge.QRImage.url }}" style="width: 100px;" />
         </a>
-    </div>
+    </option>
     {% endif %}
+    {% endfor %}
 
-</div>
-{% endif %}
+</select> -->
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Qr codes for challenges
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <p class="dropdown-item" > hhhh</p>
+      <a class="dropdown-item" >Another action</a>
+      <a class="dropdown-item">Something else here</a>
+    </div>
+  </div>
 
+<!-- {% endif %} -->
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
