@@ -88,6 +88,8 @@ def home(request):
             "date": challenge_participant.date,
             "isQR": challenge_participant.challengeId.isQR,  
             "repeatable": challenge_participant.challengeId.repeatable,
+            "QRImage": challenge_participant.challengeId.QRImage, 
+             
         }
         for challenge_participant in user_challenge
     ]
@@ -511,9 +513,9 @@ def remove_challenge(request):
         leaves = int(point) + users.leaves
         mystatus = user_challenge.status
         print(mystatus)
-        newpoint =setattr(users,f'points',points)
-        newleaves =setattr(users,f'leaves',points)
-        newchallenge =setattr(user_challenge,f'status',"complete")
+        setattr(users,f'points',points)
+        setattr(users,f'leaves',leaves)
+        setattr(user_challenge,f'status',"complete")
         users.save()
         user_challenge.save()
         return Response(status=status.HTTP_200_OK)
@@ -559,6 +561,7 @@ def my_challenges(request):
             "id": challenge_participant.challengeId.challengeId,
             "isQR": challenge_participant.challengeId.isQR,  
             "repeatable": challenge_participant.challengeId.repeatable,
+            "QRImage": challenge_participant.challengeId.QRImage,  
         }
         for challenge_participant in user_challenge
     ]
