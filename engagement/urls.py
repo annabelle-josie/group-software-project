@@ -7,5 +7,6 @@ leaderboard_patterns = [
 ]
 
 achievement_patterns = [
-
+    path("", views.achievement, name="achievements"),  # Achievements page
+    path('<int:achievement_id>/', views.achievementVisitURL, name='achievement-visit'),
 ]

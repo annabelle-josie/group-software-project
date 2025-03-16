@@ -7,21 +7,19 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    initial = True
-
     dependencies = [
-        ('main', '0001_initial'),
+        ('engagement', '0003_achievement_achievementparticipants'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='challengeparticipants',
+            model_name='achievementparticipants',
             name='username',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
-            name='challengeparticipants',
-            unique_together={('username', 'challengeId')},
+            name='achievementparticipants',
+            unique_together={('username', 'achievementId')},
         ),
     ]

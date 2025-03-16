@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -579,56 +579,3 @@ def profile(request, username):
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
 
-@login_required
-def achievementProgress(request, type, amount):
-    """Handle the progress increment request."""
-
-    if type == "onVisitSite":
-        return HttpResponse("Can not progress achievements of type onVisitSite.", status=400)
-    
-    try:
-        achievements = Achievement.objects.filter(type=type)
-    except:
-        return HttpResponse("Invalid request", status=400)
-
-    for achievement in achievements:
-        try:
-            achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement.achievementId)
-
-            achievementParticipant.progress += amount
-            achievementParticipant.save()
-
-            if achievementParticipant.progress >= achievement.amount and achievementParticipant.status == "incomplete":
-                user_stats = UserStats.objects.get(user=request.user)
-                user_stats.leaves += achievement.rewardValue
-                user_stats.points += achievement.rewardValue
-                user_stats.save()
-                achievementParticipant.status = "complete"
-                achievementParticipant.save()
-                achievementProgress(request, "onPointGain", achievement.rewardValue)
-            
-        except:
-            return HttpResponse("Something went wrong progressing this achievement.", status=400)
-        
-@login_required
-def achievementVisitURL(request, achievement_id):
-    try:
-        achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement_id)
-        achievement = achievementParticipant.achievementId
-    except AchievementParticipants.DoesNotExist:
-        return JsonResponse({'error': 'Achievement participant not found.'}, status=404)
-    
-    if achievement.type != "onVisitSite":
-        return HttpResponse("Can only complete achievements of type onVisitSite.", status=400)
-    
-    achievementParticipant.progress = 1
-    achievementParticipant.save()
-
-    if achievementParticipant.status == "incomplete":
-        user_stats = UserStats.objects.get(user=request.user)
-        user_stats.leaves += achievement.rewardValue
-        user_stats.points += achievement.rewardValue
-        user_stats.save()
-        achievementParticipant.status = "complete"
-        achievementParticipant.save()
-        achievementProgress(request, "onPointGain", achievement.rewardValue)
