@@ -17,11 +17,11 @@ auth_patterns = [
 
 friends_patterns = [
     path('', views.friends, name='friends'),
-    path('remove/', views.remove_friend, name='remove_friend'),
-    path('send_request/', views.send_friend_request, name='send_friend_request'),
-    path('accept_request/', views.accept_friend_request, name='accept_friend_request'),
-    path('reject_request/', views.reject_friend_request, name='reject_friend_request'),
-    path('get_requests/', views.get_friend_requests, name='get_friend_requests'),
+    path('api/v1/remove/', views.remove_friend),
+    path('api/v1/send_request/', views.send_friend_request),
+    path('api/v1/accept_request/', views.accept_friend_request),
+    path('api/v1/reject_request/', views.reject_friend_request),
+    path('api/v1/get_requests/', views.get_friend_requests),
 ]
 
 settings_patterns = [

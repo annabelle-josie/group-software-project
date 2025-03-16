@@ -213,7 +213,7 @@
     });
 
     removeFriendButton.addEventListener("click", function () {
-        fetch("/remove_friend/", {
+        fetch("api/v1/remove/", {
             method: "POST",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",
@@ -236,7 +236,7 @@
     responseDiv.textContent = "";
     responseDiv.className = ""; 
 
-    fetch("/send_friend_request/", {
+    fetch("/friends/api/v1/send_request/", {
         method: "POST",
         headers: {
             "X-CSRFToken": "{{ csrf_token }}",
@@ -246,30 +246,28 @@
     })
     .then(response => response.json())
     .then(data => {
-         responseDiv.textContent = data.message;
-         if (data.success) {
-             responseDiv.classList.add("text-success");
-             document.getElementById("friendUsername").value = "";
-         } else {
-             responseDiv.classList.add("text-danger");
-         }
+        responseDiv.textContent = data.message;
+        if (data.success) {
+            responseDiv.classList.add("text-success");
+            document.getElementById("friendUsername").value = "";
+        } else {
+            responseDiv.classList.add("text-danger");
+        }
 
-         if (data.success) {
-             setTimeout(() => {
-                 modal.hide();
-                 window.location.reload();
-             }, 2500);
-         }
+        if (data.success) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 2500);
+        }
     })
     .catch(error => {
-         console.error("Error:", error);
-         responseDiv.textContent = "An error occurred.";
-         responseDiv.classList.add("text-danger");
+        responseDiv.classList.add("text-danger");
+        responseDiv.textContent = "Friend request already sent/accepted.";
     });
-}
+    }
 
     function loadFriendRequests() {
-        fetch("/get_friend_requests/")
+        fetch("api/v1/get_requests/")
         .then(response => response.json())
         .then(data => {
             var requestList = document.getElementById("friendRequestsList");
@@ -297,7 +295,7 @@
     }
 
     function acceptRequest(userId) {
-        fetch("/accept_friend_request/", {
+        fetch("api/v1/accept_request/", {
             method: "POST",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",
@@ -308,7 +306,7 @@
     }
 
     function rejectRequest(userId) {
-        fetch("/reject_friend_request/", {
+        fetch("api/v1/reject_request/", {
             method: "POST",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",

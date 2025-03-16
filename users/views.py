@@ -67,9 +67,7 @@ def friends(request):
 @login_required
 @api_view(["POST"])
 def remove_friend(request):
-    """API to remove a friend"""
-    data = json.loads(request.body)
-    friend_id = data.get("user_id")
+    friend_id = request.data.get("user_id")
     if not friend_id:
         return Response({"error": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -77,13 +75,10 @@ def remove_friend(request):
     request.user.unfriend(friend)
     return Response({"message": "Friend removed successfully."}, status=status.HTTP_200_OK)
 
-
 @login_required
 @api_view(["POST"])
 def send_friend_request(request):
-    """API to send a friend request"""
-    data = json.loads(request.body)
-    username = data.get("username")
+    username = request.data.get("username")
     if not username:
         return Response({"success": False, "message": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,17 +87,15 @@ def send_friend_request(request):
     except CustomUser.DoesNotExist:
         return Response({"success": False, "message": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.user == to_user:
+            return Response({"success": False, "message": "You cannot send a friend request to yourself."}, status=status.HTTP_404_NOT_FOUND)
     request.user.send_friend_request(to_user)
     return Response({"success": True, "message": "Friend request sent."}, status=status.HTTP_200_OK)
-
-
 
 @login_required
 @api_view(["POST"])
 def accept_friend_request(request):
-    """API to accept a friend request"""
-    data = json.loads(request.body)
-    friend_id = data.get("user_id")
+    friend_id = request.data.get("user_id")
     if not friend_id:
         return Response({"error": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -110,14 +103,10 @@ def accept_friend_request(request):
     request.user.accept_friend_request(friend)
     return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
 
-
-
 @login_required
 @api_view(["POST"])
 def reject_friend_request(request):
-    """API to reject a friend request"""
-    data = json.loads(request.body)
-    friend_id = data.get("user_id")
+    friend_id = request.data.get("user_id")
     if not friend_id:
         return Response({"error": "Invalid request"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -125,11 +114,9 @@ def reject_friend_request(request):
     request.user.reject_friend_request(friend)
     return Response({"message": "Friend request rejected."}, status=status.HTTP_200_OK)
 
-
 @login_required
 @api_view(["GET"])
 def get_friend_requests(request):
-    """API to get all incoming friend requests"""
     friend_requests = request.user.get_incoming_friend_requests().values("id", "username")
     return Response({"friend_requests": list(friend_requests)}, status=status.HTTP_200_OK)
 
