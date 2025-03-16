@@ -124,7 +124,7 @@ class ChallengeTests(TestCase):
         for _ in range(self.challenge.noOfTasks):
             response = self.client.post(
                 "/api/v1/removeTask", 
-                {"challengeId": self.challenge.challengeId}, 
+                {"challengeId": self.challenge.challengeId},
             )
         
         response = self.client.delete(

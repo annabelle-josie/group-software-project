@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from garden.models import UserGarden
 from engagement.models import UserStats
+from engagement.views import achievementProgress
 from event_management.models import Events, EventParticipants
 from garden.models import Plant
 from .models import *
