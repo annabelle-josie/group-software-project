@@ -33,5 +33,5 @@ urlpatterns = [
     path("updateGarden", views.updateGarden, name="updateGarden"),
     path('scan-qr/<int:event_id>/<str:qr_code>/', views.scan_qr, name='scan_qr'),
     path('scan-challenge/<int:challenge_id>/<str:qr_code>/', views.scan_qr, name='scan_challenge'),
-    path('delete_account/', views.delete_account, name='delete_account'),
+    #path('delete_account/', views.delete_account, name='delete_account'),
 ]
