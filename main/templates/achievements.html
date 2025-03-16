@@ -16,11 +16,11 @@
                 <strong>{{ item.name }}</strong> - {{ item.desc }}  
                 <p>Progress: {{ item.progress }}/{{ item.amount }} | Reward: {{ item.rewardValue }} leaves</p>
                 {% if item.type == 'onVisitSite' %}
-                <a href={{ item.url }} target="_blank">Visit Site</a>
+                <button class="btn btn-primary visitBtn" data-id="{{ item.id }}" data-url="{{ item.url }}">Visit Achievement URL</button>
                 {% endif %}
                 <div class="progress">
                     {% if item.percent == 0 %}
-                    <div class="progress" role="progressbar" style="width: 100%;">{{item.percent}}%</div>
+                    <div class="progress" role="progressbar" style="width: 100%;">0%</div>
                     {% else %}
                     <div class="progress-bar bg-custom" role="progressbar" style="width: {{item.percent}}%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{item.percent}}%</div>
                     {% endif %}
@@ -32,5 +32,41 @@
       <br>
   </div>
 </div>
+
+<script>
+    // Get all buttons with the class 'visitBtn'
+    const buttons = document.querySelectorAll('.visitBtn');
+  
+    // Add event listener for each button
+    buttons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        // Get the URL from the button's data-url attribute
+        const url = button.getAttribute('data-url');
+        
+        // Get the ID from the button's data-id attribute
+        const id = button.getAttribute('data-id');
+        
+        // Open the URL in a new tab
+        window.open(url, "_blank");
+  
+        // Call the achievementVisitURL function in the backend using AJAX
+        fetch(`/achievement-visit/${id}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            console.log(`Visit for item ${id} tracked successfully!`);
+          }
+        })
+        .catch(error => {
+          console.error("Error tracking visit:", error);
+        });
+      });
+    });
+  </script>
 
 {% endblock %}

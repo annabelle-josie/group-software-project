@@ -729,9 +729,11 @@ def achievementVisitURL(request, achievement_id):
         achievementParticipant.save()
         achievementProgress(request, "onPointGain", achievement.rewardValue)
 
+    return JsonResponse({'status': 'success'})
+
 @login_required(login_url="/auth/login")
 def achievement(request):
-    user_achievements = AchievementParticipants.objects.filter(username=request.user,status="incomplete")
+    user_achievements = AchievementParticipants.objects.filter(username=request.user)
 
     achievements = [
         {
