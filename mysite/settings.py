@@ -34,7 +34,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 #CHANGE THIS TO WHATEVER HOSTNAME WE CHOOSE!
 ALLOWED_HOSTS = ['down2earth.eu.pythonanywhere.com', '127.0.0.1', '.localhost']
 
-AUTH_USER_MODEL = "user_management.CustomUser"
+AUTH_USER_MODEL = "users.CustomUser"
 
 # Application definition
 
@@ -46,9 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-    'login',
+    'users',
     'garden',
-    'user_management',
     'rest_framework',
     'event_management'
 ]

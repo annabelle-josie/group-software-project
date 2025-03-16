@@ -50,7 +50,7 @@ class challengeForm(ModelForm):
 
 # Model representing participants in a challenge
 class ChallengeParticipants(models.Model):
-    username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)  # Reference to the user
+    username = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE)  # Reference to the user
     challengeId = models.ForeignKey(Challenge, on_delete=models.CASCADE)  # Reference to the challenge
     progress = models.IntegerField(default=0)  # Progress of the user in the challenge
     date = models.DateField(default= now)
@@ -106,7 +106,7 @@ class Achievement(models.Model):
         return self.name
     
 class AchievementParticipants(models.Model):
-    username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)  # Reference to the user
+    username = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE)  # Reference to the user
     achievementId = models.ForeignKey(Achievement, on_delete=models.CASCADE)  # Reference to the challenge
     progress = models.IntegerField(default=0)  # Progress of the user in the challenge
 

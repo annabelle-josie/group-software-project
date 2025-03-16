@@ -20,7 +20,7 @@ class Events(models.Model):
     eventQRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)  
     isQR = models.BooleanField(default=False) 
     eventImage = models.ImageField(upload_to="event_images/", default=None, null=True, blank=True)  
-    eventMaster = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE)
+    eventMaster = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "Events"
@@ -31,12 +31,12 @@ class Events(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.eventImage:
-            self.eventImage = "default_event_images/cheese.jpg"
+            self.eventImage = "default_event_background.gif"
         super().save(*args, **kwargs)
 
 # Model representing the participants of an event
 class EventParticipants(models.Model):
-    username = models.ForeignKey("user_management.CustomUser", on_delete=models.CASCADE) # Reference to the user
+    username = models.ForeignKey("users.CustomUser", on_delete=models.CASCADE) # Reference to the user
     eventId = models.ForeignKey(Events, on_delete=models.CASCADE) # Reference to the event
     progress = models.IntegerField(default=0) # Progress of the user in the event
     STATUS_CHOICES = [

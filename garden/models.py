@@ -13,7 +13,7 @@ class Plant(models.Model):
 
 # UserGarden class is created to store the plants that the user has in their garden
 class UserGarden(models.Model):
-    user = models.OneToOneField("user_management.CustomUser", on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField("users.CustomUser", on_delete=models.CASCADE, primary_key=True)
     plant1Id = models.ForeignKey(Plant, on_delete=models.SET_NULL, null=True, blank=True, related_name="slot1")
     plant2Id = models.ForeignKey(Plant, on_delete=models.SET_NULL, null=True, blank=True, related_name="slot2")
     plant3Id = models.ForeignKey(Plant, on_delete=models.SET_NULL, null=True, blank=True, related_name="slot3")

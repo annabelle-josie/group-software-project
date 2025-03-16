@@ -19,12 +19,12 @@ from django.contrib.auth.decorators import login_required
 from event_management.models import Events, EventParticipants
 from django.contrib.auth import get_user_model, logout
 from garden.models import UserGarden
-from user_management.models import CustomUser, UserStats
+from users.models import CustomUser, UserStats
 from django.shortcuts import get_object_or_404
-from user_management.models import UserStats, CustomUser
+from users.models import UserStats, CustomUser
 from garden.models import Plant
 import json
-from login.forms import ProfileUpdateForm, CustomPasswordChangeForm
+from users.forms import ProfileUpdateForm, CustomPasswordChangeForm
 from django.urls import reverse
 from django.conf import settings
 
@@ -165,7 +165,7 @@ def leaderboard(request):
 def get_leaderboard(request):
     user = request.user
     global_leaders = UserStats.objects.raw(
-        "SELECT id, user_id, points FROM user_management_userstats ORDER BY points DESC LIMIT 10"
+        "SELECT id, user_id, points FROM users_userstats ORDER BY points DESC LIMIT 10"
     )
     data = {'leaderboard': []}
     for leader in global_leaders:
@@ -189,7 +189,7 @@ def get_leaderboard(request):
                 entry[f'plant{slot}'] = '/static/potted_plant.png'
 
     user_rank_queryset = UserStats.objects.raw(
-        "SELECT userrank, id FROM (SELECT user_management_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM user_management_userstats) AS ranking WHERE user_id = %s",
+        "SELECT userrank, id FROM (SELECT users_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM users_userstats) AS ranking WHERE user_id = %s",
         [user.id]
     )
     global_rank = None
@@ -613,7 +613,7 @@ These are then returned to the front-end within context to the market.html templ
 @login_required(login_url="/auth/login")
 def market_view(request):
     # Fetching all plants, plants owned by the user, and how many leaves that user has
-    plants = Plant.objects.filter(onMarket=True)   # Fetch from DB only plants that are allowed to be on market
+    plants = Plant.objects.filter(onMarket=True).order_by('price')   # Fetch from DB only plants that are allowed to be on market
     user = CustomUser.objects.get(username=request.user)
     currentLeaves = UserStats.objects.get(user_id=user.id).leaves
     ownedPlants = user.owned_plants.all()
@@ -674,119 +674,6 @@ def profile(request, username):
         plant_slots = None
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
-
-@login_required()
-def settings(request):
-    user_form = ProfileUpdateForm(instance=request.user)
-    password_form = CustomPasswordChangeForm(user=request.user)
-
-    if request.method == 'POST':
-        if 'update_profile' in request.POST:
-            user_form = ProfileUpdateForm(request.POST, instance=request.user)
-            if user_form.is_valid():
-                user_form.save()
-                messages.success(request, 'Your profile has been updated successfully!')
-                return redirect('settings')
-        elif 'change_password' in request.POST:
-            password_form = CustomPasswordChangeForm(user=request.user, data=request.POST)
-            if password_form.is_valid():
-                password_form.save()
-                messages.success(request, 'Your password has been changed successfully!')
-                return redirect('/auth/login/')
-    else:
-        user_form = ProfileUpdateForm(instance=request.user)
-        password_form = CustomPasswordChangeForm(user=request.user)
-
-    context = {
-        'user_form': user_form,
-        'password_form': password_form
-    }
-    return render(request, "settings.html", context)
-
-@login_required
-def delete_account(request):
-    if request.method == 'POST':
-        user = request.user
-        logout(request)
-        user.delete()
-        messages.success(request, 'Your account has been deleted successfully.')
-        return redirect('home')
-    return render(request, 'settings.html')
-
-
-@login_required(login_url="/auth/login")
-def friends(request):
-    user_friends = request.user.get_friends()
-    friends_total = user_friends.count()
-
-    if friends_total > 4:
-        paginator = Paginator(user_friends, 4)
-        page_number = request.GET.get('page')
-        friends_page = paginator.get_page(page_number)
-    else:
-        friends_page = user_friends
-
-    return render(request, "friends.html", {"friends_page": friends_page, "friends_total": friends_total})
-@login_required
-def remove_friend(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        friend_id = data.get("user_id")
-        if not friend_id:
-            return HttpResponse("Invalid request", status=400)
-        friend = get_object_or_404(CustomUser, id=friend_id)
-        request.user.unfriend(friend)
-        return HttpResponse(status=200)
-    return HttpResponse("Invalid request method", status=405)
-
-
-@login_required
-def send_friend_request(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            username = data.get("username")
-            if not username:
-                return JsonResponse({"success": False, "message": "Username is required."})
-            try:
-                to_user = CustomUser.objects.get(username=username)
-            except CustomUser.DoesNotExist:
-                return JsonResponse({"success": False, "message": "User does not exist."})
-            request.user.send_friend_request(to_user)
-            return JsonResponse({"success": True, "message": "Friend request sent."})
-        except ValueError as e:
-            return JsonResponse({"success": False, "message": str(e)})
-
-
-@login_required
-def accept_friend_request(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        friend_id = data.get("user_id")
-        if not friend_id:
-            return HttpResponse("Invalid request.", status=400)
-        friend = get_object_or_404(CustomUser, id=friend_id)
-        request.user.accept_friend_request(friend)
-        return HttpResponse(status=200)
-    return HttpResponse("Invalid request method", status=405)
-
-
-@login_required
-def reject_friend_request(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        friend_id = data.get("user_id")
-        if not friend_id:
-            return HttpResponse("Invalid request.", status=400)
-        friend = get_object_or_404(CustomUser, id=friend_id)
-        request.user.reject_friend_request(friend)
-        return HttpResponse(status=200)
-    return HttpResponse("Invalid request method", status=405)
-
-@login_required
-def get_friend_requests(request):
-    friend_requests = request.user.get_incoming_friend_requests().values("id", "username")
-    return JsonResponse({"friend_requests": list(friend_requests)})
 
 @login_required
 def achievementProgress(request, type, amount):

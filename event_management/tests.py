@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import Group
 from event_management.models import Events, EventParticipants
-from user_management.models import CustomUser, UserStats
+from users.models import CustomUser, UserStats
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()
 
