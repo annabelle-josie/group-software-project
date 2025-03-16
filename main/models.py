@@ -100,7 +100,7 @@ class Achievement(models.Model):
     ]
 
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default="onPointGain")
-    url = models.CharField(max_length=200, null=True, default=None)
+    url = models.CharField(max_length=200, blank=True, null=True, default=None)
 
     def __str__(self):
         return self.name

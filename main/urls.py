@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.home, name="home"),  # Home page
     # path("qr", views.generate_qr, name="qr"),  # QR code generation page
     path("leaderboard", views.leaderboard, name="leaderboard"),  # Leaderboard page
+    path("achievements", views.achievement, name="achievements"),  # Achievements page
     path("allchallenges", views.my_challenges, name="allchallenges"),  # All challenges page
     # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),

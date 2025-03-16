@@ -728,3 +728,24 @@ def achievementVisitURL(request, achievement_id):
         achievementParticipant.status = "complete"
         achievementParticipant.save()
         achievementProgress(request, "onPointGain", achievement.rewardValue)
+
+@login_required(login_url="/auth/login")
+def achievement(request):
+    user_achievements = AchievementParticipants.objects.filter(username=request.user,status="incomplete")
+
+    achievements = [
+        {
+            "id": achievement_participant.achievementId.achievementId,
+            "name": achievement_participant.achievementId.name,
+            "desc": achievement_participant.achievementId.desc,
+            "amount": achievement_participant.achievementId.amount,
+            "rewardValue": achievement_participant.achievementId.rewardValue,
+            "type": achievement_participant.achievementId.type,
+            "url": achievement_participant.achievementId.url,
+            "progress": achievement_participant.progress,
+            "status": achievement_participant.status,
+            "percent": achievement_participant.progress * 100 // achievement_participant.achievementId.amount,
+        }
+        for achievement_participant in user_achievements
+    ]
+    return render(request, 'achievements.html', {'achievement_list': achievements})
