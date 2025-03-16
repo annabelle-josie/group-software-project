@@ -31,7 +31,7 @@ class Events(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.eventImage:
-            self.eventImage = "default_event_images/cheese.jpg"
+            self.eventImage = "default_event_background.gif"
         super().save(*args, **kwargs)
 
 # Model representing the participants of an event

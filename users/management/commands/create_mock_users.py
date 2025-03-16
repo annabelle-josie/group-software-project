@@ -26,22 +26,25 @@ DEMO_USERS = [
         "points": 70,
     },
     {
-        "username": "Amy",
-        "email": "al980@exeter.ac.uk",
-        "password": "password4",
-        "points": 80,
-    },
-    {
         "username": "David",
         "email": "dw689@exeter.ac.uk",
-        "password": "password5",
+        "password": "password4",
         "points": 90,
     },
     {
         "username": "Oliver",
         "email": "oj261@exeter.ac.uk",
-        "password": "password6",
+        "password": "password5",
         "points": 100,
+    },
+]
+
+DEMO_SUPERUSERS = [
+    {
+        "username": "Amy",
+        "email": "al980@exeter.ac.uk",
+        "password": "password6",
+        "points": 80,
     },
     {
         "username": "James",
@@ -77,4 +80,27 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write(self.style.SUCCESS(f"Updated UserStats for {username} to {points} points/leaves."))
 
-            self.stdout.write(self.style.SUCCESS("Created/updated successfully."))
+            for user_data in DEMO_SUPERUSERS:
+                username = user_data["username"]
+                email = user_data["email"]
+                password = user_data["password"]
+                points = user_data["points"]
+
+                user, created = custom_user.objects.get_or_create(username=username, defaults={"email": email})
+                if created:
+                    user.set_password(password)
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.save()
+                    self.stdout.write(self.style.SUCCESS(f"Created superuser: {username}"))
+                else:
+                    self.stdout.write(self.style.WARNING(f"Superuser {username} already exists."))
+                
+                stats, stats_created = UserStats.objects.get_or_create(user=user)
+                stats.points = points
+                stats.leaves = points
+                stats.save()
+                if stats_created:
+                    self.stdout.write(self.style.SUCCESS(f"Created UserStats for superuser {username} with {points} points/leaves."))
+                else:
+                    self.stdout.write(self.style.SUCCESS(f"Updated UserStats for superuser {username} to {points} points/leaves."))
