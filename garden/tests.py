@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from user_management.models import CustomUser
+from users.models import CustomUser
 from garden.models import UserGarden, Plant
 
 class GardenTests(TestCase):

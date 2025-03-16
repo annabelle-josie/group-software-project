@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 from main.models import Challenge, ChallengeParticipants
-from user_management.models import CustomUser, UserStats
+from users.models import CustomUser, UserStats
 from garden.models import Plant
 # Test case for the home page and protected views
 class HomePageTest(TestCase):

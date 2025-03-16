@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import UserGarden, Plant
 from django.http import HttpResponseRedirect
-from user_management.models import CustomUser
+from users.models import CustomUser
 from .serializers import UserGardenSerializer, PlantSerializer
 from django.contrib.auth.decorators import login_required
 
