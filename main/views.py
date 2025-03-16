@@ -1,38 +1,29 @@
+import secrets
+import string
+import json
 from random import randint
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from django.contrib import messages
-from .models import *
-import secrets
-import string
-from .serializers import *
-from django.contrib.auth.forms import UserCreationForm
-from django.urls import reverse_lazy
-from django.views.generic import CreateView
-from django.core.paginator import Paginator
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.contrib.auth.models import User
+from django.urls import reverse, reverse_lazy
+from django.http import JsonResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
-from event_management.models import Events, EventParticipants
-from django.contrib.auth import get_user_model, logout
-from garden.models import UserGarden
-from users.models import CustomUser, UserStats
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from users.models import UserStats, CustomUser
+from garden.models import UserGarden
+from engagement.models import UserStats
+from engagement.views import achievementProgress
+from event_management.models import Events, EventParticipants
 from garden.models import Plant
-import json
-from users.forms import ProfileUpdateForm, CustomPasswordChangeForm
-from django.urls import reverse
-from django.conf import settings
-
+from .models import *
+from .serializers import *
 
 
 # Create views here
 
-User = get_user_model()
+custom_user = get_user_model()
 
 # home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
@@ -94,7 +85,7 @@ def home(request):
         for challenge_participant in user_challenge
     ]
 
-    users = CustomUser.objects.get(username= request.user)
+    users = custom_user.objects.get(username= request.user)
     available = users.owned_plants.all()
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
 
@@ -105,7 +96,7 @@ def garden(request):
 def gardenView(request):
     """View to display the garden on the main page"""
     userGarden = UserGarden.objects.get(user=request.user)
-    users = CustomUser.objects.get(username= request.user)
+    users = custom_user.objects.get(username= request.user)
     # available = users.owned_plants.all().values()
     available = users.owned_plants.all()
     allplants= Plant.objects.filter(onMarket=True)
@@ -148,92 +139,6 @@ def updateGarden(request):
     except Plant.DoesNotExist:
         return Response({"error": "no "}, status=status.HTTP_404_NOT_FOUND)
     return HttpResponseRedirect(redirect_to="/")
-
-@login_required(login_url="/auth/login")
-def leaderboard(request):
-    global_data = json.loads(get_leaderboard(request).content)
-    friends_data = json.loads(get_friends_leaderboard(request).content)
-    
-    context = {
-        'leaderboard': global_data.get('leaderboard', []),
-        'friend_leaderboard': friends_data.get('friend_leaderboard', []),
-        'rank': global_data.get('global_rank', 0),
-        'user_friend_rank': friends_data.get('user_friend_rank', 0),
-    }
-    return render(request, "leaderboard.html", context)
-
-
-@api_view(['GET'])
-def get_leaderboard(request):
-    user = request.user
-    global_leaders = UserStats.objects.raw(
-        "SELECT id, user_id, points FROM users_userstats ORDER BY points DESC LIMIT 10"
-    )
-    data = {'leaderboard': []}
-    for leader in global_leaders:
-        uid = leader.user_id
-        username = CustomUser.objects.get(pk=uid).get_username()
-        points = leader.points
-        data['leaderboard'].append({'username': username, 'points': points})
-
-    for entry in data['leaderboard']:
-        try:
-            user_obj = CustomUser.objects.get(username=entry['username'])
-            user_garden = UserGarden.objects.get(user_id=user_obj.id)
-            for slot in range(1, 7):
-                try:
-                    plant = Plant.objects.get(id=getattr(user_garden, f"plant{slot}Id_id"))
-                    entry[f'plant{slot}'] = plant.image.url
-                except Plant.DoesNotExist:
-                    entry[f'plant{slot}'] = '/static/potted_plant.png'
-        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist):
-            for slot in range(1, 7):
-                entry[f'plant{slot}'] = '/static/potted_plant.png'
-
-    user_rank_queryset = UserStats.objects.raw(
-        "SELECT userrank, id FROM (SELECT users_userstats.*, RANK() OVER (ORDER BY points DESC) AS userrank FROM users_userstats) AS ranking WHERE user_id = %s",
-        [user.id]
-    )
-    global_rank = None
-    for item in user_rank_queryset:
-        global_rank = item.userrank
-    data['global_rank'] = global_rank if global_rank is not None else 0
-    return JsonResponse(data)
-
-@api_view(['GET'])
-def get_friends_leaderboard(request):
-    user = request.user
-    friend_ids = list(user.get_friends().values_list('id', flat=True))
-    friend_ids.append(user.id)
-    friend_stats = UserStats.objects.filter(user_id__in=friend_ids).order_by('-points')
-    data = {'friend_leaderboard': []}
-    user_friend_rank = None
-    for position, friend_stat in enumerate(friend_stats, start=1):
-        username = friend_stat.user.get_username()
-        points = friend_stat.points
-        data['friend_leaderboard'].append({
-            'username': username,
-            'points': points,
-            'friend_rank': position,
-        })
-        if friend_stat.user == user:
-            user_friend_rank = position
-    data['user_friend_rank'] = user_friend_rank if user_friend_rank is not None else 0
-
-    for entry in data['friend_leaderboard']:
-        try:
-            user_obj = CustomUser.objects.get(username=entry['username'])
-            user_garden = UserGarden.objects.get(user_id=user_obj.id)
-            for slot in range(1, 7):
-                try:
-                    plant = Plant.objects.get(id=getattr(user_garden, f"plant{slot}Id_id"))
-                    entry[f'plant{slot}'] = plant.image.url
-                except Plant.DoesNotExist:
-                    entry[f'plant{slot}'] = '/static/potted_plant.png'
-        except (CustomUser.DoesNotExist, UserGarden.DoesNotExist):
-            for slot in range(1, 7):
-                entry[f'plant{slot}'] = '/static/potted_plant.png'
-    return JsonResponse(data)
 
 
 @login_required(login_url="/auth/login")
@@ -630,7 +535,7 @@ def my_challenges(request):
             new_challenge.generateQrImage()
             new_challenge.save()
         if repeatable is False:
-            all_users = CustomUser.objects.all()
+            all_users = custom_user.objects.all()
             for user in all_users:
                 ChallengeParticipants.objects.create(
                     username=user,
@@ -653,7 +558,7 @@ These are then returned to the front-end within context to the market.html templ
 def market_view(request):
     # Fetching all plants, plants owned by the user, and how many leaves that user has
     plants = Plant.objects.filter(onMarket=True).order_by('price')   # Fetch from DB only plants that are allowed to be on market
-    user = CustomUser.objects.get(username=request.user)
+    user = custom_user.objects.get(username=request.user)
     currentLeaves = UserStats.objects.get(user_id=user.id).leaves
     ownedPlants = user.owned_plants.all()
     
@@ -675,7 +580,7 @@ def add_purchased_plant(request):
         plantName = request.data.get('plantName')
         userData = request.data.get('user')
 
-        user = CustomUser.objects.get(username=userData)
+        user = custom_user.objects.get(username=userData)
         currentPlants = user.owned_plants.all()
         plant = Plant.objects.get(name=plantName)
         userStatObj = UserStats.objects.get(user_id=user.id)
@@ -706,7 +611,7 @@ def add_purchased_plant(request):
 @login_required
 def profile(request, username):
     try:
-        owner = CustomUser.objects.get(username=username)
+        owner = custom_user.objects.get(username=username)
         userGarden = UserGarden.objects.get(user_id=owner.id)
         plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except:
@@ -714,56 +619,3 @@ def profile(request, username):
 
     return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
 
-@login_required
-def achievementProgress(request, type, amount):
-    """Handle the progress increment request."""
-
-    if type == "onVisitSite":
-        return HttpResponse("Can not progress achievements of type onVisitSite.", status=400)
-    
-    try:
-        achievements = Achievement.objects.filter(type=type)
-    except:
-        return HttpResponse("Invalid request", status=400)
-
-    for achievement in achievements:
-        try:
-            achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement.achievementId)
-
-            achievementParticipant.progress += amount
-            achievementParticipant.save()
-
-            if achievementParticipant.progress >= achievement.amount and achievementParticipant.status == "incomplete":
-                user_stats = UserStats.objects.get(user=request.user)
-                user_stats.leaves += achievement.rewardValue
-                user_stats.points += achievement.rewardValue
-                user_stats.save()
-                achievementParticipant.status = "complete"
-                achievementParticipant.save()
-                achievementProgress(request, "onPointGain", achievement.rewardValue)
-            
-        except:
-            return HttpResponse("Something went wrong progressing this achievement.", status=400)
-        
-@login_required
-def achievementVisitURL(request, achievement_id):
-    try:
-        achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement_id)
-        achievement = achievementParticipant.achievementId
-    except AchievementParticipants.DoesNotExist:
-        return JsonResponse({'error': 'Achievement participant not found.'}, status=404)
-    
-    if achievement.type != "onVisitSite":
-        return HttpResponse("Can only complete achievements of type onVisitSite.", status=400)
-    
-    achievementParticipant.progress = 1
-    achievementParticipant.save()
-
-    if achievementParticipant.status == "incomplete":
-        user_stats = UserStats.objects.get(user=request.user)
-        user_stats.leaves += achievement.rewardValue
-        user_stats.points += achievement.rewardValue
-        user_stats.save()
-        achievementParticipant.status = "complete"
-        achievementParticipant.save()
-        achievementProgress(request, "onPointGain", achievement.rewardValue)

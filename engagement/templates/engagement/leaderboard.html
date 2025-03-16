@@ -25,7 +25,7 @@
         <div class="col-3 text-center">
             <img class="img-fluid" style="max-width:55px" src="{% static 'icons/crown.png' %}" alt="crown icon">
             <h1>{{ rank }}</h1>
-            <p>Rank</p>
+            <p>Global Rank</p>
         </div>
         <div class="col-3 text-center">
             <img class="img-fluid" style="max-width:55px" src="{% static 'icons/leaf.png' %}" alt="leaf icon">
@@ -44,7 +44,7 @@
           <button class="nav-link active" id="global-tab" data-bs-toggle="tab" data-bs-target="#global" type="button" role="tab" aria-controls="global" aria-selected="true">Global</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="friend-tab" data-bs-toggle="tab" data-bs-target="#friend" type="button" role="tab" aria-controls="friend" aria-selected="false">Friend</button>
+          <button class="nav-link" id="friend-tab" data-bs-toggle="tab" data-bs-target="#friend" type="button" role="tab" aria-controls="friend" aria-selected="false">Friends</button>
         </li>
     </ul>
     
@@ -108,7 +108,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if friend_leaderboard|length == 0 %}
+                    {% if friend_leaderboard|length == 1 %}
                     <tr>
                         <td colspan="3">No friends yet.</td>
                     </tr>

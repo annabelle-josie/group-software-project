@@ -4,11 +4,14 @@ import tempfile
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from event_management.models import Events, EventParticipants
-from users.models import CustomUser, UserStats
+from engagement.models import UserStats
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+custom_user = get_user_model()
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class EventTests(TestCase):
@@ -18,7 +21,7 @@ class EventTests(TestCase):
         """Set up test users, events, and event participants before each test."""
         self.client = Client()
         
-        self.gamekeeper = CustomUser.objects.create_user(username="gamekeeper", email='admintestemail@email.com', password="AdminPass123!")
+        self.gamekeeper = custom_user.objects.create_user(username="gamekeeper", email='admintestemail@email.com', password="AdminPass123!")
         gamekeeper_group, _ = Group.objects.get_or_create(name="Game Keepers")
         self.gamekeeper.groups.add(gamekeeper_group)
 
@@ -33,7 +36,7 @@ class EventTests(TestCase):
             isQR=False,
         )
 
-        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
+        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.user_stats = UserStats.objects.get(user=self.user)
         self.client.login(username="testuser", password="SecurePass123!")
 
