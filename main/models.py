@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.forms import ModelForm
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 import qrcode
 from django.contrib import admin
 from io import BytesIO
@@ -23,26 +24,27 @@ class Challenge(models.Model):
     QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)
     isQR = models.BooleanField(default=False)
     repeatable = models.BooleanField(default=False)
-    # could have repeatable achivements not reapeatble only reset daily when complete achivement get acheivement added to a list 
 
     def __str__(self):
         return self.title  # String representation of the challenge
 # Form for creating or updating a challenge
 class ChallengeAdmin(admin.ModelAdmin):
-    def save_model(self, request, obj, form, change):
-        print(obj.challengeId)
-        if (obj.isQR is True):
-            obj.qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80))
-            qr = qrcode.make(obj.qrvalue)
-            buffer = BytesIO()
-            qr.save(buffer, format="PNG")
-            obj.QRImage.save(f"qr_{obj.challengeId}.png", ContentFile(buffer.getvalue()), save=False)
-        return super().save_model(request, obj, form, change)
-    
     readonly_fields =("qrvalue","QRImage")
     list_display=["challengeId","title","qrvalue","QRImage"]
-    #,"desc", "noOfTasks","rewardValue", "isQR","repeatable"
-
+    @receiver(post_save, sender= Challenge)
+    def update_qr(sender,instance,created,**kwargs):
+        if created:
+            if (instance.isQR is True):
+                print(instance.challengeId)   
+                qr_secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80))
+                instance.qrvalue = qr_secret
+                base_url = 'down2earth.eu.pythonanywhere.com'
+                qr_url = f"{base_url}{reverse('scan_challenge', args=[instance.challengeId, qr_secret])}"
+                qr = qrcode.make(qr_url)
+                buffer = BytesIO()
+                qr.save(buffer, format="PNG")
+                instance.QRImage.save(f"Cqr_{instance.challengeId}.png", ContentFile(buffer.getvalue()), save=False)
+                instance.save()
 class challengeForm(ModelForm):
     class Meta:
         model = Challenge

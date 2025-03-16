@@ -4,42 +4,47 @@
 {% block title %}all challenges{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-    <h1> all {{ user.username }}'s challenges!</h1>
+
+{% if isGamekeeper %}
+<div class="container">
+    <div class="row">
+        <div class="col"  style="background-color: #ffdfbe;">
+            
+{% elif user.is_authenticated %}
+<div class="mobile-wrapper">
 {% else %}
     <h1>you are not logged on</h1>
 {% endif %}
-{% if isGamekeeper %}
-    <h2> scroll to create new challenges</h2>
-{% endif %}
-  
-<div class="row">
+
   <!-- Pink column -->
-  <div class="col-12 col-md-12" style="background-color: rgb(255, 176, 176)">
-      <h2 class="mt-2">Current Tasks</h2>
+   
+  <div  class="col-12 col-md-12" style="background-color: #ffdfbe;">
+      <h2 class="mt-2 mx-5">Current Tasks for {{user.username}}</h2>
       <ul class="list-group">
           {% for item in challenge_list %}
           <li class="list-group-item">
               <div>
-                <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  
-                {% if item.isQR %}
-                        <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
-                        </button> </p>
-                        <span class="badge bg-warning text-dark">QR Required</span>
-                        <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-                {% else %}
-                  <button class="remove-button form-check-input border border-dark"
-                          qr="{{ item.qrvalue }}"
-                          progress="{{ item.progress }}"
-                          data-tasks="{{ item.noOfTasks }}"
-                          data-id="{{ item.id }}"
-                          data-points="{{ item.rewardValue }}">
-                  </button> </p>
-                  {% endif %}
-                  {% if item.repeatable is False %} 
-                        <span class="badge bg-success text-dark">Achievment</span>
-                {% endif %} 
+                {% if item.QRImage %}
+                <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                </button> 
+        {% else %}
+          <button class="remove-button form-check-input border border-dark"
+                  qr="{{ item.qrvalue }}"
+                  progress="{{ item.progress }}"
+                  data-tasks="{{ item.noOfTasks }}"
+                  data-id="{{ item.id }}"
+                  data-points="{{ item.rewardValue }}">
+          </button>
+          {% endif %}
+          <strong>{{ item.title }}</strong> - {{ item.desc }}  
+        <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p>
+          {% if item.repeatable is False %} 
+                <span class="badge bg-success text-dark">Achievment</span>
+        {% endif %} 
+        {% if item.QRImage %}
+                <span class="badge bg-warning text-dark">QR Required</span>
+                <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
+        {% endif %}
                 
               </div>
           </li>
@@ -49,17 +54,18 @@
       </ul>
       <br>
   </div>
+    </div>
 
-</div>
 
     <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
 {% if isGamekeeper %}
     <!-- Create new challenge column -->
-   <h2> challenge qr codes</h2>
-    <ul>
+     <div class="col" style="background-color: #ffdfbe;">
+   <h2 class="mt-2 mx-2"> all challenge qr codes</h2>
+   <ul class="list-group">
     {% for challenge in allchallenges %}
     {% if challenge.QRImage %}
-        <li>
+        <li class="list-group-item">
         {{ challenge.title }} 
         <a href="{{ challenge.QRImage.url }}" target="_blank">
             <img src="{{ challenge.QRImage.url }}" style="width: 100px;" />
@@ -68,8 +74,12 @@
     {% endif %}
     {% endfor %}
 </ul>
+<br>
+</div>
+</div>
 
 {% endif %}
+
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
@@ -168,6 +178,7 @@
             }
         });
     }
+   
    
 </script>
 {% endblock %}

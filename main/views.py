@@ -88,6 +88,8 @@ def home(request):
             "date": challenge_participant.date,
             "isQR": challenge_participant.challengeId.isQR,  
             "repeatable": challenge_participant.challengeId.repeatable,
+            "QRImage": challenge_participant.challengeId.QRImage, 
+             
         }
         for challenge_participant in user_challenge
     ]
@@ -274,7 +276,43 @@ def scan_qr(request, event_id, qr_code):
 
     return JsonResponse({'error': 'Invalid QR code.'}, status=400)
 
+@login_required(login_url="/auth/login")
+def scan_challenge(request, challenge_id, qr_code):
+    """Handles QR scanning, auto-registers user if not registered, and increments progress if valid."""
+    try:
+        challenge = Challenge.objects.get(challengeId = challenge_id)
+    except Challenge.DoesNotExist:
+        return JsonResponse({'error': 'Invalid challenge.'}, status=404)
 
+    try:
+        ChallengeParticipant = ChallengeParticipants.objects.get(username=request.user, challengeId=challenge)
+    except ChallengeParticipants.DoesNotExist:
+        ChallengeParticipant = ChallengeParticipants(username=request.user, challengeId=challenge, progress=0, status="incomplete")
+        ChallengeParticipant.save()
+
+    if challenge.isQR and challenge.qrvalue == qr_code:
+        if ChallengeParticipant.progress < challenge.noOfTasks:
+            ChallengeParticipant.progress += 1
+            if ChallengeParticipant.progress >= challenge.noOfTasks:
+                ChallengeParticipant.status = "complete"
+            
+            ChallengeParticipant.save()
+
+            if ChallengeParticipant.status == "complete":
+                user_stats = UserStats.objects.get(user=request.user)
+                user_stats.leaves += challenge.rewardValue
+                user_stats.points += challenge.rewardValue
+                user_stats.save()
+                return redirect('events')  
+
+        return JsonResponse({
+            'progress': ChallengeParticipant.progress,
+            'totalTasks': challenge.noOfTasks,
+            'status': ChallengeParticipant.status,
+            'completed': False
+        })
+
+    return JsonResponse({'error': 'Invalid QR code.'}, status=400)
 
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
@@ -515,9 +553,9 @@ def remove_challenge(request):
         leaves = int(point) + users.leaves
         mystatus = user_challenge.status
         print(mystatus)
-        newpoint =setattr(users,f'points',points)
-        newleaves =setattr(users,f'leaves',leaves)
-        newchallenge =setattr(user_challenge,f'status',"complete")
+        setattr(users,f'points',points)
+        setattr(users,f'leaves',leaves)
+        setattr(user_challenge,f'status',"complete")
         achievementProgress(request, "onPointGain", int(point))
         achievementProgress(request, "onChallengeComplete", 1)
         users.save()
@@ -565,6 +603,7 @@ def my_challenges(request):
             "id": challenge_participant.challengeId.challengeId,
             "isQR": challenge_participant.challengeId.isQR,  
             "repeatable": challenge_participant.challengeId.repeatable,
+            "QRImage": challenge_participant.challengeId.QRImage,  
         }
         for challenge_participant in user_challenge
     ]

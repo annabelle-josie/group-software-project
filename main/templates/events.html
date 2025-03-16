@@ -67,7 +67,11 @@
                                             <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
                                             <div class="card-body">
                                                 <p class="card-text fw-bold">{{ event.title }}</p>
-                                                <p class="card-text truncate-overflow">{{ event.desc }}</p>
+                                                {% if event.desc|length > 59 %}
+                                                    <p class="card-text truncate-overflow">{{ event.desc }}</p>
+                                                {% else %}
+                                                    <p class="card-text">{{ event.desc }}</p>
+                                                {% endif %}
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div class="btn-group">
                                                         <button type="button" class="btn btn-sm btn-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
@@ -118,7 +122,11 @@
                                         <img src="{{event.eventImage}}" class="bd-placeholder-img card-img-top" width="100%" height="225" alt="Event Image" >
                                         <div class="card-body">
                                             <p class="card-text fw-bold">{{ event.title }}</p>
+                                            {% if event.desc|length > 59 %}
                                             <p class="card-text truncate-overflow">{{ event.desc }}</p>
+                                        {% else %}
+                                            <p class="card-text">{{ event.desc }}</p>
+                                        {% endif %}
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
