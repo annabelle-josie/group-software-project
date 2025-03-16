@@ -2,19 +2,17 @@ import os
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.utils import timezone
-from users.models import CustomUser
-from event_management.models import Events 
-from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth import get_user_model
+from event_management.models import Events
 
+custom_user = get_user_model()
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         # Ensure the event master exists
-        try:
-            event_master = CustomUser.objects.get(username='James')
-        except ObjectDoesNotExist:
-            event_master = CustomUser.objects.create(username='James', email='jb1658@exeter.ac.uk', password='password7')
-            event_master.set_password('password')
+        event_master, created = custom_user.objects.get_or_create(username="James", email='jb1658@exeter.ac.uk')
+        if created:
+            event_master.set_password("password7")
             event_master.save()
 
         events_data = [
