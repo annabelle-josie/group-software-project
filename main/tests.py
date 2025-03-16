@@ -2,16 +2,19 @@ import json
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 from main.models import Challenge, ChallengeParticipants
-from users.models import CustomUser, UserStats
+from engagement.models import UserStats
 from garden.models import Plant
+
+custom_user = get_user_model()
 # Test case for the home page and protected views
 class HomePageTest(TestCase):
 
     def setUp(self):
         """Set up a test user for authentication."""
         
-        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="password123")
+        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="password123")
 
         # List of all protected views that require authentication
         self.protected_urls = [
@@ -51,14 +54,14 @@ class ChallengeTests(TestCase):
             qrvalue="recycle_bottle"
         )
 
-        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
+        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
 
     def test_new_user_is_assigned_to_existing_challenges(self):
         """Ensure that a newly created user is automatically assigned to existing challenges."""
 
-        new_user = CustomUser.objects.create_user(username="newtestuser", email="testemail@email.com", password="SecurePass123!")
+        new_user = custom_user.objects.create_user(username="newtestuser", email="testemail@email.com", password="SecurePass123!")
 
         self.assertTrue(ChallengeParticipants.objects.filter(username=new_user, challengeId=self.challenge).exists())
 
@@ -142,7 +145,7 @@ class MarketTests(TestCase):
     def setUp(self):
         """Set up test users, plants, and user stats before each test."""
         self.client = Client()
-        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
+        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
         self.user_stats = UserStats.objects.get(user=self.user)
@@ -179,39 +182,3 @@ class MarketTests(TestCase):
 
         self.assertEqual(self.user_stats.leaves, 50)
         self.assertNotIn(self.plant2, owned_plants)
-
-class LeaderboardTests(TestCase):
-    """Tests for leaderboard functionality."""
-
-    def setUp(self):
-        """Set up a test user and create additional users with varying points."""
-        self.client = Client()
-
-        self.user = CustomUser.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
-        self.client.login(username="testuser", password="SecurePass123!")
-        self_user_stats = UserStats.objects.get(user=self.user)
-        self_user_stats.points = 80
-        self_user_stats.save()
-
-        # Create 11 additional users so total 12 users exist.
-        self.created_users = [self.user]
-        for i in range(1, 12):
-            new_user = CustomUser.objects.create_user(username=f"user{i}", email=f"testemail{i}@email.com", password="Pass123!")
-            self.created_users.append(new_user)
-            stats = UserStats.objects.get(user=new_user)
-            stats.points = 50 + (i * 10)
-            stats.save()
-
-def test_leaderboard_view_returns_top_ten(self):
-        """Test that the leaderboard view returns the top 10 users in descending order and includes the logged-in user's points."""
-        response = self.client.get(reverse("leaderboard"))
-        context = response.context
-        leaderboard_data = context.get("leaderboard")
-        logged_in_points = context.get("points")
-
-        self.assertEqual(logged_in_points, 80)
-        self.assertIsInstance(leaderboard_data, list)
-        self.assertEqual(len(leaderboard_data), 10)
-
-        points_list = [entry['points'] for entry in leaderboard_data]
-        self.assertEqual(points_list, sorted(points_list, reverse=True))

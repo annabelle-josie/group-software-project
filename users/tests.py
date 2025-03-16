@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
-from .models import UserStats, Friendship
+from .models import Friendship
+from engagement.models import UserStats
 from garden.models import Plant, UserGarden
 from django.urls import reverse
 

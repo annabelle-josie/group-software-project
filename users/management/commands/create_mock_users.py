@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from users.models import UserStats
+from django.contrib.auth.models import Group
+from engagement.models import UserStats
 
 custom_user = get_user_model()
 
@@ -57,6 +58,7 @@ DEMO_SUPERUSERS = [
 class Command(BaseCommand):
     def handle(self, *args, **options):
         with transaction.atomic():
+            group, created = Group.objects.get_or_create(name="Game Keepers")
             for user_data in DEMO_USERS:
                 username = user_data["username"]
                 email = user_data["email"]

@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import CustomUser, UserStats, Friendship
+from .models import CustomUser, Friendship
 
 admin.site.register(CustomUser)
-admin.site.register(UserStats)
+
 admin.site.register(Friendship) 

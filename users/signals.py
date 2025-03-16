@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from garden.utils import get_or_create_default_plant
-from .models import UserStats
+from engagement.models import UserStats
 from garden.models import UserGarden, Plant
 
 custom_user = get_user_model()

@@ -12,14 +12,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Plant',
+            name='UserStats',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('price', models.IntegerField()),
-                ('image', models.ImageField(upload_to='plant_images/')),
-                ('fact', models.TextField()),
-                ('onMarket', models.BooleanField(default=True)),
+                ('leaves', models.IntegerField(default=0)),
+                ('points', models.IntegerField(default=0)),
             ],
+            options={
+                'verbose_name': 'User Stats',
+                'verbose_name_plural': 'User Stats',
+            },
         ),
     ]
