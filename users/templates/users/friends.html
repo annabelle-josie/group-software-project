@@ -253,12 +253,6 @@
         } else {
             responseDiv.classList.add("text-danger");
         }
-
-        if (data.success) {
-            setTimeout(() => {
-                window.location.reload();
-            }, 2500);
-        }
     })
     .catch(error => {
         responseDiv.classList.add("text-danger");

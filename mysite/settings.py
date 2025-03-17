@@ -48,9 +48,10 @@ INSTALLED_APPS = [
     'main',
     'users',
     'engagement',
-    'garden',
+    'challenges',
+    'events',
+    'plants',
     'rest_framework',
-    'event_management'
 ]
 
 MIDDLEWARE = [

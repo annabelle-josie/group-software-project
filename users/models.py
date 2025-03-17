@@ -26,7 +26,7 @@ class CustomUserManager(BaseUserManager):
 class CustomUser(AbstractUser):
     """Custom user model extending the default Django user model with friends, owned plants, and stats."""
     email = models.EmailField(null=False, blank=False)
-    owned_plants = models.ManyToManyField("garden.Plant", related_name="owners")
+    owned_plants = models.ManyToManyField("plants.Plant", related_name="owners")
     objects = CustomUserManager()
 
     def send_friend_request(self, to_user):

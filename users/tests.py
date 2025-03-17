@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from .models import Friendship
 from engagement.models import UserStats
-from garden.models import Plant, UserGarden
+from plants.models import Plant, UserGarden
 from django.urls import reverse
 
 custom_user = get_user_model() # Get the user model
