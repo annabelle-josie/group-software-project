@@ -247,6 +247,7 @@ def events(request):
             "isQR": eventParticipant.eventId.isQR,
             "eventImage": eventParticipant.eventId.eventImage.url if eventParticipant.eventId.eventImage else None,
             "eventMaster": eventParticipant.eventId.eventMaster.username,
+            "plantReward": eventParticipant.eventId.plantReward,
         }
         for eventParticipant in userEvents
     ]
@@ -271,6 +272,7 @@ def events(request):
             "isQR": event.isQR,
             "eventImage": event.eventImage.url if event.eventImage else None,
             "eventMaster": event.eventMaster.username,
+            "plantReward": event.plantReward,
         }
         for event in availableEvents
     ]
@@ -279,20 +281,20 @@ def events(request):
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
 
     if request.method == "POST" and isGamekeeper:
-        # Handle the creation of a new event by a Game Keeper
         title = request.POST["title"]
         desc = request.POST["desc"]
-        noOfTasks = request.POST["noOfTasks"]
-        rewardValue = request.POST["rewardValue"]
+        noOfTasks = int(request.POST["noOfTasks"])
+        rewardValue = int(request.POST["rewardValue"])
         startDate = request.POST["startDate"]
         endDate = request.POST["endDate"]
         isQR = request.POST["qrCode"] == "qr"
         eventImage = request.FILES.get('eventImage')
+        plant_id = request.POST.get("plantReward")
 
-        # Generate a random QR code if selected
+        plantReward = Plant.objects.get(id=plant_id) if plant_id else None
+
         qr_secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
-        # Create the new event without assigning it to users yet
         newEvent = Events.objects.create(
             title=title,
             desc=desc,
@@ -303,7 +305,8 @@ def events(request):
             eventMaster=request.user,
             eventQR=qr_secret,
             isQR=isQR,
-            eventImage=eventImage
+            eventImage=eventImage,
+            plantReward=plantReward
         )
 
         if isQR:
@@ -317,10 +320,13 @@ def events(request):
 
         return HttpResponseRedirect(request.path)
 
+    plants = Plant.objects.all()
+
     return render(request, 'events.html', {
         'events': eventsWithProgress,
         'available_events': available_events,
-        'isGamekeeper': isGamekeeper
+        'isGamekeeper': isGamekeeper,
+        'plants': plants
     })
 
 
@@ -384,13 +390,20 @@ def incrementProgress(request, event_id):
         achievementProgress(request, "onEventComplete", 1)
         user_stats.save()
 
+        if event.plantReward:
+            user = request.user
+            plant = event.plantReward
+            if plant not in user.owned_plants.all():
+                # Add the plant to the user's owned plants
+                user.owned_plants.add(plant)
+
         return JsonResponse({
             'progress': eventParticipant.progress,
             'totalTasks': event.noOfTasks,
             'status': eventParticipant.status,
             'rewardAdded': event.rewardValue,
             'newBalance': user_stats.leaves,
-            'completed': True 
+            'completed': True
         })
 
     return JsonResponse({

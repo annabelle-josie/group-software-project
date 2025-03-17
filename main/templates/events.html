@@ -74,9 +74,9 @@
                                                 {% endif %}
                                                 <div class="d-flex justify-content-between align-items-center">
                                                     <div class="btn-group">
-                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="updateModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.progress }}`, `{{ event.noOfTasks }}`, `{{ event.participant.status}}`, `{{ event.isQR }}`, `{{ event.plantReward.image }}`)" data-bs-toggle="modal" data-bs-target="#activeEventModal">View</button>
                                                         {% if event.eventMaster == user.username %}
-                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`, `{{ event.plantReward.image }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
                                                         {% endif %}
                                                     </div>
                                                     <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
@@ -129,9 +129,17 @@
                                         {% endif %}
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-secondary" onclick="availableModalSetup(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
+                                                    <button type="button" class="btn btn-sm btn-secondary" onclick="availableModalSetup(
+                                                        `{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`,
+                                                        `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`,
+                                                        `{{ event.eventId }}`, `{{ event.plantReward.image }}`)"
+                                                        data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
                                                     {% if event.eventMaster == user.username %}
-                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(`{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`, `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`, `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`)" data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
+                                                        <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(
+                                                            `{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`,
+                                                            `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`,
+                                                            `{{ event.eventId }}`, `{{ event.isQR }}`, `{{ event.eventQRImage }}`, `{{ event.plantReward.image }}`)"
+                                                            data-bs-toggle="modal" data-bs-target="#availableEventModal">Edit</button>
                                                     {% endif %}
                                                 </div>
                                                 <small class="text-body-secondary">{{event.rewardValue}} Leaves</small>
@@ -166,6 +174,7 @@
                     <p id="eventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
                     <p id="eventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
                     <p id="eventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                    <div id="plantViewer"></div>
                     
                     <p id="eventProgress">
                         <strong>Progress:</strong> 
@@ -220,6 +229,7 @@
                     <p id="availableEventEndDate"><strong>End Date:</strong> {{ event.endDate }}</p>
                     <p id="availableEventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
                     <p id="availableEventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
+                    <div id="availablePlantViewer"></div>
                     <div id="qrCodeViewer"></div>
                     <button id="availableSignUpButton" class="btn btn-primary" onclick="signUpEvent({{ event.eventId }})">
                         Register for Event
@@ -273,6 +283,16 @@
                         <label for="rewardValue" class="form-label">Reward Value:</label>
                         <input type="number" name="rewardValue" class="form-control" max="1000" min="20" required>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="plantReward" class="form-label">Plant Reward:</label>
+                        <select name="plantReward" id="plantReward" class="form-control">
+                            <option value="">No Plant Reward</option>
+                            {% for plant in plants %}
+                                <option value="{{ plant.id }}">{{ plant.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     
                     <div class="mb-3">
                         <label for="startDate" class="form-label">Start Date:</label>
@@ -299,13 +319,16 @@
 
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
-        function updateModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventProgress, eventTasks, eventStatus, eventQR){
+        function updateModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventProgress, eventTasks, eventStatus, eventQR, plantReward){
             document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
             document.getElementById("eventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
             document.getElementById("eventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
             document.getElementById("eventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
             document.getElementById("eventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
             document.getElementById("eventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
+            document.getElementById("plantViewer").innerHTML = ("<strong>Plant Rewards</p><img src='/media/" + plantReward + "' alt='QR Code' height='150px'>");
+
+
             
             const progressString = 
             "<strong>Progress:</strong> \
@@ -344,7 +367,7 @@
             document.getElementById("eventReader").innerHTML = readerString;
         }
 
-        function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId){
+        function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, plantReward){
             document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
             document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
             document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
@@ -354,11 +377,12 @@
             document.getElementById("availableSignUpButton").innerHTML = ("Register For Event");
             document.getElementById("availableSignUpButton").onclick = (() => signUpEvent(eventId));
             document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
+            document.getElementById("availablePlantViewer").innerHTML = ("<strong>Event plant:</strong> " + "<img src='/media/" + plantReward + "' alt='Plant Reward' height='150px'>");
             document.getElementById("qrCodeViewer").innerHTML = "";
             console.log("complete");
         }
 
-        function gamekeeperModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventIsQR, eventQRImage){
+        function gamekeeperModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventIsQR, eventQRImage, plantReward){
             document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
             document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
             document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
@@ -368,6 +392,7 @@
             document.getElementById("availableSignUpButton").innerHTML = ("Delete Event");
             document.getElementById("availableSignUpButton").onclick = (() => deleteEvent(eventId));
             document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
+            document.getElementById("availablePlantViewer").innerHTML =  ("<strong>Plant Rewards</p><img src='/media/" + plantReward + "' alt='QR Code' height='150px'>");
             console.log(eventQRImage);
             if(eventIsQR == "True"){
                 document.getElementById("qrCodeViewer").innerHTML = ("<img src='" + eventQRImage + "' alt='QR Code' height=250px>");
