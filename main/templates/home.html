@@ -48,7 +48,7 @@
                 </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                    <form class="form-group mb-4" action="plants/updateGarden" method="post" name="submitform" id="submitform">
                         {% csrf_token %}
                         <div class="row">
                             {% for plant in available %}

@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'engagement',
     'challenges',
     'events',
-    'garden',
+    'plants',
     'rest_framework',
 ]
 

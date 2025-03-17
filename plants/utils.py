@@ -1,5 +1,5 @@
 from django.core.files import File
-from garden.models import Plant
+from plants.models import Plant
 from django.conf import settings
 
 def get_or_create_default_plant():

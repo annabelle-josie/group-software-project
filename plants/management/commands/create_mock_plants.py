@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.files import File
-from garden.models import Plant
+from plants.models import Plant
 
 class Command(BaseCommand):
     def handle(self, *args, **options):

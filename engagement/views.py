@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from garden.models import Plant, UserGarden
+from plants.models import Plant, UserGarden
 from .models import UserStats, Achievement, AchievementParticipants
 
 custom_user = get_user_model()

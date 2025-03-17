@@ -6,7 +6,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from io import BytesIO
 from django.core.files.base import ContentFile
-from garden.models import Plant
+from plants.models import Plant
 
 # Model representing an event
 class Events(models.Model):

@@ -12,7 +12,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from engagement.models import UserStats
-from garden.models import Plant
+from plants.models import Plant
 from engagement.views import achievementProgress
 from .models import Events, EventParticipants
 
