@@ -5,7 +5,6 @@ from garden.models import Plant
 class Command(BaseCommand):
     def handle(self, *args, **options):
         plants_data = [
-            {"name": "Template_Plant", "fact": "A placeholder plant for testing purposes.", "price": 25, "onMarket": True},
             {"name": "Potted Plant", "fact": "A common, easy-to-care-for plant often found indoors.", "price": 0, "onMarket": False},
             {"name": "Little Pink Cactus", "fact": "A cute, small cactus with vibrant pink spines.", "price": 30, "onMarket": True},
             {"name": "Rose", "fact": "Roses are a symbol of love and are known for their fragrant blooms.", "price": 40, "onMarket": True},

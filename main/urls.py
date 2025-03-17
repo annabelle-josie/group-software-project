@@ -8,7 +8,6 @@ urlpatterns = [
     path("", views.home, name="home"),  # Home page
     # path("qr", views.generate_qr, name="qr"),  # QR code generation page
 
-    path("allchallenges", views.my_challenges, name="allchallenges"),  # All challenges page
     # path("createchallenge", views.createChallenge, name="createchallenge"),
     # path("save", views.save_image,name="save" ),
     # path("garden/", include("garden.urls")),  # Include garden app URLs
@@ -16,7 +15,7 @@ urlpatterns = [
     path("auth/", include(auth_patterns)),
     path("friends/", include(friends_patterns)),
     path("settings/", include(settings_patterns)),
-
+    path("challenges/", include("challenges.urls")),
     path("leaderboard/", include(leaderboard_patterns)),
     path("achievement/", include(achievement_patterns)),
 
@@ -24,17 +23,15 @@ urlpatterns = [
     path("market/", views.market_view, name="market"),  # Market page
     # path("addChallenge", views.add_challenge),  # Add challenge endpoint
     # path("api/v1/addChallenge", views.add_challenge),  # API endpoint to add challenge
-    path("api/v1/removeChallenge", views.remove_challenge),  # API endpoint to remove challenge
-    path("api/v1/removeTask", views.remove_task),  # API endpoint to remove task
+ 
     path('incrementProgress/<int:event_id>/', views.incrementProgress, name='incrementProgress'),  # Increment progress endpoint
     path("market/api/add_purchased_plant", views.add_purchased_plant, name="add_purchased_plant"),  # Add purchased plant endpoint
     path('delete_event/<int:event_id>/', views.delete_event, name='delete_event'),
-    path('challenge_increment_progress/<int:challenge_Id>', views.challenge_increment_progress, name='challenge_increment_progress'),
+    
     path("profile/<str:username>/", views.profile),
     path('sign_up_for_event/<int:event_id>/', views.sign_up_for_event, name='sign_up_for_event'),
     path("api/get_garden/<int:user_id>/", views.get_garden, name="get_garden"),
     path("updateGarden", views.updateGarden, name="updateGarden"),
     path('scan-qr/<int:event_id>/<str:qr_code>/', views.scan_qr, name='scan_qr'),
-    path('scan-challenge/<int:challenge_id>/<str:qr_code>/', views.scan_qr, name='scan_challenge'),
     #path('delete_account/', views.delete_account, name='delete_account'),
 ]

@@ -5,19 +5,7 @@
 
 {% block content %}
 
-{% if isGamekeeper %}
-<div class="container">
-    <div class="row">
-        <div class="col"  style="background-color: #ffdfbe;">
-            
-{% elif user.is_authenticated %}
 <div class="mobile-wrapper">
-{% else %}
-    <h1>you are not logged on</h1>
-{% endif %}
-
-  <!-- Pink column -->
-   
   <div  class="col-12 col-md-12" style="background-color: #ffdfbe;">
       <h2 class="mt-2 mx-5">Current Tasks for {{user.username}}</h2>
       <ul class="list-group">
@@ -54,7 +42,7 @@
       </ul>
       <br>
   </div>
-    </div>
+</div>
 
 
     <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
@@ -149,32 +137,32 @@
     function startScanner(challengeId) {
         const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
         const button = document.getElementById(`button-${challengeId}`);
-        alert(challengeId)
         readerContainer.style.display = "block"; 
         button.style.display = "none";
-        alert(challengeId)
         const qr = button.getAttribute('qr');
-        alert("hi")
+        var expectedQr = `down2earth.eu.pythonanywhere.com/challenges/scan-challenge/${challengeId}/` + qr + '/';
         let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
         var html5QrcodeScanner = new Html5QrcodeScanner(
             `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
         html5QrcodeScanner.render(function(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText){
-                alert("qrcode scanned")
+            if (expectedQr === decodedText){
+                alert("QR code scanned");
                 fetch(`/challenge_increment_progress/${challengeId}/`, {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ qrCode: decodedText })
-                })
-                alert('task completed!');
+                    body: JSON.stringify({ qrCode: decodedText.trim() })
+                });
+                alert('Task completed!');
                 window.location.reload();
-            }
-            else{
-                alert("try a different code")
+            } else {
+                alert("Incorrect code");
+                alert('Expected: '+ expectedQr);
+                alert('Actual: '+ decodedText);
+                
             }
         });
     }

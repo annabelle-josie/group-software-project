@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import *
+from .models import Challenge
 
 # Serialiser for the Challenge model
 class ChallengeSerializer(serializers.ModelSerializer):

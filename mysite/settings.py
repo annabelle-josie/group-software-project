@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'main',
     'users',
     'engagement',
+    'challenges',
     'garden',
     'rest_framework',
     'event_management'
