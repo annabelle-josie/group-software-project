@@ -3,16 +3,20 @@ from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-from event_management.models import Events
+from django.contrib.auth.models import Group
+from events.models import Events
 
 custom_user = get_user_model()
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        # Ensure the event master exists
+        group, created = Group.objects.get_or_create(name="Game Keepers")
         event_master, created = custom_user.objects.get_or_create(username="James", email='jb1658@exeter.ac.uk')
         if created:
             event_master.set_password("password7")
+            event_master.is_superuser = True
+            event_master.is_staff = True
+            event_master.groups.add(group)
             event_master.save()
 
         events_data = [
@@ -49,7 +53,7 @@ class Command(BaseCommand):
                 'rewardValue': 50,
                 'startDate': timezone.datetime(2025, 3, 9, 12, 40),
                 'endDate': timezone.datetime(2025, 3, 29, 12, 40),
-                'eventQR': 'OuweMvQXOmDWWB9gYW9xVCAmR4NBdIq',
+                'eventQR': 'Litterpicking',
                 'eventQRImage': 'static/example_qr_codes/litterpicking.png',
                 'eventImage': 'static/event_backgrounds/event_background3.gif',
                 'isQR': True,

@@ -401,7 +401,7 @@
         }
 
     function signUpEvent(eventId) {
-        fetch(`/sign_up_for_event/${eventId}/`, {
+        fetch(`/events/sign_up_for_event/${eventId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
@@ -444,7 +444,7 @@
 
     html5QrcodeScanner.render(function(decodedText, decodedResult) {
         console.log(`Scan result: ${decodedText}`, decodedResult);
-        fetch(`/incrementProgress/${eventId}/`, {
+        fetch(`/events/incrementProgress/${eventId}/`, {
             method: "POST",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",
@@ -479,7 +479,7 @@
 
 
     function incrementProgress(eventId) {
-    fetch(`/incrementProgress/${eventId}/`, {
+    fetch(`/events/incrementProgress/${eventId}/`, {
         method: "POST",
         headers: {
             "X-CSRFToken": "{{ csrf_token }}",
@@ -532,7 +532,7 @@
 
     function deleteEvent(eventId) {
     if (confirm("Are you sure you want to delete this event?")) {
-        fetch(`/delete_event/${eventId}/`, {
+        fetch(`/events/delete_event/${eventId}/`, {
             method: "DELETE",
             headers: {
                 "X-CSRFToken": "{{ csrf_token }}",

@@ -93,6 +93,7 @@ class Command(BaseCommand):
                     user.set_password(password)
                     user.is_superuser = True
                     user.is_staff = True
+                    user.groups.add(group)
                     user.save()
                     self.stdout.write(self.style.SUCCESS(f"Created superuser: {username}"))
                 else:

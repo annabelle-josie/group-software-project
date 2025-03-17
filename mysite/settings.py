@@ -49,9 +49,9 @@ INSTALLED_APPS = [
     'users',
     'engagement',
     'challenges',
+    'events',
     'garden',
     'rest_framework',
-    'event_management'
 ]
 
 MIDDLEWARE = [
