@@ -48,7 +48,7 @@
                 </button>
                 </div>
                 <div class="modal-body">
-                    <form class="form-group mb-4" action="updateGarden" method="post" name="submitform" id="submitform">
+                    <form class="form-group mb-4" action="plants/updateGarden" method="post" name="submitform" id="submitform">
                         {% csrf_token %}
                         <div class="row">
                             {% for plant in available %}
@@ -101,7 +101,7 @@
                             <p class="text-center">No challenges left</p>
                         {% endfor %}
                     </ul>
-                    <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='allchallenges'">See more tasks</button>
+                    <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See more tasks</button>
                 </div>
             </div>
 
