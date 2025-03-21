@@ -88,10 +88,7 @@
                               </button>
                               {% endif %}
                               <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                            <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p>
-                              {% if item.repeatable is False %} 
-                                    <span class="badge bg-success text-dark">Achievment</span>
-                            {% endif %} 
+                            <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p> 
                             {% if item.QRImage %}
                                     <span class="badge bg-warning text-dark">QR Required</span>
                                     <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
@@ -101,12 +98,15 @@
                             <p class="text-center">No challenges left</p>
                         {% endfor %}
                     </ul>
-                    <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See more tasks</button>
+                   
+                        <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See challenge QR Codes</button>
+                    
                 </div>
             </div>
 
         </div>
     </div>
+
 
 </div>
 <!-- Scripts -->
@@ -123,7 +123,7 @@
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
                     if (tasks == (parseInt(progress) + 1)) {
-                        fetch('api/v1/removeChallenge', {
+                        fetch('challenges/api/v1/removeChallenge', {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -147,7 +147,7 @@
                             alert('Error completing challenge.');
                         });
                     } else {
-                        fetch('api/v1/removeTask', {
+                        fetch('challenges/api/v1/removeTask', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -186,7 +186,7 @@
             console.log(`Scan result: ${decodedText}`, decodedResult);
             if (qr == decodedText){
                 alert("QR code scanned");
-                fetch(`/challenge_increment_progress/${challengeId}/`, {
+                fetch(`challenges/challenge_increment_progress/${challengeId}/`, {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",

@@ -14,7 +14,6 @@ class Challenge(models.Model):
     qrvalue = models.CharField(max_length=50, default=None, null=True, blank=True)
     QRImage = models.ImageField(upload_to="qr_codes/", default=None, null=True, blank=True)
     isQR = models.BooleanField(default=False)
-    repeatable = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title  # String representation of the challenge
@@ -44,16 +43,16 @@ class ChallengeParticipants(models.Model):
         return f"{self.username.username} - {self.challengeId.title}"  # String representation of the participant
 
     # Signal receiver to assign new users to existing challenges
-    @receiver(post_save, sender=get_user_model())
-    def assignUserToExistingChallenges(sender, instance, created, **kwargs):
-        if created:
-            existing_challenges = Challenge.objects.all()  # Get all existing challenges
-            for challenge in existing_challenges:
-                if not ChallengeParticipants.objects.filter(username=instance, challengeId=challenge).exists():
-                    ChallengeParticipants.objects.create(
-                        username=instance,
-                        challengeId=challenge,
-                        progress=0,
-                        status="incomplete"
-                    )  # Assign the new user to each existing challenge
+    # @receiver(post_save, sender=get_user_model())
+    # def assignUserToExistingChallenges(sender, instance, created, **kwargs):
+    #     if created:
+    #         existing_challenges = Challenge.objects.all()  # Get all existing challenges
+    #         for challenge in existing_challenges:
+    #             if not ChallengeParticipants.objects.filter(username=instance, challengeId=challenge).exists():
+    #                 ChallengeParticipants.objects.create(
+    #                     username=instance,
+    #                     challengeId=challenge,
+    #                     progress=0,
+    #                     status="incomplete"
+    #                 )  # Assign the new user to each existing challenge
 

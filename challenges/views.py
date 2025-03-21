@@ -32,7 +32,6 @@ def my_challenges(request):
             "qrvalue":challenge_participant.challengeId.qrvalue,
             "id": challenge_participant.challengeId.challengeId,
             "isQR": challenge_participant.challengeId.isQR,  
-            "repeatable": challenge_participant.challengeId.repeatable,
             "QRImage": challenge_participant.challengeId.QRImage,  
         }
         for challenge_participant in user_challenge
@@ -43,7 +42,6 @@ def my_challenges(request):
         noOfTasks = request.POST["noOfTasks"]
         rewardValue = request.POST["rewardValue"]
         isQR = request.POST["qrCode"] == "qr"
-        repeatable = request.POST["repeatable"] == "repeatable"
 
         qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
 
@@ -54,20 +52,10 @@ def my_challenges(request):
             rewardValue=rewardValue,
             qrvalue= qrvalue,
             isQR =isQR,
-            repeatable = repeatable,
         )
         if isQR:
             new_challenge.generateQrImage()
             new_challenge.save()
-        if repeatable is False:
-            all_users = custom_user.objects.all()
-            for user in all_users:
-                ChallengeParticipants.objects.create(
-                    username=user,
-                    challengeId=new_challenge,
-                    progress=0, 
-                    status="incomplete"  
-            )
         return HttpResponseRedirect(request.path)
     
 
@@ -106,7 +94,7 @@ def remove_task(request):
         challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
         user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
         user = user_challenge.progress +1 
-        newprogrress =setattr(user_challenge,f'progress',user)
+        setattr(user_challenge,f'progress',user)
         user_challenge.save()
         return Response(status=status.HTTP_200_OK)
     except:
@@ -133,6 +121,7 @@ def challenge_increment_progress(request, challenge_id):
         user_stats.leaves += challenge.rewardValue
         user_stats.points += challenge.rewardValue
         user_stats.save()
+        return HttpResponseRedirect()
 
 
 @login_required(login_url="/auth/login")
@@ -142,7 +131,6 @@ def scan_challenge(request, challenge_id, qr_code):
         challenge = Challenge.objects.get(challengeId = challenge_id)
     except Challenge.DoesNotExist:
         return JsonResponse({'error': 'Invalid challenge.'}, status=404)
-
     try:
         ChallengeParticipant = ChallengeParticipants.objects.get(username=request.user, challengeId=challenge)
     except ChallengeParticipants.DoesNotExist:
@@ -162,7 +150,7 @@ def scan_challenge(request, challenge_id, qr_code):
                 user_stats.leaves += challenge.rewardValue
                 user_stats.points += challenge.rewardValue
                 user_stats.save()
-                return redirect('events')  
+                return HttpResponseRedirect("home")
 
         return JsonResponse({
             'progress': ChallengeParticipant.progress,
