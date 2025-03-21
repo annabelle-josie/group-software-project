@@ -132,7 +132,7 @@
                                                     <button type="button" class="btn btn-sm btn-secondary" onclick="availableModalSetup(
                                                         `{{ event.title}}`, `{{ event.desc}}`, `{{ event.startDate }}`,
                                                         `{{ event.endDate }}`, `{{ event.rewardValue }}`, `{{ event.eventMaster }}`,
-                                                        `{{ event.eventId }}`, `{{ event.plantReward.image }}`)"
+                                                        `{{ event.eventId }}`, `{{ event.plantReward.image }}`, `{{ event.isQR }}`)"
                                                         data-bs-toggle="modal" data-bs-target="#availableEventModal">View</button>
                                                     {% if event.eventMaster == user.username %}
                                                         <button type="button" class="btn btn-sm btn-secondary" onclick="gamekeeperModal(
@@ -193,10 +193,6 @@
                     <div id="eventReader" class="eventReader">
                     {% if event.isQR and event.participant.status != "complete" and event.progress < event.noOfTasks %}
                             <div id="reader-{{ event.eventId }}" class="p-2">
-                                <button class="btn btn-primary" onclick="startScanner({{ event.eventId }})">
-                                    Scan QR Code
-                                </button>
-                                <div id="reader-{{ event.eventId }}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
                             </div>
                         {% else %}
                             {% if event.participant.status != "complete" and event.progress < event.noOfTasks %}
@@ -230,6 +226,7 @@
                     <p id="availableEventRewardValue"><strong>Reward:</strong> {{ event.rewardValue }}</p>
                     <p id="availableEventMaster"><strong>Event Master:</strong> {{ event.eventMaster }}</p>
                     <div id="availablePlantViewer"></div>
+                    <div id="availableEventQr"></div>
                     <div id="qrCodeViewer"></div>
                     <button id="availableSignUpButton" class="btn btn-primary" onclick="signUpEvent({{ event.eventId }})">
                         Register for Event
@@ -326,7 +323,13 @@
             document.getElementById("eventEndDate").innerHTML =  ("<strong>End Date:</strong>" +  eventEndDate);
             document.getElementById("eventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
             document.getElementById("eventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
-            document.getElementById("plantViewer").innerHTML = ("<strong>Plant Rewards</p><img src='/media/" + plantReward + "' alt='QR Code' height='150px'>");
+            if (plantReward && plantReward !== "None" && plantReward.trim() !== "" && plantReward !== "undefined") {
+                document.getElementById("plantViewer").innerHTML = 
+                    "<strong>Plant Reward:</strong><br><img src='/media/" + plantReward + "' alt='Plant Reward' height='150px'>";
+            } else {
+                document.getElementById("plantViewer").innerHTML = "";
+            }
+
 
 
             
@@ -351,10 +354,7 @@
 
             var readerString = "";
             if(eventQR == "True" && eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
-                readerString = "<div id='reader-" + eventId + "' class='p-2'> \
-                    <button class='btn btn-primary' onclick='startScanner(" + eventId + ")'> Scan QR Code </button> \
-                    <div id='reader-" + eventId + "-reader' style='width: 100%; max-width: 400px; margin: auto;'></div> \
-                                    </div>";
+                readerString = "<strong> Scan event QR Code in your camera app </strong>";
             } else{
                 if(eventStatus != "complete" && parseInt(eventProgress) < parseInt(eventTasks)){
                     readerString = "<button class='btn btn-primary' id='increment-" + eventId + "' onclick='incrementProgress("  + eventId + ")'> \
@@ -367,7 +367,8 @@
             document.getElementById("eventReader").innerHTML = readerString;
         }
 
-        function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, plantReward){
+        function availableModalSetup(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, plantReward, eventIsQR){
+            console.log("plantReward =", plantReward);
             document.getElementById("availableEventModalLabel").innerHTML = eventTitle;
             document.getElementById("availableEventDesc").innerHTML = ("<strong>Description:</strong> " + eventDesc);
             document.getElementById("availableEventStartDate").innerHTML = ("<strong>Start Date:</strong>" + eventStartDate);
@@ -375,11 +376,24 @@
             document.getElementById("availableEventRewardValue").innerHTML =  ("<strong>Reward:</strong> " + eventRewardValue);
             document.getElementById("availableEventMaster").innerHTML =  ("<strong>Event Master:</strong> " + eventMaster);
             document.getElementById("availableSignUpButton").innerHTML = ("Register For Event");
+            if (eventIsQR === "True" || eventIsQR === true) {
+                document.getElementById("availableEventQr").innerHTML = "<p><strong>QR Event</strong></p>";
+            } else {
+                document.getElementById("availableEventQr").innerHTML = "<p><strong>Non QR Event</strong></p>";
+            }
             document.getElementById("availableSignUpButton").onclick = (() => signUpEvent(eventId));
             document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-primary");
-            document.getElementById("availablePlantViewer").innerHTML = ("<strong>Event plant:</strong> " + "<img src='/media/" + plantReward + "' alt='Plant Reward' height='150px'>");
+            if (plantReward && plantReward !== "None" && plantReward.trim() !== "" && plantReward !== "undefined") {
+                document.getElementById("availablePlantViewer").innerHTML = 
+                    "<strong>Plant Reward:</strong><br><img src='/media/" + plantReward + "' alt='Plant Reward' height='150px'>";
+            } else {
+                document.getElementById("availablePlantViewer").innerHTML = "";
+            }
+
+
             document.getElementById("qrCodeViewer").innerHTML = "";
             console.log("complete");
+            console.log("plantReward passed to modal:", plantReward);  
         }
 
         function gamekeeperModal(eventTitle, eventDesc, eventStartDate, eventEndDate, eventRewardValue, eventMaster, eventId, eventIsQR, eventQRImage, plantReward){
@@ -392,11 +406,17 @@
             document.getElementById("availableSignUpButton").innerHTML = ("Delete Event");
             document.getElementById("availableSignUpButton").onclick = (() => deleteEvent(eventId));
             document.getElementById("availableSignUpButton").setAttribute("class", "btn btn-danger");
-            document.getElementById("availablePlantViewer").innerHTML =  ("<strong>Plant Rewards</p><img src='/media/" + plantReward + "' alt='QR Code' height='150px'>");
-            console.log(eventQRImage);
-            if(eventIsQR == "True"){
-                document.getElementById("qrCodeViewer").innerHTML = ("<img src='" + eventQRImage + "' alt='QR Code' height=250px>");
+            if (plantReward && plantReward !== "None" && plantReward.trim() !== "") {
+                document.getElementById("availablePlantViewer").innerHTML = "<strong>Plant Reward:</strong><br><img src='/media/" + plantReward + "' alt='Plant Reward' height='150px'>";
+            } else {
+                document.getElementById("availablePlantViewer").innerHTML = "";
             }
+            if (eventIsQR === "True" && eventQRImage) {
+                document.getElementById("qrCodeViewer").innerHTML = "<strong>QR Code:</strong><br><img src='" + eventQRImage + "' alt='QR Code' height='250px'>";
+            } else {
+                document.getElementById("qrCodeViewer").innerHTML = "";
+            }
+
             console.log("complete");
         }
 
