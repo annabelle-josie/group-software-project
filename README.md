@@ -8,11 +8,13 @@ Members: Andy, Amy, Annabelle, David, James, Jason, Oliver
 
 ## **Key Features**
 
-- **Challenges**: Users complete environmentally friendly challenges to earn rewards.
+- **Challenges**: Users complete environmentally friendly that refresh daily challenges to earn rewards.
 - **Personal Garden**: An empty garden that can be customized by purchasing flowers using leaf points.
 - **Marketplace**: Users can unlock new plants and decorations using their earned points.
 - **Leaderboard**: A ranking system that allows players to compare their sustainability efforts with others.
-- **Events**: Users can attend real-world sustainability events to earn additional rewards.
+- **Events**: Users can attend real-world sustainability events to earn additional rewards. 
+- **Achivements**: Users can see their achivements with a progress bar to see how close they are to completing it.
+- **Friends**: 
 
 The application uses multiple SQLite databases to store and manage data. The gamified approach encourages players to adopt sustainable habits while competing in a friendly, engaging way.
 
@@ -26,11 +28,18 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
+  to get 
+
 ## Setup Instructions
+
+we deployed the website we used python anywhere 
+To navigate to the deployed webpage go to web address
+
+https://down2earth.eu.pythonanywhere.com/
 
 To run this Django-based web application locally, follow the steps below.
 
-### How to Run the Project
+### How to Run the Project Locally 
 
 **Download the package from the repository**  
 *(Ensure you have access to the latest version of the project.)*
@@ -53,7 +62,39 @@ python manage.py makemigrations
 
 ```console
 python manage.py migrate
+
 ```
+
+### 3. create standard database
+Still within the group-software-project folder create a standard database for the project with:
+
+```console
+python manage.py populate_database
+
+```
+
+### possible step instead of step 3 to create database modularly 
+
+```console
+python manage.py create_challenges
+
+```
+
+```console
+python manage.py create_mock_users
+
+```
+
+```console
+python manage.py create_achivements
+
+```
+```console
+python manage.py create_mock_users
+
+```
+in create achivements and create_mock_events wanted in the begining 
+
 
 ### 3. Run the Server
 
@@ -73,14 +114,20 @@ Once logged in you will be admitted to the home page. From here you can see your
 
 As a new user you can earn leaves by completing challenges and attending events. You can see all active events in the events page, and the daily challenges from the homepage.
 
+
 ## Users available for development and testing
 
-Three users of differing levels of access have been created to allow for easy testing and exploration of the site
+we have 6 users of differing levels of access have been created to allow for easy testing and exploration of the site
 
-1. Normal user -> Username: basicuser Password: easypeasy
-2. Gamekeeper -> Username: gamekeeper1 Password: easypeasy
+1. Normal user -> Username: Jason Password:password1
+2. Normal user -> Username: Andy Password:password2 
+3. Normal user -> Username: Annabelle Password: password3
+4. Normal user-> Username: David Password: password4
+5. Admin -> Username:Oliver  Password: password5
+6. Admin -> Username:Amy Password: password6
 
-
+All Admin are also Gamekeepers and an Admin can create a user and assign them to be a gamekeeper.
+    
 To run the Django tests, input the command:
 
 ```console

@@ -76,7 +76,7 @@
                             {% if forloop.counter <= 4 %}
                                 <li class="list-group-item">
                                     {% if item.QRImage %}
-                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button" onclick="alert('qrcode required')">
                                     </button> 
                                 {% else %}
                                 <button class="remove-button form-check-input border border-dark"
@@ -91,7 +91,6 @@
                             <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p> 
                             {% if item.QRImage %}
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                    <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
                             {% endif %}
                             {% endif %}
                         {% empty %}
@@ -173,34 +172,34 @@
         });
     });
 
-    function startScanner(challengeId) {
-        const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
-        const button = document.getElementById(`button-${challengeId}`);
-        readerContainer.style.display = "block"; 
-        button.style.display = "none";
-        const qr = button.getAttribute('qr');
-        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
-        var html5QrcodeScanner = new Html5QrcodeScanner(
-            `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
-        html5QrcodeScanner.render(function(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText){
-                alert("QR code scanned");
-                fetch(`challenges/challenge_increment_progress/${challengeId}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ qrCode: decodedText })
-                });
-                alert('Task completed!');
-                window.location.reload();
-            } else {
-                alert("Try a different code");
-            }
-        });
-    }
+    // function startScanner(challengeId) {
+    //     const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
+    //     const button = document.getElementById(`button-${challengeId}`);
+    //     readerContainer.style.display = "block"; 
+    //     button.style.display = "none";
+    //     const qr = button.getAttribute('qr');
+    //     let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
+    //     var html5QrcodeScanner = new Html5QrcodeScanner(
+    //         `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
+    //     html5QrcodeScanner.render(function(decodedText, decodedResult) {
+    //         console.log(`Scan result: ${decodedText}`, decodedResult);
+    //         if (qr == decodedText){
+    //             alert("QR code scanned");
+    //             fetch(`challenges/challenge_increment_progress/${challengeId}/`, {
+    //                 method: "POST",
+    //                 headers: {
+    //                     "X-CSRFToken": "{{ csrf_token }}",
+    //                     "Content-Type": "application/json"
+    //                 },
+    //                 body: JSON.stringify({ qrCode: decodedText })
+    //             });
+    //             alert('Task completed!');
+    //             window.location.reload();
+    //         } else {
+    //             alert("Try a different code");
+    //         }
+    //     });
+    // }
 
     function updatePlantOwned(plantName, test) {
         const $plantname = document.querySelector('#plantname');
