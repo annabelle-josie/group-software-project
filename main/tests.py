@@ -20,7 +20,7 @@ class HomePageTest(TestCase):
         self.protected_urls = [
             reverse('home'),
             reverse('friends'),
-            reverse('challenges'),
+            reverse('allchallenges'),
             reverse('events'),
             reverse('market'),
             reverse('leaderboard'),

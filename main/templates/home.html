@@ -98,9 +98,9 @@
                             <p class="text-center">No challenges left</p>
                         {% endfor %}
                     </ul>
-                   
+                    {% if isGamekeeper %}
                         <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See challenge QR Codes</button>
-                    
+                    {% endif %}
                 </div>
             </div>
 
@@ -179,25 +179,30 @@
         readerContainer.style.display = "block"; 
         button.style.display = "none";
         const qr = button.getAttribute('qr');
+        var expectedQr = `down2earth.eu.pythonanywhere.com/challenges/scan-challenge/${challengeId}/` + qr + '/';
         let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
         var html5QrcodeScanner = new Html5QrcodeScanner(
             `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
         html5QrcodeScanner.render(function(decodedText, decodedResult) {
             console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText){
-                alert("QR code scanned");
-                fetch(`challenges/challenge_increment_progress/${challengeId}/`, {
+            if (expectedQr === decodedText){
+                fetch(`challenges/challenge_increment_progress/${challengeId}`, {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": "{{ csrf_token }}",
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ qrCode: decodedText })
+                    body: JSON.stringify({ qrCode: decodedText.trim() })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Task completed!');
+                        window.location.reload();
+                    }
                 });
-                alert('Task completed!');
-                window.location.reload();
             } else {
-                alert("Try a different code");
+                alert("Incorrect code");
+                
             }
         });
     }

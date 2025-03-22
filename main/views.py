@@ -20,81 +20,56 @@ def home(request):
         plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
     except UserGarden.DoesNotExist:
         plant_slots = []
-    try:
-        user = request.user
-        my_user_challenge = ChallengeParticipants.objects.filter(username=request.user)
-        findchallenge = ChallengeParticipants.objects.raw(
-        "SELECT id,username_id, date FROM challenges_ChallengeParticipants"
-        )
-        found = False
-        for leader in findchallenge:
-            current = leader.username_id
-            if current == user.id:
-                date = leader.date
-                found = True
-    except ChallengeParticipants.DoesNotExist:
-        my_user_challenge = None
-        found = False
-        date = None
-    challenges = Challenge.objects.all()
-    currentdate = timezone.now().date()
-    amount = challenges.count()
-    update = False
-    print(found)
-    if (found):
-        for i in my_user_challenge:
-            if date != currentdate:
-                my_user_challenge.get(challengeId=i.challengeId).delete()
-                update = True
-    
-    if found is False and challenges :
-        update = True
-    if update is True:
-        if amount > 0 :
-            count=0
-            mylist =[]
-            while count < 3:
-                challenge = challenges[randint(0, amount - 1)]
-                if(challenge.challengeId not in mylist):
-                    mylist.append(challenge.challengeId)
-                    ChallengeParticipants.objects.create(
-                        username=request.user,
-                        challengeId=challenge,
-                        progress=0, 
-                        status="incomplete"  
 
-                    )
-                    count += 1
-    user_challenge = ChallengeParticipants.objects.filter(username=request.user, status="incomplete")
+    currentdate = timezone.now().date()
+    
+    # Remove any challenge assignments that are not for today.
+    ChallengeParticipants.objects.filter(username=request.user).delete()
+
+    challenges = Challenge.objects.all()
+    amount = challenges.count()
+
+    # Assign 3 new challenges for today.
+    if amount > 0:
+        count = 0
+        mylist = []
+        while count < 3:
+            # Pick a random challenge.
+            challenge = challenges.order_by('?').first()
+            if challenge.challengeId not in mylist:
+                mylist.append(challenge.challengeId)
+                ChallengeParticipants.objects.create(
+                    username=request.user,
+                    challengeId=challenge,
+                    progress=0,
+                    status="incomplete",
+                    date=currentdate
+                )
+                count += 1
+
+    # Retrieve the fresh list of today's challenge assignments.
+    user_challenge = ChallengeParticipants.objects.filter(
+        username=request.user, status="incomplete", date=currentdate
+    )
     challenge_in_progress = [
         {
-            "title": challenge_participant.challengeId.title,
-            "desc": challenge_participant.challengeId.desc,
-            "rewardValue": challenge_participant.challengeId.rewardValue,
-            "progress": challenge_participant.progress,
-            "noOfTasks":challenge_participant.challengeId.noOfTasks,
-            "qrvalue":challenge_participant.challengeId.qrvalue,
-            "id": challenge_participant.challengeId.challengeId,
-            "date": challenge_participant.date,
-            "isQR": challenge_participant.challengeId.isQR,  
-            "QRImage": challenge_participant.challengeId.QRImage, 
-             
+            "title": cp.challengeId.title,
+            "desc": cp.challengeId.desc,
+            "rewardValue": cp.challengeId.rewardValue,
+            "progress": cp.progress,
+            "noOfTasks": cp.challengeId.noOfTasks,
+            "qrvalue": cp.challengeId.qrvalue,
+            "id": cp.challengeId.challengeId,
+            "date": cp.date,
+            "isQR": cp.challengeId.isQR,  
+            "QRImage": cp.challengeId.QRImage,
         }
-        for challenge_participant in user_challenge
+        for cp in user_challenge
     ]
 
-    users = custom_user.objects.get(username= request.user)
+    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
+
+    users = custom_user.objects.get(username=request.user)
     available = users.owned_plants.all()
-    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
-
-@login_required
-def profile(request, username):
-    try:
-        owner = custom_user.objects.get(username=username)
-        userGarden = UserGarden.objects.get(user_id=owner.id)
-        plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
-    except:
-        plant_slots = None
-
-    return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
+    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available, "isGamekeeper": isGamekeeper})
 

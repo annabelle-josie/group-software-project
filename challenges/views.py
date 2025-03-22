@@ -1,3 +1,4 @@
+import json
 import secrets
 import string
 from django.shortcuts import render, redirect
@@ -14,7 +15,10 @@ from .models import Challenge, ChallengeParticipants
 
 custom_user = get_user_model()
 
+@login_required(login_url="/auth/login")
 def my_challenges(request):
+    if not request.user.groups.filter(name="Game Keepers").exists():
+        return HttpResponseRedirect("/")
     user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     try:
@@ -66,42 +70,52 @@ def my_challenges(request):
 
 # function to delete a challenge, returns a JSON response that indicates success or failure
 @api_view(['DELETE'])
+@login_required(login_url="/auth/login")
 def remove_challenge(request):
     point = request.data.get('points')
     try:
-        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
+        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId=request.data.get('challengeId'))
         users = UserStats.objects.get(user=request.user)
-        points = int(point) + users.points
-        leaves = int(point) + users.leaves
-        mystatus = user_challenge.status
-        setattr(users,f'points',points)
-        setattr(users,f'leaves',leaves)
-        setattr(user_challenge,f'status',"complete")
+        users.points += int(point)
+        users.leaves += int(point)
+        user_challenge.status = "complete"
+
+        # Trigger achievement progress
         achievementProgress(request, "onPointGain", int(point))
         achievementProgress(request, "onChallengeComplete", 1)
+
         users.save()
         user_challenge.save()
+
         return Response(status=status.HTTP_200_OK)
-    except:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    except ChallengeParticipants.DoesNotExist:
+        return Response(
+            {"error": "Challenge participant not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
 # function to remove a task from a challenge, returns a JSON response that indicates success or failure
 @api_view(['POST'])
+@login_required(login_url="/auth/login")
 def remove_task(request):
-    challengeIds =request.data.get('challengeId')
+    challenge_id = request.data.get('challengeId')
     try:
-        challenge = Challenge.objects.get(pk=request.data.get('challengeId'))
-        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId= request.data.get('challengeId'))
-        user = user_challenge.progress +1 
-        setattr(user_challenge,f'progress',user)
+        # Ensure the challenge exists
+        challenge = Challenge.objects.get(pk=challenge_id)
+        user_challenge = ChallengeParticipants.objects.get(username=request.user, challengeId=challenge_id)
+        # Increment progress
+        user_challenge.progress += 1
         user_challenge.save()
+
         return Response(status=status.HTTP_200_OK)
-    except:
+
+    except (Challenge.DoesNotExist, ChallengeParticipants.DoesNotExist):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-@login_required
+
+
+@login_required(login_url="/auth/login")
 def challenge_increment_progress(request, challenge_id):
     """Handle the progress increment request."""
     try:
@@ -111,8 +125,8 @@ def challenge_increment_progress(request, challenge_id):
         return JsonResponse({'error': 'challenge participant not found.'}, status=404)
 
     if challenge_participant.progress < challenge.noOfTasks:
-        challenge_participant.progress += 1  
-        if challenge_participant.progress >= challenge.noOfTasks:  
+        challenge_participant.progress += 1
+        if challenge_participant.progress >= challenge.noOfTasks:
             challenge_participant.status = "complete"
         challenge_participant.save()
 
@@ -121,7 +135,9 @@ def challenge_increment_progress(request, challenge_id):
         user_stats.leaves += challenge.rewardValue
         user_stats.points += challenge.rewardValue
         user_stats.save()
-        return HttpResponseRedirect()
+        return HttpResponseRedirect('/')
+    
+    return JsonResponse({"message": "Progress incremented."})
 
 
 @login_required(login_url="/auth/login")

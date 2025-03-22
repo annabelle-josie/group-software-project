@@ -176,7 +176,7 @@
       <!-- User Info -->
       <div class="d-flex align-items-center">
         {% if user.is_authenticated %}
-          <p class="mb-0 me-3 fw-bold" style="color: white">{{ user.username }}</p>
+          <p class="mb-0 me-3 fw-bold fs-4" style="color: white">{{ user.username }}</p>
           <div class="d-flex align-items-center border rounded p-2" style="background-color: #F7F7FF;">
             <p class="mb-0 fw-bold">{{ user.stats.leaves }}</p>
             <img src="{% static 'icons/leaf.png' %}" height="25px" class="ms-2" alt="leaf icon">

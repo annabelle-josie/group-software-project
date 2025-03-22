@@ -64,7 +64,7 @@ def friends(request):
 
     return render(request, "users/friends.html", {"friends_page": friends_page, "friends_total": friends_total})
 
-@login_required
+@login_required(login_url="/auth/login")
 @api_view(["POST"])
 def remove_friend(request):
     friend_id = request.data.get("user_id")
@@ -75,7 +75,7 @@ def remove_friend(request):
     request.user.unfriend(friend)
     return Response({"message": "Friend removed successfully."}, status=status.HTTP_200_OK)
 
-@login_required
+@login_required(login_url="/auth/login")
 @api_view(["POST"])
 def send_friend_request(request):
     username = request.data.get("username")
@@ -92,7 +92,7 @@ def send_friend_request(request):
     request.user.send_friend_request(to_user)
     return Response({"success": True, "message": "Friend request sent."}, status=status.HTTP_200_OK)
 
-@login_required
+@login_required(login_url="/auth/login")
 @api_view(["POST"])
 def accept_friend_request(request):
     friend_id = request.data.get("user_id")
@@ -103,7 +103,7 @@ def accept_friend_request(request):
     request.user.accept_friend_request(friend)
     return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
 
-@login_required
+@login_required(login_url="/auth/login")
 @api_view(["POST"])
 def reject_friend_request(request):
     friend_id = request.data.get("user_id")
@@ -114,14 +114,14 @@ def reject_friend_request(request):
     request.user.reject_friend_request(friend)
     return Response({"message": "Friend request rejected."}, status=status.HTTP_200_OK)
 
-@login_required
+@login_required(login_url="/auth/login")
 @api_view(["GET"])
 def get_friend_requests(request):
     friend_requests = request.user.get_incoming_friend_requests().values("id", "username")
     return Response({"friend_requests": list(friend_requests)}, status=status.HTTP_200_OK)
 
 
-@login_required()
+@login_required(login_url="/auth/login")
 def settings(request):
     user_form = ProfileUpdateForm(instance=request.user)
     password_form = CustomPasswordChangeForm(user=request.user)
@@ -149,7 +149,7 @@ def settings(request):
     }
     return render(request, "users/settings.html", context)
 
-@login_required
+@login_required(login_url="/auth/login")
 def delete_account(request):
     if request.method == 'POST':
         user = request.user
