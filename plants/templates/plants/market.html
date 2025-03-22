@@ -79,7 +79,7 @@
               <div class="plant-card" onclick='updatePlantOwned("{{ plant.image.url }}", "{{ plant.name }}", "{{ plant.price }}", "{{ plant.fact }}", "{{ user }}", "{{ plant }}")'>
                 <img class="plant-bg" src="{% static 'icons/PlantBGBlue.png' %}" alt="Plant Background" tabindex="0">
                 <img class="plant-img" src="{{ plant.image.url }}" alt="{{ plant.name }}" tabindex="0">
-                <img class="sold-badge" src="{% static 'icons/Sold.png' %}" alt="Sold!" tabindex="0">
+                <img class="sold-badge" src="{% static 'icons/Sold Tag.png' %}" alt="Sold!" tabindex="0">
               </div>
             {% else %}
               <!-- Unowned Plant Card -->
@@ -203,10 +203,11 @@
   }
   .sold-badge {
     position: absolute;
-    width: 35%;
+    width: 60%;
     top: 50%;
     right: -5%;
-    transform: translateY(-50%);
+    transform: translateY(50%);
+    transform: rotate(25deg);
     z-index: 3;
   }
 
