@@ -10,7 +10,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 20,
         "isQR": False,
-        "repeatable": True,
     },
     {
         "title": "Recycle 3 Pieces of Litter",
@@ -18,7 +17,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 3,
         "rewardValue": 20,
         "isQR": True,
-        "repeatable": True,
     },
     {
         "title": "Bring Your Reusable Water Bottle",
@@ -26,7 +24,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 15,
         "isQR": True,
-        "repeatable": True,
     },
     {
         "title": "Bring Your Own Bag",
@@ -34,7 +31,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 15,
         "isQR": True,
-        "repeatable": True,
     },
     {
         "title": "Bike to Campus",
@@ -42,7 +38,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 25,
         "isQR": True,
-        "repeatable": True,
     },
     {
         "title": "Opt to Walk",
@@ -50,7 +45,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 5,
         "isQR": False,
-        "repeatable": True,
     },
     {
         "title": "Conserve Energy",
@@ -58,7 +52,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 5,
         "isQR": False,
-        "repeatable": True,
     },
     {
         "title": "Eat Sustainably",
@@ -66,7 +59,6 @@ CHALLENGE_DATA = [
         "noOfTasks": 1,
         "rewardValue": 5,
         "isQR": False,
-        "repeatable": True,
     }
 ]
 
