@@ -1,4 +1,6 @@
-from django.test import TestCase, Client
+import shutil
+import tempfile
+from django.test import TestCase, Client, override_settings
 from django.contrib.auth import get_user_model
 from .models import Friendship
 from engagement.models import UserStats
@@ -7,15 +9,21 @@ from django.urls import reverse
 
 custom_user = get_user_model() # Get the user model
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class UserCreationTests(TestCase):
 
     def setUp(self):
         """Set up test users and Game Keeper group before each test."""
         self.potted_plant = Plant.objects.create(name="Potted Plant", price=10, fact="A simple potted plant.")
-        self.user = custom_user.objects.create(username="testuser", password="password123")
-        self.game_keeper = custom_user.objects.create(username="gamekeeper", password="securepass")
+        self.user = custom_user.objects.create(username="testuser", email="testuseremail@email.com", password="password123")
+        self.game_keeper = custom_user.objects.create(username="gamekeeper", email="testgamekeeperemail@email.com", password="securepass")
 
-
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
     
     def test_userstats_creation(self):
         """Ensure a UserStats entry is created when a user is made."""
@@ -39,6 +47,7 @@ class UserCreationTests(TestCase):
         self.assertEqual(user_garden.plant6Id, self.potted_plant)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class LoginTests(TestCase):
     """Tests for user authentication including signup, login, and access control."""
 
@@ -48,7 +57,12 @@ class LoginTests(TestCase):
         self.signup_url = reverse('signup')
         self.login_url = reverse('login')
         self.logout_url = reverse('logout')
-        self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
+        self.user = custom_user.objects.create_user(username="testuser", email="testuseremail@email.com", password="SecurePass123!")
+
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     ## Signup Tests ##
     def test_signup_with_valid_data(self):
@@ -97,7 +111,19 @@ class LoginTests(TestCase):
             "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "A user with that username already exists.") 
+        self.assertContains(response, "A user with that username already exists.")
+
+    def test_signup_existing_email(self):
+        """Test signup fails if email is already in use."""
+        response = self.client.post(self.signup_url, {
+            'username': 'emailtuser',
+            "email": "testuseremail@email.com",
+            'password1': 'NewPass123!',
+            'password2': 'NewPass123!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "User with this Email already exists.")
 
     def test_signup_password_too_short(self):
         """Ensure password is rejected if it's too short."""
@@ -111,7 +137,17 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "This password is too short")
 
-
+    def test_signup_password_mismatch(self):
+        """Ensure password is rejected if they don't match."""
+        response = self.client.post(self.signup_url, {
+            'username': 'mismatchuser',
+            "email": "testemail@email.com",
+            'password1': 'NewPass123!',
+            'password2': 'NewPass234!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The two password fields didn’t match.")
 
     ## Login Tests ##
     def test_login_valid_user(self):
@@ -154,14 +190,20 @@ class LoginTests(TestCase):
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class FriendshipTests(TestCase):
 
     def setUp(self):
-        """Create two users for testing friendships."""
+        """Create users for testing friendships."""
         self.user_a = custom_user.objects.create_user(username="userA", email='testemail1@email.com', password="testpassword")
         self.user_b = custom_user.objects.create_user(username="userB", email='testemail2@email.com', password="testpassword")
         self.user_c = custom_user.objects.create_user(username="userC", email='testemail3@email.com', password="testpassword")
         self.user_d = custom_user.objects.create_user(username="userD", email='testemail4@email.com', password="testpassword")
+
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     def test_send_friend_request(self):
         """Test sending a friend request."""

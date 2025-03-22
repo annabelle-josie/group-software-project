@@ -1,5 +1,7 @@
 import json
-from django.test import TestCase
+import shutil
+import tempfile
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from engagement.models import UserStats
@@ -7,6 +9,9 @@ from .models import Challenge, ChallengeParticipants
 
 custom_user = get_user_model()
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class ChallengeTests(TestCase):
     """Tests for Challenge creation, assignment, and participation."""
 
@@ -23,6 +28,10 @@ class ChallengeTests(TestCase):
         self.user = custom_user.objects.create_user(username="testuser", email="testemail@email.com", password="SecurePass123!")
         self.client.login(username="testuser", password="SecurePass123!")
 
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     def test_new_user_is_assigned_to_existing_challenges(self):
         """Ensure that a newly created user is automatically assigned to existing challenges."""

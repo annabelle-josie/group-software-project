@@ -1,9 +1,14 @@
-from django.test import TestCase
+import shutil
+import tempfile
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
 custom_user = get_user_model()
-# Test case for the home page and protected views
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class HomePageTest(TestCase):
 
     def setUp(self):
@@ -15,10 +20,17 @@ class HomePageTest(TestCase):
         self.protected_urls = [
             reverse('home'),
             reverse('friends'),
+            reverse('challenges'),
             reverse('events'),
-            reverse('leaderboard'),
             reverse('market'),
+            reverse('leaderboard'),
+            reverse('settings'),
         ]
+
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     def test_redirects_for_unauthenticated_users(self):
         """Ensure unauthenticated users are redirected to login for all protected pages."""
