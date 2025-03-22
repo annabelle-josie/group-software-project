@@ -29,20 +29,36 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            # Manually add classes to fields not covered in Meta.widgets
             self.fields['password1'].widget.attrs.update({'class': 'form-control'})
             self.fields['password2'].widget.attrs.update({'class': 'form-control'})
             self.fields['privacy_policy'].widget.attrs.update({'class': 'form-check-input'})
-            self.fields['email'].label
-
-
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['email'] # update to ['username', 'email'] if username is to be updated
+        fields = ['email']
+
+        widgets = {
+            'email': forms.TextInput(attrs={'class':'form-control'})}
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({'class': 'form-control'})
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     class Meta:
         model = CustomUser
         fields = ['old_password', 'new_password1', 'new_password2']
+
+        widgets = {
+            'old_password': forms.PasswordInput(attrs={'class':'form-control'}),
+            'new_password1': forms.PasswordInput(attrs={'class':'form-control'}),
+            'new_password2': forms.PasswordInput(attrs={'class':'form-control'})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Manually add classes to fields not covered in Meta.widgets
+        self.fields['old_password'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['new_password2'].widget.attrs.update({'class': 'form-control'})
+

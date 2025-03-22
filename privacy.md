@@ -1,6 +1,6 @@
 # PRIVACY POLICY
 
-Last updated February 23, 2025
+Last updated March 18, 2025
 
 In compliance with GDPR legislation.
 
@@ -24,7 +24,7 @@ This summary provides key points from our Privacy Notice, but you can find out m
 - **In what situations and with which parties do we share personal information?** We may share information in specific situations and with specific third parties. Learn more about when and with whom we share your personal information.
 - **How do we keep your information safe?** We have adequate organisational and technical processes and procedures in place to protect your personal information. However, no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other unauthorised third parties will not be able to defeat our security and improperly collect, access, steal, or modify your information. Learn more about how we keep your information safe.
 - **What are your rights?** Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information. Learn more about your privacy rights.
-- **How do you exercise your rights?** The easiest way to exercise your rights is by contacting at969@exeter.ac.uk. We will consider and act upon any request in accordance with applicable data protection laws.
+- **How do you exercise your rights?** The easiest way to exercise your rights is by contacting us at at969@exeter.ac.uk. We will consider and act upon any request in accordance with applicable data protection laws.
 - **Want to learn more about what we do with any information we collect?** Review the Privacy Notice in full.
 
 ## TABLE OF CONTENTS
@@ -54,6 +54,7 @@ We collect personal information that you voluntarily provide to us when you regi
 
 - usernames
 - passwords
+- email addresses
 
 **Sensitive Information.** We do not process sensitive information.
 
@@ -70,7 +71,9 @@ All personal information that you provide to us must be true, complete, and accu
 
 In Short: We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent.
 
-We process your personal information for a variety of reasons, depending on how you interact with our Services.
+We process your personal information for a variety of reasons, depending on how you interact with our Services, including:
+
+- To facilitate account creation account and authentication and otherwise manage user accounts. We may process your information so you can create and log into your account, as well as keep your account in working order.
 
 ## 3. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?
 
@@ -78,13 +81,14 @@ In Short: We may share information in specific situations described in this sect
 
 We may need to share your personal information in the following situations:
 
-- **Business Transfers.** We may share or transfer your information in connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.
+- **University Collaboration.** We may share your information with other departments or research groups within the university for academic and research purposes.
+- **Service Providers.** We may share your information with third-party service providers, such as PythonAnywhere, who provide hosting services and may have access to some data as part of their services.
 
 ## 4. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?
 
 In Short: We may transfer, store, and process your information in countries other than your own.
 
-Our servers are based in the United Kingdom (UK). If you are accessing our Services from outside, please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see 'WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?' above), in and other countries.
+Our servers are hosted on PythonAnywhere, which hosts their servers in the EU. Although this is a UK-based project and the services are intended for the UK, if you are accessing our Services from outside the UK, please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see 'WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?' above), in the EU and other countries/regions.
 
 ## 5. HOW LONG DO WE KEEP YOUR INFORMATION?
 
@@ -118,6 +122,7 @@ However, please note that this will not affect the lawfulness of the processing 
 
 If you would at any time like to review or change the information in your account or terminate your account, you can:
 
+- Update your account details or delete your account in the settings page
 - Contact us using the contact information provided.
 
 Upon your request to terminate your account, we will deactivate or delete your account and information from our active databases. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any investigations, enforce our legal terms and/or comply with applicable legal requirements.
@@ -142,4 +147,4 @@ Down2Earth
 
 ## 12. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?
 
-You have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. To request to review, update, or delete your personal information, please email: at969@exeter.ac.uk.
+You have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. When logged in, you can update your details or delete your account in the settings page. To do this, navigate to the settings page and follow the instructions to update your profile or delete your account. Alternatively, to request to review, update, or delete your personal information, please email: at969@exeter.ac.uk.
