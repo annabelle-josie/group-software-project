@@ -12,7 +12,24 @@
     .nav-link:hover{
         color: #3B322C;
     }
+
+    body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    h1 {
+        background-color: white;
+        padding: 10px;
+        display: inline-block; /* Ensures background only covers the text */
+        border-radius: 10px;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 </style>
+
 <div class="container">
     <!-- Trophy Icon + Title -->
     <div class="d-flex justify-content-center m-4">

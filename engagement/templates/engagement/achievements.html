@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
+{% load static %}
 
 {% block title %}Achievements{% endblock %}
 
 {% block content %}
 
 <style>
+  body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+  }
+
   .bg-custom {
     background-color: #7eb37b !important;
   }
