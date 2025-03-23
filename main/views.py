@@ -13,6 +13,7 @@ custom_user = get_user_model()
 # home view, displays the user's garden and challenges
 @login_required(login_url="/auth/login")
 def home(request):
+    isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     if not request.user.is_authenticated:
         return render(request, "home.html", {"plant_slots": None})  # Prevents error for anonymous users
     try:
@@ -40,7 +41,6 @@ def home(request):
     currentdate = timezone.now().date()
     amount = challenges.count()
     update = False
-    print(found)
     if (found):
         for i in my_user_challenge:
             if date != currentdate:
@@ -85,7 +85,7 @@ def home(request):
 
     users = custom_user.objects.get(username= request.user)
     available = users.owned_plants.all()
-    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available})
+    return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available, "isGamekeeper":isGamekeeper})
 
 @login_required
 def profile(request, username):

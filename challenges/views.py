@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from engagement.models import UserStats
 from engagement.views import achievementProgress
-from .forms import ChallengeForm
 from .models import Challenge, ChallengeParticipants
 
 custom_user = get_user_model()
@@ -21,47 +20,7 @@ def my_challenges(request):
         allchallenges= Challenge.objects.all()
     except:
         allchallenges = None
-    challenge_in_progress = [
-        {
-            "title": challenge_participant.challengeId.title,
-            "desc": challenge_participant.challengeId.desc,
-            "rewardValue": challenge_participant.challengeId.rewardValue,
-            "progress": challenge_participant.progress,
-            "noOfTasks":challenge_participant.challengeId.noOfTasks,
-            "status": challenge_participant.status,
-            "qrvalue":challenge_participant.challengeId.qrvalue,
-            "id": challenge_participant.challengeId.challengeId,
-            "isQR": challenge_participant.challengeId.isQR,  
-            "QRImage": challenge_participant.challengeId.QRImage,  
-        }
-        for challenge_participant in user_challenge
-    ]
-    if request.method == "POST" and isGamekeeper:
-        title = request.POST["title"]
-        desc = request.POST["desc"]
-        noOfTasks = request.POST["noOfTasks"]
-        rewardValue = request.POST["rewardValue"]
-        isQR = request.POST["qrCode"] == "qr"
-
-        qrvalue = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(80)) if isQR else None
-
-        new_challenge = Challenge.objects.create(
-            title=title,
-            desc=desc,
-            noOfTasks=noOfTasks,
-            rewardValue=rewardValue,
-            qrvalue= qrvalue,
-            isQR =isQR,
-        )
-        if isQR:
-            new_challenge.generateQrImage()
-            new_challenge.save()
-        return HttpResponseRedirect(request.path)
-    
-
-    return render(request, 'challenges/allchallenges.html', {
-        'form':ChallengeForm(),
-        'challenge_list': challenge_in_progress, 'isGamekeeper': isGamekeeper, 'allchallenges':allchallenges})
+    return render(request, 'challenges/challengeQR.html', {'isGamekeeper': isGamekeeper, 'allchallenges':allchallenges})
 
 
 # function to delete a challenge, returns a JSON response that indicates success or failure

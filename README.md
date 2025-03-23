@@ -14,7 +14,7 @@ Members: Andy, Amy, Annabelle, David, James, Jason, Oliver
 - **Leaderboard**: A ranking system that allows players to compare their sustainability efforts with others.
 - **Events**: Users can attend real-world sustainability events to earn additional rewards. 
 - **Achivements**: Users can see their achivements with a progress bar to see how close they are to completing it.
-- **Friends**: 
+- **Friends**: Users can add another user as a friend with their username if they accept friend request they can compete on friends leaderboard and see their gardens. 
 
 The application uses multiple SQLite databases to store and manage data. The gamified approach encourages players to adopt sustainable habits while competing in a friendly, engaging way.
 
@@ -28,7 +28,7 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
-  to get 
+  get the env file from technical documents and add it to project root so that users can reset password
 
 ## Setup Instructions
 
@@ -86,7 +86,7 @@ python manage.py create_mock_users
 ```
 
 ```console
-python manage.py create_achivements
+python manage.py create_achievements
 
 ```
 ```console
