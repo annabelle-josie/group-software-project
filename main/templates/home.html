@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% load auth_extras static %}
 
+
 {% block title %} Home {% endblock %}
 
 {% block content %}
 <div class="mobile-wrapper">
     
     <div class="container-fluid mt-5">
+
         <h1 class="text-center">Your Garden</h1>
         <div class="p-3 rounded">
             <div id="garden-display" class="rounded container mx-auto w-md-50 w-100" style="position: relative;">
@@ -214,9 +216,26 @@
 </script>
 
 <style>
+    body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
     .clickable {
         -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
         filter: drop-shadow(5px 5px 5px #eaff00);
     }
+
+    h1 {
+        background-color: white;
+        padding: 10px;
+        display: inline-block; /* Ensures background only covers the text */
+        border-radius: 10px;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
 </style>
 {% endblock %}

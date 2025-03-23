@@ -12,8 +12,16 @@
     .nav-link:hover{
         color: #3B322C;
     }
+
+    body {
+        padding-top: 90px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
 </style>
-<div class="container">
+
+<div class="container" style="background-color: rgb(241, 241, 241); border-radius: 15px; padding-bottom: 10px;">
+    <br>
     <!-- Trophy Icon + Title -->
     <div class="d-flex justify-content-center m-4">
         <img class="img-fluid" style="max-width:90px" src="{% static 'icons/trophy.png' %}" alt="trophy icon">
@@ -85,7 +93,7 @@
                     </tr>
                     {% endfor %}
                     
-                    <tr style="border-top: 2px solid #ccc;" class="table-success">
+                    <tr style="border-top: 2px solid rgb(204, 204, 204);" class="table-success">
                         <td>{{ rank }}</td>
                         <td>
                             <div class="d-flex justify-content-between">

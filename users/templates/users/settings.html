@@ -2,6 +2,18 @@
 {% block title %}Settings{% endblock %}
 {% load custom_filters %}
 {% block content %}
+{% load static %}
+
+{% block extra_css %} <!-- Copy this block to override the base html background for other pages -->
+<style>
+    body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+
 <div class="mobile-wrapper mt-3 mb-3">
 <div class="d-flex justify-content-center">
     <div class="container">

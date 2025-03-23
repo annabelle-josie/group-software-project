@@ -3,13 +3,31 @@
 {% block content %}
 {% load static %}
 
+<style> 
+    body {
+        padding-top: 60px; 
+        background: url("{% static 'backgrounds/generalBackground.png' %}") no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    h1 {
+        background-color: white;
+        padding: 10px;
+        display: inline-block; /* Ensures background only covers the text */
+        border-radius: 10px;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+</style>
+
 <div class="mobile-wrapper">
 
     <div class="d-flex flex-column">
     <!-- This container will expand if content is short -->
     <div class="flex-grow-1">
         <div class="container mt-4 mb-5">
-            <h1 class="text-center mb-4">Friends</h1>
+            <h1 class="text-center mb-4" >Friends</h1>
         
             <div class="d-flex justify-content-between mb-3">
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addFriendModal">
