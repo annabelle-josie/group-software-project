@@ -112,7 +112,7 @@ def achievement(request):
             "url": achievement_participant.achievementId.url,
             "progress": achievement_participant.progress,
             "status": achievement_participant.status,
-            "percent": achievement_participant.progress * 100 // achievement_participant.achievementId.amount,
+            "percent": min(achievement_participant.progress * 100 // achievement_participant.achievementId.amount, 100),
         }
         for achievement_participant in user_achievements
     ]
