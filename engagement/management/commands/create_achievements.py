@@ -6,6 +6,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         achievements = [
+            {"name": "Sustainable Reader", "desc": "Read about Exeter Uni's sustainability plans", "amount": 1, "rewardValue": 30, "type": "onVisitSite", "url": "https://www.exeter.ac.uk/about/sustainability/"},
+            {"name": "Climate Researcher", "desc": "Read about Exeter Uni's leading climate change research", "amount": 1, "rewardValue": 30, "type": "onVisitSite", "url": "https://www.exeterinnovation.com/expertise/environment/"},
+            {"name": "Goal Setter", "desc": "Read about the UN Sustainable Development Goals at Exeter Uni", "amount": 1, "rewardValue": 30, "type": "onVisitSite", "url": "https://www.exeter.ac.uk/about/sdgs/"},
             {"name": "Point Scorer I", "desc": "Score points", "amount": 100, "rewardValue": 10, "type": "onPointGain"},
             {"name": "Point Scorer II", "desc": "Score points", "amount": 500, "rewardValue": 50, "type": "onPointGain"},
             {"name": "Point Scorer III", "desc": "Score points", "amount": 2500, "rewardValue": 250, "type": "onPointGain"},
@@ -15,7 +18,7 @@ class Command(BaseCommand):
             {"name": "Challenge Completer I", "desc": "Complete challenges", "amount": 50, "rewardValue": 50, "type": "onChallengeComplete"},
             {"name": "Challenge Completer II", "desc": "Complete challenges", "amount": 250, "rewardValue": 100, "type": "onChallengeComplete"},
             {"name": "Challenge Completer III", "desc": "Complete challenges", "amount": 1000, "rewardValue": 150, "type": "onChallengeComplete"},
-            {"name": "Resource Explorer", "desc": "Visit the Exeter Uni sustainability page", "amount": 1, "rewardValue": 30, "type": "onVisitSite", "url": " https://www.exeter.ac.uk/about/sustainability/"},
+            
         ]
         
         for achievement_data in achievements:
