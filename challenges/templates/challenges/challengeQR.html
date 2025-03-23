@@ -1,57 +1,16 @@
 {% extends 'base.html' %}
 {% load auth_extras %}
 
-{% block title %}all challenges{% endblock %}
+{% block title %}All QR codes for the Challenges{% endblock %}
 
 {% block content %}
-
-<div class="mobile-wrapper">
-  <div  class="col-12 col-md-12" style="background-color: #ffdfbe;">
-      <h2 class="mt-2 mx-5">Current Tasks for {{user.username}}</h2>
-      <ul class="list-group">
-          {% for item in challenge_list %}
-          <li class="list-group-item">
-              <div>
-                {% if item.QRImage %}
-                <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
-                </button> 
-        {% else %}
-          <button class="remove-button form-check-input border border-dark"
-                  qr="{{ item.qrvalue }}"
-                  progress="{{ item.progress }}"
-                  data-tasks="{{ item.noOfTasks }}"
-                  data-id="{{ item.id }}"
-                  data-points="{{ item.rewardValue }}">
-          </button>
-          {% endif %}
-          <strong>{{ item.title }}</strong> - {{ item.desc }}  
-        <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p>
-          {% if item.repeatable is False %} 
-                <span class="badge bg-success text-dark">Achievment</span>
-        {% endif %} 
-        {% if item.QRImage %}
-                <span class="badge bg-warning text-dark">QR Required</span>
-                <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
-        {% endif %}
-                
-              </div>
-          </li>
-          {% empty %}
-          <p>No challenges left</p>
-          {% endfor %}
-      </ul>
-      <br>
-  </div>
-</div>
-
-
     <!-- Second row for creating challenges and showing QR image (if gamekeeper) -->
 {% if isGamekeeper %}
     <!-- Create new challenge column -->
      <div class="col" style="background-color: #ffdfbe;">
    <h2 class="mt-2 mx-2"> QR codes for the challenges</h2>
    <ul class="list-group">
-    {% for challenge in allchallenges %}
+    {% for challenge in challengeQR %}
     {% if challenge.QRImage %}
         <li class="list-group-item">
         {{ challenge.title }} 
@@ -65,7 +24,10 @@
 <br>
 </div>
 </div>
-
+{% else %}
+<script>
+    window.location.href = "/";
+</script>
 {% endif %}
 
 
@@ -134,38 +96,6 @@
             });
         });
     });
-    function startScanner(challengeId) {
-        const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
-        const button = document.getElementById(`button-${challengeId}`);
-        readerContainer.style.display = "block"; 
-        button.style.display = "none";
-        const qr = button.getAttribute('qr');
-        var expectedQr = `down2earth.eu.pythonanywhere.com/challenges/scan-challenge/${challengeId}/` + qr + '/';
-        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
-        var html5QrcodeScanner = new Html5QrcodeScanner(
-            `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
-        html5QrcodeScanner.render(function(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (expectedQr === decodedText){
-                alert("QR code scanned");
-                fetch(`/challenge_increment_progress/${challengeId}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ qrCode: decodedText.trim() })
-                });
-                alert('Task completed!');
-                window.location.reload();
-            } else {
-                alert("Incorrect code");
-                alert('Expected: '+ expectedQr);
-                alert('Actual: '+ decodedText);
-                
-            }
-        });
-    }
    
    
 </script>

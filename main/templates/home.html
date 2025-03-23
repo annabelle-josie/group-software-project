@@ -10,7 +10,7 @@
         <h1 class="text-center">Your Garden</h1>
         <div class="p-3 rounded">
             <div id="garden-display" class="rounded container mx-auto w-md-50 w-100" style="position: relative;">
-                <img class="rounded" style="border: 4px solid #000000;" width="100%" src="static/backgrounds/Garden Background.png" alt="garden background">
+                <img class="rounded" style="border: 4px solid #000000;" width="100%" src="static/backgrounds/garden_background.png" alt="garden background">
                 <img class="nonClickable" id="1" width="20%" style="position: absolute; left: 22.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.0.image.url }}" alt="{{ plant_slots.0.name }}">
                 <img class="nonClickable" id="2" width="20%" style="position: absolute; left: 50%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.1.image.url }}" alt="{{ plant_slots.1.name }}">
                 <img class="nonClickable" id="3" width="20%" style="position: absolute; left: 77.5%; top: 53.125%; transform: translate(-50%, -100%);" src="{{ plant_slots.2.image.url }}" alt="{{ plant_slots.2.name }}">
@@ -76,7 +76,7 @@
                             {% if forloop.counter <= 4 %}
                                 <li class="list-group-item">
                                     {% if item.QRImage %}
-                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button-{{item.id}}" onclick="startScanner({{item.id}})">
+                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button" onclick="alert('qrcode required')">
                                     </button> 
                                 {% else %}
                                 <button class="remove-button form-check-input border border-dark"
@@ -88,25 +88,24 @@
                               </button>
                               {% endif %}
                               <strong>{{ item.title }}</strong> - {{ item.desc }}  
-                            <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p>
-                              {% if item.repeatable is False %} 
-                                    <span class="badge bg-success text-dark">Achievment</span>
-                            {% endif %} 
+                            <p>Progress: {{ item.progress }}/{{ item.noOfTasks }} | Reward: {{ item.rewardValue }} points  </p> 
                             {% if item.QRImage %}
                                     <span class="badge bg-warning text-dark">QR Required</span>
-                                    <div id="reader-{{item.id}}-reader" style="width: 100%; max-width: 400px; margin: auto;"></div>
                             {% endif %}
                             {% endif %}
                         {% empty %}
                             <p class="text-center">No challenges left</p>
                         {% endfor %}
                     </ul>
-                    <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See more tasks</button>
+                    {% if isGamekeeper %}
+                        <button class="btn btn-secondary mt-3 w-100" onclick="window.location.href='challenges'">See challenge QR Codes</button>
+                    {% endif %}
                 </div>
             </div>
 
         </div>
     </div>
+
 
 </div>
 <!-- Scripts -->
@@ -123,7 +122,7 @@
                 const confirmRemove = confirm('Are you sure you have completed this task?');
                 if (confirmRemove) {
                     if (tasks == (parseInt(progress) + 1)) {
-                        fetch('api/v1/removeChallenge', {
+                        fetch('challenges/api/v1/removeChallenge', {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -147,7 +146,7 @@
                             alert('Error completing challenge.');
                         });
                     } else {
-                        fetch('api/v1/removeTask', {
+                        fetch('challenges/api/v1/removeTask', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -173,34 +172,6 @@
         });
     });
 
-    function startScanner(challengeId) {
-        const readerContainer = document.getElementById(`reader-${challengeId}-reader`);
-        const button = document.getElementById(`button-${challengeId}`);
-        readerContainer.style.display = "block"; 
-        button.style.display = "none";
-        const qr = button.getAttribute('qr');
-        let qrBoxSize = window.innerWidth < 400 ? 150 : 250;
-        var html5QrcodeScanner = new Html5QrcodeScanner(
-            `reader-${challengeId}-reader`, { fps: 10, qrbox: qrBoxSize });
-        html5QrcodeScanner.render(function(decodedText, decodedResult) {
-            console.log(`Scan result: ${decodedText}`, decodedResult);
-            if (qr == decodedText){
-                alert("QR code scanned");
-                fetch(`/challenge_increment_progress/${challengeId}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ qrCode: decodedText })
-                });
-                alert('Task completed!');
-                window.location.reload();
-            } else {
-                alert("Try a different code");
-            }
-        });
-    }
 
     function updatePlantOwned(plantName, test) {
         const $plantname = document.querySelector('#plantname');
@@ -245,7 +216,7 @@
 <style>
     .clickable {
         -webkit-filter: drop-shadow(5px 5px 5px #eaff00);
-        filter: drop-shadow(0 0 10px #eaff00);
+        filter: drop-shadow(5px 5px 5px #eaff00);
     }
 </style>
 {% endblock %}
