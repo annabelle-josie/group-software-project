@@ -87,14 +87,3 @@ def home(request):
     available = users.owned_plants.all()
     return render(request, "home.html", {"plant_slots": plant_slots, "challenge_list":challenge_in_progress, "available":available, "isGamekeeper":isGamekeeper})
 
-@login_required
-def profile(request, username):
-    try:
-        owner = custom_user.objects.get(username=username)
-        userGarden = UserGarden.objects.get(user_id=owner.id)
-        plant_slots = [getattr(userGarden, f"plant{slot}Id", None) for slot in range(1, 7)]
-    except:
-        plant_slots = None
-
-    return render(request, "profile.html", {"owner": username, "plant_slots": plant_slots})
-

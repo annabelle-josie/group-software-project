@@ -1,4 +1,6 @@
-from django.test import TestCase, Client
+import shutil
+import tempfile
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from engagement.models import UserStats
@@ -6,8 +8,11 @@ from .models import Plant
 
 custom_user = get_user_model()
 
+
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class MarketTests(TestCase):
-    """Tests for the Market purchase functionality."""
 
     def setUp(self):
         """Set up test users, plants, and user stats before each test."""
@@ -19,6 +24,11 @@ class MarketTests(TestCase):
 
         self.plant1 = Plant.objects.create(name="Sunflower", price=10, fact="A bright yellow flower.", onMarket=True)
         self.plant2 = Plant.objects.create(name="Rose", price=60, fact="A romantic red flower.", onMarket=True)
+
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     def test_user_can_purchase_plant(self):
         """Ensure a user can successfully purchase a plant if they have enough leaves."""
@@ -47,5 +57,6 @@ class MarketTests(TestCase):
         self.user_stats = UserStats.objects.get(user=self.user)
         owned_plants = self.user.owned_plants.all()
 
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(self.user_stats.leaves, 50)
         self.assertNotIn(self.plant2, owned_plants)

@@ -121,7 +121,7 @@ def events(request):
         'plants': plants
     })
 
-
+@login_required(login_url="/auth/login")
 def sign_up_for_event(request, event_id):
     if request.method == 'POST':
         event = Events.objects.get(eventId=event_id)
@@ -142,6 +142,7 @@ def sign_up_for_event(request, event_id):
 
 
 # function to delete an event, returns a JSON response that indicates success or failure
+@login_required(login_url="/auth/login")
 def delete_event(request, event_id):
     if request.method == "DELETE":
         event = get_object_or_404(Events, eventId=event_id)
@@ -194,7 +195,7 @@ def scan_qr(request, event_id, qr_code):
 
     return JsonResponse({'error': 'Invalid QR code.'}, status=400)
 
-
+@login_required(login_url="/auth/login")
 def events_view(request):
     if request.user.is_authenticated:
         user_events = EventParticipants.objects.filter(username=request.user).values_list('eventId', flat=True)
@@ -213,7 +214,7 @@ def events_view(request):
 
 
 # increment progress view, increments the progress of an event participant and returns a JSON response for if user is not valid or success
-@login_required
+@login_required(login_url="/auth/login")
 def incrementProgress(request, event_id):
     """Handle the progress increment request."""
     try:

@@ -1,4 +1,6 @@
-from django.test import TestCase, Client
+import shutil
+import tempfile
+from django.test import TestCase, Client, override_settings
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -6,6 +8,9 @@ from engagement.models import UserStats
 
 custom_user = get_user_model()
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp()
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class LeaderboardTests(TestCase):
     """Tests for leaderboard functionality."""
 
@@ -27,6 +32,11 @@ class LeaderboardTests(TestCase):
             stats = UserStats.objects.get(user=new_user)
             stats.points = 50 + (i * 10)
             stats.save()
+
+    def tearDown(self):
+        """Remove the temporary media directory and all its contents."""
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+        super().tearDown()
 
     def test_leaderboard_view_returns_top_ten(self):
         """Test that the leaderboard view returns the top 10 users in descending order and includes the logged-in user's points."""

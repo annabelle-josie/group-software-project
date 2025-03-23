@@ -24,6 +24,7 @@ def leaderboard(request):
     return render(request, "engagement/leaderboard.html", context)
 
 @api_view(['GET'])
+@login_required(login_url="/auth/login")
 def get_leaderboard(request):
     user = request.user
     global_leaders = UserStats.objects.raw(
@@ -61,6 +62,7 @@ def get_leaderboard(request):
     return JsonResponse(data)
 
 @api_view(['GET'])
+@login_required(login_url="/auth/login")
 def get_friends_leaderboard(request):
     user = request.user
     friend_ids = list(user.get_friends().values_list('id', flat=True))
@@ -116,7 +118,7 @@ def achievement(request):
     ]
     return render(request, 'engagement/achievements.html', {'achievement_list': achievements})
 
-@login_required
+@login_required(login_url="/auth/login")
 def achievementProgress(request, type, amount):
     """Handle the progress increment request."""
 
@@ -147,7 +149,7 @@ def achievementProgress(request, type, amount):
         except:
             return HttpResponse("Something went wrong progressing this achievement.", status=400)
         
-@login_required
+@login_required(login_url="/auth/login")
 def achievementVisitURL(request, achievement_id):
     try:
         achievementParticipant = AchievementParticipants.objects.get(username=request.user, achievementId=achievement_id)
