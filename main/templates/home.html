@@ -76,7 +76,7 @@
                             {% if forloop.counter <= 4 %}
                                 <li class="list-group-item">
                                     {% if item.QRImage %}
-                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button" onclick="alert('qrcode required')">
+                                    <button class="form-check-input border border-dark" qr="{{item.qrvalue}}" id="button" onclick="alert('Scan a QR code to complete')">
                                     </button> 
                                 {% else %}
                                 <button class="remove-button form-check-input border border-dark"
