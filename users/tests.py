@@ -82,24 +82,72 @@ class LoginTests(TestCase):
         response = self.client.post(self.signup_url, {
             "username": "weakuser",
             "email": "testemail@email.com",
-            "password1": "weakuser1",
-            "password2": "weakuser1",
+            "password1": "weakuser1!",
+            "password2": "weakuser1!",
             "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The password is too similar to the username.") 
+        self.assertContains(response, "The password is too similar to the username.")
 
-    def test_signup_with_mismatched_passwords(self):
-        """Ensure signup fails if passwords do not match."""
+    def test_signup_password_too_short(self):
+        """Ensure password is rejected if it's too short."""
         response = self.client.post(self.signup_url, {
-            "username": "mismatchuser",
+            'username': 'shortpassuser',
             "email": "testemail@email.com",
-            "password1": "ValidPass123!",
-            "password2": "WrongPass123!",
+            'password1': 'short1!',
+            'password2': 'short1!',
             "privacy_policy": True
         })
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(custom_user.objects.filter(username="mismatchuser").exists())
+        self.assertContains(response, "The password must be at least 8 characters long.")
+
+    def test_signup_password_has_letters(self):
+        """Ensure password is rejected if it's has no letters."""
+        response = self.client.post(self.signup_url, {
+            'username': 'nolettersuser',
+            "email": "testemail@email.com",
+            'password1': '24342434!',
+            'password2': '24342434!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The password must contain at least one letter.")
+
+    def test_signup_password_has_number(self):
+        """Ensure password is rejected if it doesn't contain a number."""
+        response = self.client.post(self.signup_url, {
+            'username': 'nonumberuser',
+            "email": "testemail@email.com",
+            'password1': 'longpassword!',
+            'password2': 'longpassword!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The password must contain at least one number.")
+
+    def test_signup_password_has_symbol(self):
+        """Ensure password is rejected if it doesn't contain a symbol."""
+        response = self.client.post(self.signup_url, {
+            'username': 'nosymboluser',
+            "email": "testemail@email.com",
+            'password1': 'longpassword1',
+            'password2': 'longpassword1',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The password must contain at least one special character.")
+
+    def test_signup_password_mismatch(self):
+        """Ensure password is rejected if they don't match."""
+        response = self.client.post(self.signup_url, {
+            'username': 'mismatchuser',
+            "email": "testemail@email.com",
+            'password1': 'NewPass123!',
+            'password2': 'NewPass234!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "The two password fields didn’t match.")
 
     def test_signup_existing_username(self):
         """Test signup fails if username is already taken."""
@@ -113,6 +161,18 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "A user with that username already exists.")
 
+    def test_signup_username_has_no_symbols(self):
+        """Ensure username is rejected if it's has symbols."""
+        response = self.client.post(self.signup_url, {
+            'username': 'user@hotmail.com',
+            "email": "testemail@email.com",
+            'password1': 'NewPass123!',
+            'password2': 'NewPass123!',
+            "privacy_policy": True
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Username can only contain letters, numbers, and underscores.")
+
     def test_signup_existing_email(self):
         """Test signup fails if email is already in use."""
         response = self.client.post(self.signup_url, {
@@ -124,30 +184,6 @@ class LoginTests(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "User with this Email already exists.")
-
-    def test_signup_password_too_short(self):
-        """Ensure password is rejected if it's too short."""
-        response = self.client.post(self.signup_url, {
-            'username': 'shortpassuser',
-            "email": "testemail@email.com",
-            'password1': '12345',
-            'password2': '12345',
-            "privacy_policy": True
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "This password is too short")
-
-    def test_signup_password_mismatch(self):
-        """Ensure password is rejected if they don't match."""
-        response = self.client.post(self.signup_url, {
-            'username': 'mismatchuser',
-            "email": "testemail@email.com",
-            'password1': 'NewPass123!',
-            'password2': 'NewPass234!',
-            "privacy_policy": True
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "The two password fields didn’t match.")
 
     ## Login Tests ##
     def test_login_valid_user(self):
