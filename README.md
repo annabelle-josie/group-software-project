@@ -27,7 +27,7 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
-- To be able to use the reset password function get the .env file from technical documents and add it to project root so that the App can access the SMTP infomation. 
+- To be able to use the reset password function if you get the code from git hub get the .env file from technical documents and add it to project root so that the App can access the SMTP infomation. 
 
 ## Setup Instructions
 
