@@ -1,5 +1,4 @@
 # Down2Earth
-
 This is the Down2Earth web application. This web application is a scrum-based Django project designed as an interactive sustainability game. Users create an account and log in to access a daily task system that encourages eco-friendly activities. Completing tasks and attending events earns them **leaves**, which can be used to purchase flowers for their personal garden, and points that are used for the leaderboard.
 
 Group: Alvin and the MicroChipmunks
@@ -28,7 +27,7 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
-  get the env file from technical documents and add it to project root so that users can reset password
+  To be able to use the reset password function get the .env file from technical documents and add it to project root so that users can reset password
 
 ## Setup Instructions
 
