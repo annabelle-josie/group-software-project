@@ -27,7 +27,7 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
-  To be able to use the reset password function get the .env file from technical documents and add it to project root so that users can reset password
+- To be able to use the reset password function get the .env file from technical documents and add it to project root so that the App can access the SMTP infomation. 
 
 ## Setup Instructions
 
@@ -89,12 +89,9 @@ python manage.py create_achievements
 
 ```
 ```console
-python manage.py create_mock_users
+python manage.py create_mock_events
 
 ```
-in create achivements and create_mock_events wanted in the begining 
-
-
 ### 3. Run the Server
 
 Still within the group-software-project folder start the server with the command:
@@ -109,9 +106,19 @@ A message should then appear saying: "Starting development server at http://127.
 
 Once running the website, you will be automatically directed to log in. You may either sign up with a new account or log in using an existing username from the list of test users below. You will not be able to access the rest of the site until you are logged in.
 
-Once logged in you will be admitted to the home page. From here you can see your user's garden (this will by empty as a new user), your daily challenges and the option to scan a QR code.
+Once logged in you will be admitted to the home page. From here you can see your user's garden (this will by empty as a new user), your daily challenges which you can complete. You can also click to the edit garden button to edit the garden. 
+
+You can navigate to the friends page to send and accept friends requests. 
+
+You can go to the achievments page to see the progress for different achivements
 
 As a new user you can earn leaves by completing challenges and attending events. You can see all active events in the events page, and the daily challenges from the homepage.
+
+You can navigate to the market page to buy plants for your garden 
+
+You can naviagte to the leaderboard to see the Highest 10 scores globally and the users own rank. 
+
+You can scan QR codes to complete a Event or Challenge and this will take your User to that page. 
 
 
 ## Users available for development and testing
@@ -122,8 +129,9 @@ we have 6 users of differing levels of access have been created to allow for eas
 2. Normal user -> Username: Andy Password:password2 
 3. Normal user -> Username: Annabelle Password: password3
 4. Normal user-> Username: David Password: password4
-5. Admin -> Username:Oliver  Password: password5
-6. Admin -> Username:Amy Password: password6
+5. Normal -> Username: Oliver  Password: password5
+6. Admin -> Username: Amy Password: password6
+7. Admin -> Usernamr: James Password: password7
 
 All Admin are also Gamekeepers and an Admin can create a user and assign them to be a gamekeeper.
     
