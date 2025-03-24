@@ -7,12 +7,12 @@ Members: Andy, Amy, Annabelle, David, James, Jason, Oliver
 
 ## **Key Features**
 
-- **Challenges**: Users complete environmentally friendly that refresh daily challenges to earn rewards.
+- **Challenges**: Users complete environmentally friendly tasks that refresh daily to earn rewards.
 - **Personal Garden**: An empty garden that can be customized by purchasing flowers using leaf points.
 - **Marketplace**: Users can unlock new plants and decorations using their earned points.
 - **Leaderboard**: A ranking system that allows players to compare their sustainability efforts with others.
 - **Events**: Users can attend real-world sustainability events to earn additional rewards. 
-- **Achivements**: Users can see their achivements with a progress bar to see how close they are to completing it.
+- **Achievements**: Users can see their achivements with a progress bar to see how close they are to completing it.
 - **Friends**: Users can add another user as a friend with their username if they accept friend request they can compete on friends leaderboard and see their gardens. 
 
 The application uses multiple SQLite databases to store and manage data. The gamified approach encourages players to adopt sustainable habits while competing in a friendly, engaging way.
@@ -27,11 +27,11 @@ Before running the project, make sure you have the following installed:
   *(Recommended for dependency management)*
 - **SQLite**
 
-  To be able to use the reset password function get the .env file from technical documents and add it to project root so that users can reset password
+- To be able to use the reset password function if you get the code from git hub get the .env file from technical documents and add it to project root so that the App can access the SMTP infomation. 
 
 ## Setup Instructions
 
-we deployed the website we used python anywhere 
+We deployed the website using PythonAnywhere 
 To navigate to the deployed webpage go to web address
 
 https://down2earth.eu.pythonanywhere.com/
@@ -64,7 +64,7 @@ python manage.py migrate
 
 ```
 
-### 3. create standard database
+### 3. Create the standard database
 Still within the group-software-project folder create a standard database for the project with:
 
 ```console
@@ -72,8 +72,12 @@ python manage.py populate_database
 
 ```
 
-### possible step instead of step 3 to create database modularly 
+### Alternatively, the database creation commands to create the database by parts
 
+```console
+python manage.py create_achievements
+
+```
 ```console
 python manage.py create_challenges
 
@@ -83,18 +87,14 @@ python manage.py create_challenges
 python manage.py create_mock_users
 
 ```
-
 ```console
-python manage.py create_achievements
+python manage.py create_mock_plants
 
 ```
 ```console
-python manage.py create_mock_users
+python manage.py create_mock_events
 
 ```
-in create achivements and create_mock_events wanted in the begining 
-
-
 ### 3. Run the Server
 
 Still within the group-software-project folder start the server with the command:
@@ -109,25 +109,36 @@ A message should then appear saying: "Starting development server at http://127.
 
 Once running the website, you will be automatically directed to log in. You may either sign up with a new account or log in using an existing username from the list of test users below. You will not be able to access the rest of the site until you are logged in.
 
-Once logged in you will be admitted to the home page. From here you can see your user's garden (this will by empty as a new user), your daily challenges and the option to scan a QR code.
+Once logged in you will be admitted to the home page. From here you can see your user's garden (this will by empty as a new user), your daily challenges which you can complete. You can also click to the edit garden button to edit the garden. 
+
+You can navigate to the friends page to send and accept friends requests. 
+
+You can go to the achievments page to see the progress for different achivements
 
 As a new user you can earn leaves by completing challenges and attending events. You can see all active events in the events page, and the daily challenges from the homepage.
+
+You can navigate to the market page to buy plants for your garden 
+
+You can navigate to the leaderboard to see the Highest 10 scores globally and the users own rank. 
+
+You can scan QR codes to complete a Event or Challenge and this will take your User to that page. 
 
 
 ## Users available for development and testing
 
-we have 6 users of differing levels of access have been created to allow for easy testing and exploration of the site
+we have 7 users, some of which have different levels of access, that are created through the create_moc_users command to allow for easy testing and exploration of the site.
 
-1. Normal user -> Username: Jason Password:password1
-2. Normal user -> Username: Andy Password:password2 
-3. Normal user -> Username: Annabelle Password: password3
-4. Normal user-> Username: David Password: password4
-5. Admin -> Username:Oliver  Password: password5
-6. Admin -> Username:Amy Password: password6
+1. Normal user -> Username: Jason Password:password1!
+2. Normal user -> Username: Andy Password:password2!
+3. Normal user -> Username: Annabelle Password: password3!
+4. Normal user-> Username: David Password: password4!
+5. Normal -> Username: Oliver  Password: password5!
+6. Admin -> Username: Amy Password: password6!
+7. Admin -> Username: James Password: password7!
 
-All Admin are also Gamekeepers and an Admin can create a user and assign them to be a gamekeeper.
+All admins are also gamekeepers and an admin can create a user and assign them to be a gamekeeper.
     
-To run the Django tests, input the command:
+To run the Django tests, from within the group-software-project folder input the command:
 
 ```console
 python manage.py test
@@ -135,4 +146,4 @@ python manage.py test
 
 ### Note to developers
 
-When creating plants. No double quotes (") may be used. This will render the plant unclickable. Do not use them in facts, names or anything else. Instead use single quotes!
+When creating plants, no double quotes (") may be used. This will render the plant unclickable. Do not use them in facts, names or anything else. Instead use single quotes!

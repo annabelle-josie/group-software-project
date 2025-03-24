@@ -11,31 +11,31 @@ DEMO_USERS = [
     {
         "username": "Jason",
         "email": "jg988@exeter.ac.uk",
-        "password": "password1",
+        "password": "password1!",
         "points": 50,
     },
     {
         "username": "Andy",
         "email": "at969@exeter.ac.uk",
-        "password": "password2",
+        "password": "password2!",
         "points": 130,
     },
     {
         "username": "Annabelle",
         "email": "ar999@exeter.ac.uk",
-        "password": "password3",
+        "password": "password3!",
         "points": 70,
     },
     {
         "username": "David",
         "email": "dw689@exeter.ac.uk",
-        "password": "password4",
+        "password": "password4!",
         "points": 90,
     },
     {
         "username": "Oliver",
         "email": "oj261@exeter.ac.uk",
-        "password": "password5",
+        "password": "password5!",
         "points": 100,
     },
 ]
@@ -44,13 +44,13 @@ DEMO_SUPERUSERS = [
     {
         "username": "Amy",
         "email": "al980@exeter.ac.uk",
-        "password": "password6",
+        "password": "password6!",
         "points": 80,
     },
     {
         "username": "James",
         "email": "jb1658@exeter.ac.uk",
-        "password": "password7",
+        "password": "password7!",
         "points": 110,
     },
 ]
