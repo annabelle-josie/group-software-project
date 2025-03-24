@@ -72,7 +72,7 @@ python manage.py populate_database
 
 ```
 
-### Alternatively, the database creation commands to create the database by parts
+#### Alternatively, the database creation commands to create the database by parts
 
 ```console
 python manage.py create_achievements
@@ -93,6 +93,11 @@ python manage.py create_mock_plants
 ```
 ```console
 python manage.py create_mock_events
+
+```
+#### An additional command to clear all of the database
+```console
+python manage.py flush_and_clear_media
 
 ```
 ### 3. Run the Server
