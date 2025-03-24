@@ -183,6 +183,13 @@ def scan_qr(request, event_id, qr_code):
                 achievementProgress(request, "onPointGain", event.rewardValue)
                 achievementProgress(request, "onEventComplete", 1)
                 user_stats.save()
+            
+                if event.plantReward:
+                    user = request.user
+                    plant = event.plantReward
+                    if plant not in user.owned_plants.all():
+                        # Add the plant to the user's owned plants
+                        user.owned_plants.add(plant)
                 return redirect('events')  
 
         return JsonResponse({

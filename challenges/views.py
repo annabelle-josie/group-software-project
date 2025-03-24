@@ -14,7 +14,6 @@ from .models import Challenge, ChallengeParticipants
 custom_user = get_user_model()
 
 def my_challenges(request):
-    user_challenge = ChallengeParticipants.objects.filter(username=request.user,status="incomplete")
     isGamekeeper = request.user.groups.filter(name="Game Keepers").exists()
     try:
         allchallenges= Challenge.objects.all()
@@ -93,9 +92,7 @@ def scan_challenge(request, challenge_id, qr_code):
     try:
         ChallengeParticipant = ChallengeParticipants.objects.get(username=request.user, challengeId=challenge)
     except ChallengeParticipants.DoesNotExist:
-        ChallengeParticipant = ChallengeParticipants(username=request.user, challengeId=challenge, progress=0, status="incomplete")
-        ChallengeParticipant.save()
-
+ 
     if challenge.isQR and challenge.qrvalue == qr_code:
         if ChallengeParticipant.progress < challenge.noOfTasks:
             ChallengeParticipant.progress += 1
@@ -109,13 +106,8 @@ def scan_challenge(request, challenge_id, qr_code):
                 user_stats.leaves += challenge.rewardValue
                 user_stats.points += challenge.rewardValue
                 user_stats.save()
-                return HttpResponseRedirect("home")
-
-        return JsonResponse({
-            'progress': ChallengeParticipant.progress,
-            'totalTasks': challenge.noOfTasks,
-            'status': ChallengeParticipant.status,
-            'completed': False
-        })
-
+                achievementProgress(request, "onPointGain", challenge.rewardValue)
+                achievementProgress(request, "onChallengeComplete", 1)
+        return HttpResponseRedirect("/")
+        
     return JsonResponse({'error': 'Invalid QR code.'}, status=400)
